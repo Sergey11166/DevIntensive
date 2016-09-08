@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">DevIntensive</string>
+    <string name="app_name">Vorobyev Sergey</string>
+
+    <string name="rating">Rating</string>
+    <string name="wrote_code_lines">Wrote code lines</string>
+    <string name="projects">Projects</string>
 </resources>

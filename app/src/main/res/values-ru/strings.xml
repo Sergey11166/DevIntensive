@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Воробьёв Сергей</string>
+
+    <string name="rating">Рейтинг</string>
+    <string name="wrote_code_lines">Написано строк кода</string>
+    <string name="projects">Проектов</string>
+</resources>
