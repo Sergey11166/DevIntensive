@@ -7,6 +7,10 @@ import android.util.Log;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.Constants;
 
+/**
+ * @author Sergey Vorobyev
+ */
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = Constants.LOG_TAG_PREFIX + "MainActivity";
