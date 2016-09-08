@@ -4,4 +4,8 @@
     <string name="rating">Рейтинг</string>
     <string name="wrote_code_lines">Написано строк кода</string>
     <string name="projects">Проектов</string>
+    <string name="phone">Мобильный телефон</string>
+    <string name="vk_profile">Профиль VK</string>
+    <string name="repository">Репозиторий</string>
+    <string name="about_me">О себе</string>
 </resources>
