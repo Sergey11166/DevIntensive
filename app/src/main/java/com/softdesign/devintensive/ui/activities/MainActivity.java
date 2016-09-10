@@ -16,6 +16,12 @@ import android.widget.EditText;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.Constants;
 
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.BindViews;
+import butterknife.ButterKnife;
+
 /**
  * @author Sergey Vorobyev
  */
@@ -24,11 +30,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = Constants.LOG_TAG_PREFIX + "MainActivity";
 
-    private CoordinatorLayout mCoordinatorLayout;
-    private DrawerLayout mDrawerLayout;
-    private Toolbar mToolbar;
+    @BindView(R.id.coordinator_container) CoordinatorLayout mCoordinatorLayout;
+    @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
 
-    private EditText mUserPhone, mUserEmail, mUserVk, mUserGit, mUserBio;
+    @BindViews({R.id.phone_edit_text, R.id.email_edit_text, R.id.vk_edit_text, R.id.git_edit_text,
+            R.id.bio_edit_text})
+    List<EditText> mEditTextList;
 
     private int mCurrentEditorMode = 1;
 
@@ -37,10 +45,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         findViewById(R.id.call_img).setOnClickListener(this);
-        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_container);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
         findViewById(R.id.fab).setOnClickListener(this);
 
         setupToolBar();
