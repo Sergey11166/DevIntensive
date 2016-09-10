@@ -46,7 +46,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        findViewById(R.id.call_img).setOnClickListener(this);
         findViewById(R.id.fab).setOnClickListener(this);
 
         setupToolBar();
@@ -112,9 +111,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.call_img:
-
-                break;
             case R.id.fab:
                 showSnackBar("click");
                 break;
@@ -131,6 +127,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
+            mToolbar.setTitle(R.string.app_name);
         }
     }
 
