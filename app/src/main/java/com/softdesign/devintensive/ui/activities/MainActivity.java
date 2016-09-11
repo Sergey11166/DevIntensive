@@ -2,6 +2,7 @@ package com.softdesign.devintensive.ui.activities;
 
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -14,13 +15,17 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.softdesign.devintensive.R;
-import com.softdesign.devintensive.utils.Constants;
+import com.softdesign.devintensive.data.managers.DataManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
+
+import static com.softdesign.devintensive.utils.Constants.EDIT_MODE_KEY;
+import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 
 /**
  * @author Sergey Vorobyev
@@ -28,17 +33,37 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
-    private static final String TAG = Constants.LOG_TAG_PREFIX + "MainActivity";
+    private static final String TAG = LOG_TAG_PREFIX + "MainActivity";
+
+    private static final ButterKnife.Action<View> EDIT_MODE_TRUE = (view, index) -> {
+        view.setEnabled(true);
+        view.setFocusable(true);
+        view.setFocusableInTouchMode(true);
+    };
+
+    private static final ButterKnife.Action<View> EDIT_MODE_FALSE = (view, index) -> {
+        view.setEnabled(false);
+        view.setFocusable(false);
+        view.setFocusableInTouchMode(false);
+    };
 
     @BindView(R.id.coordinator_container) CoordinatorLayout mCoordinatorLayout;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @BindView(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.fab) FloatingActionButton mFab;
 
-    @BindViews({R.id.phone_edit_text, R.id.email_edit_text, R.id.vk_edit_text, R.id.git_edit_text,
-            R.id.bio_edit_text})
-    List<EditText> mEditTextList;
+    @BindViews({
+            R.id.phone_edit_text,
+            R.id.email_edit_text,
+            R.id.vk_edit_text,
+            R.id.git_edit_text,
+            R.id.bio_edit_text
+    })
+    List<EditText> mUserInfoViews;
 
-    private int mCurrentEditorMode = 1;
+    private DataManager mDataManager;
+
+    private boolean mCurrentEditorMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +71,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        findViewById(R.id.fab).setOnClickListener(this);
+        mFab.setOnClickListener(this);
+
+        mDataManager = DataManager.getInstance();
 
         setupToolBar();
         setupDrawer();
@@ -54,8 +81,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (savedInstanceState == null) {
 
         } else {
-
+            mCurrentEditorMode = savedInstanceState.getBoolean(EDIT_MODE_KEY);
+            changeEditMode(mCurrentEditorMode);
         }
+        loadUserInfoValue();
     }
 
     @Override
@@ -81,6 +110,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onPause() {
         super.onPause();
+        saveUserInfoValue();
         Log.d(TAG, "onPause");
     }
 
@@ -106,21 +136,32 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.d(TAG, "onSaveInstanceState");
+        outState.putBoolean(EDIT_MODE_KEY, mCurrentEditorMode);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:
-                showSnackBar("click");
+                changeEditMode(!mCurrentEditorMode);
+                mFab.setImageResource(mCurrentEditorMode ?
+                        R.drawable.ic_mode_edit_black_24dp :
+                        R.drawable.ic_done_black_24dp);
                 break;
         }
     }
 
+    /**
+     * Method show messages by {@link Snackbar}
+     * @param message Message to show
+     */
     private void showSnackBar(String message) {
         Snackbar.make(mCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
 
+    /**
+     * Method for setup {@link #mToolbar}
+     */
     private void setupToolBar() {
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -131,6 +172,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
+    /**
+     * Method for setup navigation drawer
+     */
     private void setupDrawer() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -139,5 +183,30 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return false;
         });
+    }
+
+    /**
+     * Method to change edit mode of {@link #mUserInfoViews )
+     * @param mode Activate edit mode if true, deactivate if false
+     */
+    private void changeEditMode(boolean mode) {
+        if (mode) ButterKnife.apply(mUserInfoViews, EDIT_MODE_TRUE);
+        else  ButterKnife.apply(mUserInfoViews, EDIT_MODE_FALSE);
+        mCurrentEditorMode = mode;
+    }
+
+    private void loadUserInfoValue() {
+        List<String> data = mDataManager.getPreferencesManager().loadUserProfileData();
+        for (int i = 0; i < mUserInfoViews.size(); i++) {
+            mUserInfoViews.get(i).setText(data.get(i));
+        }
+    }
+
+    private void saveUserInfoValue() {
+        List<String> data = new ArrayList<>(5);
+        for (EditText view : mUserInfoViews) {
+            data.add(view.getText().toString());
+        }
+        mDataManager.getPreferencesManager().saveUserProfileData(data);
     }
 }
