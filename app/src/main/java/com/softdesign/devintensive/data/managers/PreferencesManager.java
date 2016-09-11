@@ -30,7 +30,7 @@ public class PreferencesManager {
 
     private SharedPreferences mPreferences;
 
-    public PreferencesManager() {
+    PreferencesManager() {
         mPreferences = App.getSharedPreferences();
     }
 

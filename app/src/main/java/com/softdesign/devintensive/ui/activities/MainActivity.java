@@ -1,10 +1,17 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -13,6 +20,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
@@ -72,19 +80,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         mFab.setOnClickListener(this);
-
-        mDataManager = DataManager.getInstance();
-
         setupToolBar();
         setupDrawer();
 
-        if (savedInstanceState == null) {
+        mDataManager = DataManager.getInstance();
+        loadUserInfoValue();
 
-        } else {
+        if (savedInstanceState != null) {
             mCurrentEditorMode = savedInstanceState.getBoolean(EDIT_MODE_KEY);
             changeEditMode(mCurrentEditorMode);
         }
-        loadUserInfoValue();
     }
 
     @Override
@@ -144,10 +149,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.fab:
                 changeEditMode(!mCurrentEditorMode);
-                mFab.setImageResource(mCurrentEditorMode ?
-                        R.drawable.ic_mode_edit_black_24dp :
-                        R.drawable.ic_done_black_24dp);
                 break;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -183,6 +194,33 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return false;
         });
+        roundAvatar(navigationView);
+    }
+
+    /**
+     * Method to round avatar of drawer header
+     *
+     * @param navigationView Object of {@link NavigationView}
+     */
+
+    private void roundAvatar(NavigationView navigationView) {
+        //get bitmap
+        Resources res = getResources();
+        Bitmap srcBmp = BitmapFactory.decodeResource(res, R.drawable.avatar);
+
+        //make square bitmap
+        int size = Math.min(srcBmp.getWidth(), srcBmp.getHeight());
+        Bitmap squareBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(squareBitmap);
+        c.drawBitmap(srcBmp, (size - srcBmp.getWidth()) / 2, (size - srcBmp.getHeight()) /2, null);
+
+        //round bitmap
+        RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(res, squareBitmap);
+        rbd.setCornerRadius(Math.max(squareBitmap.getWidth(), squareBitmap.getHeight()) / 2);
+
+        //set bitmap to image view of drawer header
+        ImageView view = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
+        view.setImageDrawable(rbd);
     }
 
     /**
@@ -193,6 +231,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (mode) ButterKnife.apply(mUserInfoViews, EDIT_MODE_TRUE);
         else  ButterKnife.apply(mUserInfoViews, EDIT_MODE_FALSE);
         mCurrentEditorMode = mode;
+        mFab.setImageResource(mCurrentEditorMode ?
+                R.drawable.ic_done_black_24dp :
+                R.drawable.ic_mode_edit_black_24dp);
     }
 
     private void loadUserInfoValue() {
