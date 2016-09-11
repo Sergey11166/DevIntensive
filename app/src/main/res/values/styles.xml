@@ -48,4 +48,8 @@
         <item name="android:layout_height">?attr/actionBarSize</item>
         <item name="android:theme">@style/AppTheme.PopupOverlay</item>
     </style>
+
+    <style name="wrap_content_only.fab">
+        <item name="android:layout_marginEnd">@dimen/fab_right_space</item>
+    </style>
 </resources>

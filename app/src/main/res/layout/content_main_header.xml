@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="110dp"
+    android:background="@color/gray">
+
+    <LinearLayout
+        style="@style/header_layout"
+        android:layout_weight="1">
+
+        <TextView
+            style="@style/header_text.number"
+            android:text="5"/>
+
+        <TextView
+            style="@style/header_text"
+            android:text="@string/rating"/>
+    </LinearLayout>
+
+    <View style="@style/line.vertical.main_header"/>
+
+    <LinearLayout
+        style="@style/header_layout"
+        android:layout_weight="2">
+
+        <TextView
+            style="@style/header_text.number"
+            android:text="25000"/>
+
+        <TextView
+            style="@style/header_text"
+            android:text="@string/wrote_code_lines"/>
+    </LinearLayout>
+
+    <View style="@style/line.vertical.main_header"/>
+
+    <LinearLayout
+        style="@style/header_layout"
+        android:layout_weight="1">
+
+        <TextView
+            style="@style/header_text.number"
+            android:text="5"/>
+
+        <TextView
+            style="@style/header_text"
+            android:text="@string/projects"/>
+    </LinearLayout>
+</LinearLayout>
