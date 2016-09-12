@@ -22,8 +22,8 @@
     </style>
 
     <style name="line.vertical.main_header">
-        <item name="android:layout_marginBottom">@dimen/size_small_24</item>
-        <item name="android:layout_marginTop">@dimen/size_small_24</item>
+        <item name="android:layout_height">@dimen/size_medium_56</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 
 </resources>

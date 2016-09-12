@@ -36,21 +36,9 @@
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.v4.widget.NestedScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <include layout="@layout/content_main_header"/>
 
-            <LinearLayout
-                style="@style/match_parent_only"
-                android:orientation="vertical"
-                android:layout_marginBottom="@dimen/activity_vertical_margin">
-
-                <include layout="@layout/content_main_header"/>
-
-                <include layout="@layout/content_main_info"/>
-            </LinearLayout>
-        </android.support.v4.widget.NestedScrollView>
+        <include layout="@layout/content_main_info"/>
 
         <android.support.design.widget.FloatingActionButton
             style="@style/wrap_content_only.fab"
