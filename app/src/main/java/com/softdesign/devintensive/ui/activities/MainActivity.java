@@ -3,8 +3,6 @@ package com.softdesign.devintensive.ui.activities;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -204,21 +202,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
 
     private void roundAvatar(NavigationView navigationView) {
-        //get bitmap
         Resources res = getResources();
         Bitmap srcBmp = BitmapFactory.decodeResource(res, R.drawable.avatar);
-
-        //make square bitmap
-        int size = Math.min(srcBmp.getWidth(), srcBmp.getHeight());
-        Bitmap squareBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(squareBitmap);
-        c.drawBitmap(srcBmp, (size - srcBmp.getWidth()) / 2, (size - srcBmp.getHeight()) /2, null);
-
-        //round bitmap
-        RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(res, squareBitmap);
-        rbd.setCornerRadius(Math.max(squareBitmap.getWidth(), squareBitmap.getHeight()) / 2);
-
-        //set bitmap to image view of drawer header
+        RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(res, srcBmp);
+        rbd.setCircular(true);
         ImageView view = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
         view.setImageDrawable(rbd);
     }
