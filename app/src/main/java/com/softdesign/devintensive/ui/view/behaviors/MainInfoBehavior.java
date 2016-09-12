@@ -25,6 +25,7 @@ public class MainInfoBehavior extends AppBarLayout.ScrollingViewBehavior {
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
         final CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
+
         if (dependency instanceof LinearLayout && !(dependency instanceof AppBarLayout)) {
             if (lp.getAnchorId() != -1 && (lp.getAnchorId() != dependency.getId())) {
                 return false;
@@ -32,8 +33,8 @@ public class MainInfoBehavior extends AppBarLayout.ScrollingViewBehavior {
         } else {
             return false;
         }
-        lp.topMargin = dependency.getHeight();
-        child.setLayoutParams(lp);
+
+        child.setY(dependency.getTranslationY() + dependency.getHeight());
         return super.onDependentViewChanged(parent, child, dependency);
     }
 }
