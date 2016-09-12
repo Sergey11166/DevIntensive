@@ -9,4 +9,11 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowTranslucentStatus">true</item>
     </style>
+
+    <style name="toolbar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">?attr/actionBarSize</item>
+        <item name="android:layout_marginTop">@dimen/spacing_medial_24</item>
+        <item name="android:theme">@style/AppTheme.PopupOverlay</item>
+    </style>
 </resources>

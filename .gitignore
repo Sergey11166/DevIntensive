@@ -4,6 +4,7 @@
 /.idea
 /local.properties
 /gradle.properties
+/captures
 gradlew
 gradlew.bat
 /build

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior=".ui.view.behaviors.MainInfoBehavior"
+    tools:ignore="contentDescription">
+
+    <LinearLayout
+        style="@style/match_parent_only"
+        android:orientation="vertical"
+        android:layout_marginBottom="@dimen/activity_vertical_margin">
+
+        <LinearLayout style="@style/main_item_layout">
+
+            <ImageView
+                style="@style/main_icon.left"
+                android:src="@drawable/ic_call_black_24dp"/>
+
+            <android.support.design.widget.TextInputLayout
+                style="@style/main_text_input_layout">
+
+                <EditText
+                    style="@style/main_edit_text"
+                    android:id="@+id/phone_edit_text"
+                    android:inputType="phone"
+                    android:hint="@string/phone"
+                    android:text="+79090909090"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageView
+                style="@style/main_icon.right"
+                android:src="@drawable/ic_phone_in_talk_black_24dp"/>
+        </LinearLayout>
+
+        <View style="@style/line.horizontal.main"/>
+
+        <LinearLayout style="@style/main_item_layout">
+
+            <ImageView
+                style="@style/main_icon.left"
+                android:src="@drawable/ic_email_black_24dp"
+                android:id="@+id/imageView"
+                android:layout_height="wrap_content"/>
+
+            <android.support.design.widget.TextInputLayout
+                style="@style/main_text_input_layout">
+
+                <EditText
+                    style="@style/main_edit_text"
+                    android:id="@+id/email_edit_text"
+                    android:inputType="textEmailAddress"
+                    android:hint="@string/email"
+                    android:text="@string/sevoro_sv_gmail_com"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageView
+                style="@style/main_icon.right"
+                android:src="@drawable/ic_send_black_24dp"/>
+        </LinearLayout>
+
+        <View style="@style/line.horizontal.main"/>
+
+        <LinearLayout style="@style/main_item_layout">
+
+            <ImageView
+                style="@style/main_icon.left"
+                android:src="@drawable/ic_vk_circle"/>
+
+            <android.support.design.widget.TextInputLayout
+                style="@style/main_text_input_layout">
+
+                <EditText
+                    style="@style/main_edit_text"
+                    android:id="@+id/vk_edit_text"
+                    android:inputType="textUri|textMultiLine"
+                    android:hint="@string/vk_profile"
+                    android:text="vk.com/sergey11166"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageView
+                style="@style/main_icon.right"
+                android:src="@drawable/ic_visibility_black_24dp"/>
+        </LinearLayout>
+
+        <View style="@style/line.horizontal.main"/>
+
+        <LinearLayout style="@style/main_item_layout">
+
+            <ImageView
+                style="@style/main_icon.left"
+                android:src="@drawable/ic_github_circle"/>
+
+            <android.support.design.widget.TextInputLayout
+                style="@style/main_text_input_layout">
+
+                <EditText
+                    style="@style/main_edit_text"
+                    android:id="@+id/git_edit_text"
+                    android:inputType="textMultiLine"
+                    android:hint="@string/repository"
+                    android:text="github.com/sergey11166/DevIntensive"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageView
+                style="@style/main_icon.right"
+                android:src="@drawable/ic_visibility_black_24dp"/>
+        </LinearLayout>
+
+        <View style="@style/line.horizontal.main"/>
+
+        <LinearLayout style="@style/main_item_layout">
+
+            <ImageView
+                style="@style/main_icon.left"
+                android:src="@drawable/ic_account_circle"/>
+
+            <android.support.design.widget.TextInputLayout
+                style="@style/main_text_input_layout">
+
+                <EditText
+                    style="@style/main_edit_text"
+                    android:id="@+id/bio_edit_text"
+                    android:inputType="textMultiLine"
+                    android:hint="@string/about_me"
+                    android:text="@string/lorem_ipsum"/>
+            </android.support.design.widget.TextInputLayout>
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v4.widget.NestedScrollView>
