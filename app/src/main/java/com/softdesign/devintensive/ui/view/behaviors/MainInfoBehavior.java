@@ -12,9 +12,9 @@ import android.widget.LinearLayout;
  */
 
 @SuppressWarnings("unused")
-public class MainHeaderNestedScrollViewBehavior extends AppBarLayout.ScrollingViewBehavior {
+public class MainInfoBehavior extends AppBarLayout.ScrollingViewBehavior {
 
-    public MainHeaderNestedScrollViewBehavior(Context context, AttributeSet attrs) {
+    public MainInfoBehavior(Context context, AttributeSet attrs) {
     }
 
     @Override
@@ -27,7 +27,6 @@ public class MainHeaderNestedScrollViewBehavior extends AppBarLayout.ScrollingVi
         final CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
         if (dependency instanceof LinearLayout && !(dependency instanceof AppBarLayout)) {
             if (lp.getAnchorId() != -1 && (lp.getAnchorId() != dependency.getId())) {
-                // The anchor ID exists and doesn't match the dependency
                 return false;
             }
         } else {

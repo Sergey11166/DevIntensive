@@ -223,6 +223,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 R.drawable.ic_mode_edit_black_24dp);
     }
 
+    /**
+     * Method to load user info from SharedPreferences
+     */
     private void loadUserInfoValue() {
         List<String> data = mDataManager.getPreferencesManager().loadUserProfileData();
         for (int i = 0; i < mUserInfoViews.size(); i++) {
@@ -230,6 +233,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
+    /**
+     * Method to save user info to SharedPreferences
+     */
     private void saveUserInfoValue() {
         List<String> data = new ArrayList<>(5);
         for (EditText view : mUserInfoViews) {

@@ -11,18 +11,19 @@ import android.view.WindowManager;
  * @author Sergey Vorobyev
  */
 
-public class UIHandler {
+public class UIHelper {
 
     public static int getMinHeight(View v) {
-        int widthMeasureSpec = View.MeasureSpec
-                .makeMeasureSpec(getScreenWidth(v.getContext()), View.MeasureSpec.AT_MOST);
         int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        int widthMeasureSpec = View.MeasureSpec
+                .makeMeasureSpec(getScreenWidth(), View.MeasureSpec.AT_MOST);
+
         v.measure(widthMeasureSpec, heightMeasureSpec);
         return v.getMeasuredHeight();
     }
 
-    private static int getScreenWidth(Context context) {
-        WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+    private static int getScreenWidth() {
+        WindowManager manager = (WindowManager) App.get().getSystemService(Context.WINDOW_SERVICE);
         Display display = manager.getDefaultDisplay();
         int deviceWidth;
         Point point = new Point();
@@ -31,8 +32,8 @@ public class UIHandler {
         return deviceWidth;
     }
 
-    public static float getAppBarSize(Context context) {
-        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
+    public static float getAppBarSize() {
+        final TypedArray styledAttributes = App.get().getTheme().obtainStyledAttributes(
                 new int[]{android.R.attr.actionBarSize});
         float mActionBarSize = styledAttributes.getDimension(0, 0);
         styledAttributes.recycle();
@@ -40,11 +41,11 @@ public class UIHandler {
         return mActionBarSize;
     }
 
-    public static int getStatusBarHeight(Context context) {
+    public static int getStatusBarHeight() {
         int result = 0;
-        int resId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        int resId = App.get().getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resId > 0) {
-            result = context.getResources().getDimensionPixelSize(resId);
+            result = App.get().getResources().getDimensionPixelSize(resId);
         }
         return result;
     }

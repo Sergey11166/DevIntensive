@@ -9,9 +9,9 @@ import android.view.View;
 
 import com.softdesign.devintensive.R;
 
-import static com.softdesign.devintensive.utils.UIHandler.getAppBarSize;
-import static com.softdesign.devintensive.utils.UIHandler.getMinHeight;
-import static com.softdesign.devintensive.utils.UIHandler.getStatusBarHeight;
+import static com.softdesign.devintensive.utils.UIHelper.getAppBarSize;
+import static com.softdesign.devintensive.utils.UIHelper.getMinHeight;
+import static com.softdesign.devintensive.utils.UIHelper.getStatusBarHeight;
 
 /**
  * @author Sergey Vorobyev
@@ -19,18 +19,16 @@ import static com.softdesign.devintensive.utils.UIHandler.getStatusBarHeight;
 
 public class MainHeaderBehavior extends AppBarLayout.ScrollingViewBehavior {
 
-    private Context mContext;
-    private float mMinLayoutHeight;
-    private float mMaxLayoutHeight;
+    private float mMinHeaderHeight;
+    private float mMaxHeaderHeight;
     private float mMinAppbarHeight;
     private float mMaxAppbarHeight;
 
     public MainHeaderBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MainHeaderBehavior);
-        mMinLayoutHeight = a.getDimensionPixelSize(R.styleable.MainHeaderBehavior_min_height, 0);
+        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MainHeaderBehavior);
+        mMinHeaderHeight = a.getDimensionPixelSize(R.styleable.MainHeaderBehavior_min_height, 0);
         a.recycle();
     }
 
@@ -49,13 +47,13 @@ public class MainHeaderBehavior extends AppBarLayout.ScrollingViewBehavior {
             return false;
         }
 
-        if (mMaxLayoutHeight == 0) {
+        if (mMinHeaderHeight == 0) {
             initProperties(child, appBarLayout);
         }
 
         final float curAppBarHeight = appBarLayout.getBottom() - mMinAppbarHeight;
         final float expandedPercentageFactor = curAppBarHeight / mMaxAppbarHeight;
-        lp.height = (int) (mMinLayoutHeight + (mMaxLayoutHeight - mMinLayoutHeight) * expandedPercentageFactor);
+        lp.height = (int) (mMinHeaderHeight + (mMaxHeaderHeight - mMinHeaderHeight) * expandedPercentageFactor);
 
         child.setLayoutParams(lp);
 
@@ -63,9 +61,9 @@ public class MainHeaderBehavior extends AppBarLayout.ScrollingViewBehavior {
     }
 
     private void initProperties(View child, AppBarLayout dependency) {
-        mMaxLayoutHeight = child.getHeight();
-        if (mMinLayoutHeight == 0.0f) mMinLayoutHeight = getMinHeight(child);
-        mMinAppbarHeight = getStatusBarHeight(mContext) + getAppBarSize(mContext);
+        mMaxHeaderHeight = child.getHeight();
+        if (mMinHeaderHeight == 0.0f) mMinHeaderHeight = getMinHeight(child);
+        mMinAppbarHeight = getStatusBarHeight() + getAppBarSize();
         mMaxAppbarHeight = dependency.getHeight() - mMinAppbarHeight;
     }
 }
