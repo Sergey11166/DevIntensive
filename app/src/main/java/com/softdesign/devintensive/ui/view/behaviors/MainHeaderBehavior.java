@@ -1,13 +1,11 @@
 package com.softdesign.devintensive.ui.view.behaviors;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.util.AttributeSet;
 import android.view.View;
-
-import com.softdesign.devintensive.R;
+import android.widget.LinearLayout;
 
 import static com.softdesign.devintensive.utils.UIHelper.getAppBarSize;
 import static com.softdesign.devintensive.utils.UIHelper.getMinHeight;
@@ -17,7 +15,9 @@ import static com.softdesign.devintensive.utils.UIHelper.getStatusBarHeight;
  * @author Sergey Vorobyev
  */
 
-public class MainHeaderBehavior extends AppBarLayout.ScrollingViewBehavior {
+@SuppressWarnings("unused")
+public class MainHeaderBehavior<Header extends LinearLayout>
+        extends CoordinatorLayout.Behavior<Header> {
 
     private float mMinHeaderHeight;
     private float mMaxHeaderHeight;
@@ -26,14 +26,15 @@ public class MainHeaderBehavior extends AppBarLayout.ScrollingViewBehavior {
 
     public MainHeaderBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MainHeaderBehavior);
-        mMinHeaderHeight = a.getDimensionPixelSize(R.styleable.MainHeaderBehavior_min_height, 0);
-        a.recycle();
     }
 
     @Override
-    public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
+    public boolean layoutDependsOn(CoordinatorLayout parent, Header child, View dependency) {
+        return dependency instanceof AppBarLayout;
+    }
+
+    @Override
+    public boolean onDependentViewChanged(CoordinatorLayout parent, Header child, View dependency) {
         final CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
 
         AppBarLayout appBarLayout;
@@ -47,23 +48,24 @@ public class MainHeaderBehavior extends AppBarLayout.ScrollingViewBehavior {
             return false;
         }
 
-        if (mMinHeaderHeight == 0) {
+        if (mMinHeaderHeight == 0.0f) {
             initProperties(child, appBarLayout);
         }
 
-        final float curAppBarHeight = appBarLayout.getBottom() - mMinAppbarHeight;
-        final float expandedPercentageFactor = curAppBarHeight / mMaxAppbarHeight;
+        final float appBarHeight = appBarLayout.getBottom() - mMinAppbarHeight;
+        final float expandedPercentageFactor = appBarHeight / mMaxAppbarHeight;
         lp.height = (int) (mMinHeaderHeight + (mMaxHeaderHeight - mMinHeaderHeight) * expandedPercentageFactor);
 
+        child.setTranslationY(appBarLayout.getBottom());
         child.setLayoutParams(lp);
 
         return super.onDependentViewChanged(parent, child, dependency);
     }
 
-    private void initProperties(View child, AppBarLayout dependency) {
+    private void initProperties(Header child, AppBarLayout dependency) {
         mMaxHeaderHeight = child.getHeight();
         if (mMinHeaderHeight == 0.0f) mMinHeaderHeight = getMinHeight(child);
-        mMinAppbarHeight = getStatusBarHeight() + getAppBarSize();
+        mMinAppbarHeight = getStatusBarHeight(child.getContext()) + getAppBarSize(child.getContext());
         mMaxAppbarHeight = dependency.getHeight() - mMinAppbarHeight;
     }
 }

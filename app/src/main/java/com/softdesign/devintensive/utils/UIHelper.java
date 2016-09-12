@@ -16,14 +16,14 @@ public class UIHelper {
     public static int getMinHeight(View v) {
         int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         int widthMeasureSpec = View.MeasureSpec
-                .makeMeasureSpec(getScreenWidth(), View.MeasureSpec.AT_MOST);
+                .makeMeasureSpec(getScreenWidth(v), View.MeasureSpec.AT_MOST);
 
         v.measure(widthMeasureSpec, heightMeasureSpec);
         return v.getMeasuredHeight();
     }
 
-    private static int getScreenWidth() {
-        WindowManager manager = (WindowManager) App.get().getSystemService(Context.WINDOW_SERVICE);
+    private static int getScreenWidth(View view) {
+        WindowManager manager = (WindowManager) view.getContext().getSystemService(Context.WINDOW_SERVICE);
         Display display = manager.getDefaultDisplay();
         int deviceWidth;
         Point point = new Point();
@@ -32,8 +32,8 @@ public class UIHelper {
         return deviceWidth;
     }
 
-    public static float getAppBarSize() {
-        final TypedArray styledAttributes = App.get().getTheme().obtainStyledAttributes(
+    public static float getAppBarSize(Context context) {
+        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
                 new int[]{android.R.attr.actionBarSize});
         float mActionBarSize = styledAttributes.getDimension(0, 0);
         styledAttributes.recycle();
@@ -41,11 +41,11 @@ public class UIHelper {
         return mActionBarSize;
     }
 
-    public static int getStatusBarHeight() {
+    public static int getStatusBarHeight(Context context) {
         int result = 0;
-        int resId = App.get().getResources().getIdentifier("status_bar_height", "dimen", "android");
+        int resId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resId > 0) {
-            result = App.get().getResources().getDimensionPixelSize(resId);
+            result = context.getResources().getDimensionPixelSize(resId);
         }
         return result;
     }

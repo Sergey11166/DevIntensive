@@ -3,9 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    style="@style/match_parent_only"
     app:layout_behavior=".ui.view.behaviors.MainInfoBehavior"
+    app:layout_anchor="@id/main_header"
     tools:ignore="contentDescription">
 
     <LinearLayout
