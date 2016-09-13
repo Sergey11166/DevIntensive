@@ -6,7 +6,7 @@
     android:id="@+id/main_header"
     android:layout_width="match_parent"
     android:layout_height="@dimen/size_huge_112"
-    android:background="@color/gray"
+    android:background="@color/color_gray"
     app:layout_behavior=".ui.view.behaviors.MainHeaderBehavior"
     tools:ignore="Overdraw">
 

@@ -4,7 +4,7 @@
     <style name="appbar_layout">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@color/gray</item>
+        <item name="android:background">@color/color_gray</item>
     </style>
 
     <style name="user_photo">

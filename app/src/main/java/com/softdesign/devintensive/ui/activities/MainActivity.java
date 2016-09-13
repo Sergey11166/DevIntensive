@@ -1,5 +1,6 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -160,6 +161,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //super.onActivityResult(requestCode, resultCode, data);
+    }
+
     /**
      * Method show messages by {@link Snackbar}
      * @param message Message to show
@@ -242,5 +248,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             data.add(view.getText().toString());
         }
         mDataManager.getPreferencesManager().saveUserProfileData(data);
+    }
+
+    private void loadPhotoFromGallery() {
+
+    }
+
+    private void takePhotoFromCamera() {
+
     }
 }

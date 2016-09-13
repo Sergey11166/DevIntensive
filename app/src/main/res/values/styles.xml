@@ -26,7 +26,7 @@
     </style>
 
     <style name="line">
-        <item name="android:background">@color/gray_light</item>
+        <item name="android:background">@color/color_gray_light</item>
     </style>
 
     <style name="line.horizontal">

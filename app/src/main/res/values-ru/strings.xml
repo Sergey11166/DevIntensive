@@ -10,4 +10,5 @@
     <string name="about_me">О себе</string>
     <string name="my_profile">Мой профиль</string>
     <string name="team">Команда</string>
+    <string name="change_profile_photo">Изменить фотографию профиля</string>
 </resources>
