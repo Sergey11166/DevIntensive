@@ -1,18 +1,16 @@
 <resources>
     <string name="app_name">Воробьёв Сергей</string>
 
-    <string name="rating">Рейтинг</string>
-    <string name="wrote_code_lines">Написано строк кода</string>
-    <string name="projects">Проектов</string>
-    <string name="phone">Мобильный телефон</string>
-    <string name="vk_profile">Профиль VK</string>
-    <string name="repository">Репозиторий</string>
-    <string name="about_me">О себе</string>
-    <string name="my_profile">Мой профиль</string>
-    <string name="team">Команда</string>
-    <string name="change_profile_photo">Изменить фотографию профиля</string>
-    <string name="user_profile_dialog_gallery">Load from gallery</string>
-    <string name="user_profile_dialog_take_photo">Take a photo</string>
-    <string name="user_profile_dialog_cancel">Cancel</string>
-    <string name="user_profile_dialog_title">Change profile_photo</string>
+    <string name="profile.placeholder">Изменить фото профиля</string>
+    <string name="profile.placeholder.load_photo_dialog.title">Изменить фото профиля</string>
+    <string name="profile.scoreBox.rating">Рейтинг</string>
+    <string name="profile.scoreBox.code">Написано строк кода</string>
+    <string name="profile.scoreBox.projects">Проектов</string>
+    <string name="profile.info.phone">Мобильный телефон</string>
+    <string name="profile.info.vk">Профиль VK</string>
+    <string name="profile.info.github">Репозитории</string>
+    <string name="profile.info.about">Обо мне</string>
+
+    <string name="drawer.menu.my_profile">Мой профиль</string>
+    <string name="drawer.menu.my_team">Команда</string>
 </resources>

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,10 +19,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -44,8 +46,6 @@ import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 
-import static android.support.design.widget.AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED;
-import static android.support.design.widget.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 import static com.softdesign.devintensive.utils.Constants.EDIT_MODE_KEY;
 import static com.softdesign.devintensive.utils.Constants.LOAD_PROFILE_PHOTO;
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
@@ -70,24 +70,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         view.setFocusableInTouchMode(false);
     };
 
-    @BindView(R.id.coordinator_container) CoordinatorLayout mCoordinatorLayout;
+    @BindView(R.id.coordinator_layout) CoordinatorLayout mCoordinatorLayout;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.fab) FloatingActionButton mFab;
     @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
-    @BindView(R.id.placeholder_layout) View mPlaceHolderLayout;
+    @BindView(R.id.profile_placeholder_layout) View mPlaceHolderLayout;
     @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
+    @BindView(R.id.profile_info_nested_scroll_view) NestedScrollView mScrollView;
+    @BindView(R.id.profile_photo) ImageView mProfilePhoto;
 
     @BindViews({
             R.id.phone_edit_text,
             R.id.email_edit_text,
             R.id.vk_edit_text,
             R.id.git_edit_text,
-            R.id.bio_edit_text
+            R.id.about_edit_text
     })
     List<EditText> mUserInfoViews;
 
-    private AppBarLayout.LayoutParams mAppBarParams = null;
     private DataManager mDataManager;
 
     private boolean mCurrentEditorMode;
@@ -170,7 +171,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case R.id.fab:
                 changeEditMode(!mCurrentEditorMode);
                 break;
-            case R.id.placeholder_layout:
+            case R.id.profile_placeholder_layout:
                 showDialog(LOAD_PROFILE_PHOTO);
                 break;
         }
@@ -209,7 +210,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             actionBar.setDisplayHomeAsUpEnabled(true);
             mToolbar.setTitle(R.string.app_name);
         }
-        mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbarLayout.getLayoutParams();
     }
 
     /**
@@ -246,21 +246,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * @param mode Activate edit mode if true, deactivate if false
      */
     private void changeEditMode(boolean mode) {
-        if (mode) {
-            ButterKnife.apply(mUserInfoViews, EDIT_MODE_TRUE);
-            showProfilePlaceHolder();
-            lockToolbar();
-            mCollapsingToolbarLayout.setExpandedTitleColor(Color.TRANSPARENT);
-        } else {
-            ButterKnife.apply(mUserInfoViews, EDIT_MODE_FALSE);
-            hideProfilePlaceHolder();
-            unlockToolbar();
-            mCollapsingToolbarLayout.setExpandedTitleColor(Color.WHITE);
-        }
+        fullScrollDown();
         mCurrentEditorMode = mode;
         mFab.setImageResource(mCurrentEditorMode ?
                 R.drawable.ic_done_black_24dp :
                 R.drawable.ic_mode_edit_black_24dp);
+        if (mode) {
+            ButterKnife.apply(mUserInfoViews, EDIT_MODE_TRUE);
+            showProfilePlaceHolder();
+            mCollapsingToolbarLayout.setTitle(" ");
+        } else {
+            ButterKnife.apply(mUserInfoViews, EDIT_MODE_FALSE);
+            hideProfilePlaceHolder();
+            mCollapsingToolbarLayout.setTitle(getString(R.string.app_name));
+        }
     }
 
     /**
@@ -312,27 +311,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mPlaceHolderLayout.setVisibility(View.VISIBLE);
     }
 
-    private void lockToolbar() {
-        mAppBarLayout.setExpanded(true, true);
-        mAppBarParams.setScrollFlags(0);
-        mCollapsingToolbarLayout.setLayoutParams(mAppBarParams);
-    }
-
-    private void unlockToolbar() {
-        mAppBarParams.setScrollFlags(SCROLL_FLAG_SCROLL | SCROLL_FLAG_EXIT_UNTIL_COLLAPSED);
-        mCollapsingToolbarLayout.setLayoutParams(mAppBarParams);
+    private void fullScrollDown() {
+        CoordinatorLayout.LayoutParams params =
+                (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
+        AppBarLayout.Behavior behavior = (AppBarLayout.Behavior) params.getBehavior();
+        if (behavior != null) {
+            behavior.onNestedFling(mCoordinatorLayout, mAppBarLayout, null, 0, -1000000, false);
+        }
     }
 
     @Override
     protected Dialog onCreateDialog(int id) {
         switch (id) {
             case LOAD_PROFILE_PHOTO :
-                String[] items = {getString(R.string.user_profile_dialog_gallery),
-                        getString(R.string.user_profile_dialog_take_photo),
-                        getString(R.string.user_profile_dialog_cancel)};
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.user_profile_dialog_title);
+                builder.setTitle(R.string.profile_placeholder_load_photo_dialog_title);
+                final String[] items = getResources()
+                        .getStringArray(R.array.load_photo_dialog);
                 builder.setItems(items, (dialog, which) -> {
                     switch (which) {
                         case 0:

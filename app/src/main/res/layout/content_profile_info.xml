@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    style="@style/match_parent_only"
-    app:layout_behavior=".ui.view.behaviors.MainInfoBehavior"
-    app:layout_anchor="@id/main_header"
-    tools:ignore="contentDescription">
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+                                            xmlns:app="http://schemas.android.com/apk/res-auto"
+                                            xmlns:tools="http://schemas.android.com/tools"
+                                            style="@style/match_parent_all"
+                                            android:id="@+id/profile_info_nested_scroll_view"
+                                            app:layout_behavior=".ui.view.behaviors.MainInfoBehavior"
+                                            app:layout_anchor="@+id/scores_layout"
+                                            tools:ignore="contentDescription">
 
     <LinearLayout
-        style="@style/match_parent_only"
+        style="@style/match_parent_all"
         android:orientation="vertical"
         android:layout_marginBottom="@dimen/activity_vertical_margin">
 
@@ -26,8 +26,7 @@
                     style="@style/main_edit_text"
                     android:id="@+id/phone_edit_text"
                     android:inputType="phone"
-                    android:hint="@string/phone"
-                    android:text="+79090909090"/>
+                    android:hint="@string/profile.info.phone"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
@@ -42,7 +41,6 @@
             <ImageView
                 style="@style/main_icon.left"
                 android:src="@drawable/ic_email_black_24dp"
-                android:id="@+id/imageView"
                 android:layout_height="wrap_content"/>
 
             <android.support.design.widget.TextInputLayout
@@ -52,8 +50,7 @@
                     style="@style/main_edit_text"
                     android:id="@+id/email_edit_text"
                     android:inputType="textEmailAddress"
-                    android:hint="@string/email"
-                    android:text="@string/sevoro_sv_gmail_com"/>
+                    android:hint="@string/profile.info.email"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
@@ -76,8 +73,7 @@
                     style="@style/main_edit_text"
                     android:id="@+id/vk_edit_text"
                     android:inputType="textUri|textMultiLine"
-                    android:hint="@string/vk_profile"
-                    android:text="vk.com/sergey11166"/>
+                    android:hint="@string/profile.info.vk"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
@@ -100,8 +96,7 @@
                     style="@style/main_edit_text"
                     android:id="@+id/git_edit_text"
                     android:inputType="textMultiLine"
-                    android:hint="@string/repository"
-                    android:text="github.com/sergey11166/DevIntensive"/>
+                    android:hint="@string/profile.info.github"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
@@ -122,10 +117,9 @@
 
                 <EditText
                     style="@style/main_edit_text"
-                    android:id="@+id/bio_edit_text"
+                    android:id="@+id/about_edit_text"
                     android:inputType="textMultiLine"
-                    android:hint="@string/about_me"
-                    android:text="@string/lorem_ipsum"/>
+                    android:hint="@string/profile.info.about"/>
             </android.support.design.widget.TextInputLayout>
         </LinearLayout>
     </LinearLayout>
