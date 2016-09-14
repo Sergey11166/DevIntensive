@@ -11,4 +11,8 @@
     <string name="my_profile">Мой профиль</string>
     <string name="team">Команда</string>
     <string name="change_profile_photo">Изменить фотографию профиля</string>
+    <string name="user_profile_dialog_gallery">Load from gallery</string>
+    <string name="user_profile_dialog_take_photo">Take a photo</string>
+    <string name="user_profile_dialog_cancel">Cancel</string>
+    <string name="user_profile_dialog_title">Change profile_photo</string>
 </resources>

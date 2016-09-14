@@ -1,10 +1,18 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -23,15 +31,23 @@ import android.widget.ImageView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
+import com.softdesign.devintensive.utils.Constants;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 
+import static android.support.design.widget.AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED;
+import static android.support.design.widget.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 import static com.softdesign.devintensive.utils.Constants.EDIT_MODE_KEY;
+import static com.softdesign.devintensive.utils.Constants.LOAD_PROFILE_PHOTO;
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 
 /**
@@ -58,6 +74,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.fab) FloatingActionButton mFab;
+    @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
+    @BindView(R.id.placeholder_layout) View mPlaceHolderLayout;
+    @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
 
     @BindViews({
             R.id.phone_edit_text,
@@ -68,6 +87,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     })
     List<EditText> mUserInfoViews;
 
+    private AppBarLayout.LayoutParams mAppBarParams = null;
     private DataManager mDataManager;
 
     private boolean mCurrentEditorMode;
@@ -79,6 +99,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         mFab.setOnClickListener(this);
+        mPlaceHolderLayout.setOnClickListener(this);
         setupToolBar();
         setupDrawer();
 
@@ -149,6 +170,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case R.id.fab:
                 changeEditMode(!mCurrentEditorMode);
                 break;
+            case R.id.placeholder_layout:
+                showDialog(LOAD_PROFILE_PHOTO);
+                break;
         }
     }
 
@@ -185,6 +209,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             actionBar.setDisplayHomeAsUpEnabled(true);
             mToolbar.setTitle(R.string.app_name);
         }
+        mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbarLayout.getLayoutParams();
     }
 
     /**
@@ -221,8 +246,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * @param mode Activate edit mode if true, deactivate if false
      */
     private void changeEditMode(boolean mode) {
-        if (mode) ButterKnife.apply(mUserInfoViews, EDIT_MODE_TRUE);
-        else  ButterKnife.apply(mUserInfoViews, EDIT_MODE_FALSE);
+        if (mode) {
+            ButterKnife.apply(mUserInfoViews, EDIT_MODE_TRUE);
+            showProfilePlaceHolder();
+            lockToolbar();
+            mCollapsingToolbarLayout.setExpandedTitleColor(Color.TRANSPARENT);
+        } else {
+            ButterKnife.apply(mUserInfoViews, EDIT_MODE_FALSE);
+            hideProfilePlaceHolder();
+            unlockToolbar();
+            mCollapsingToolbarLayout.setExpandedTitleColor(Color.WHITE);
+        }
         mCurrentEditorMode = mode;
         mFab.setImageResource(mCurrentEditorMode ?
                 R.drawable.ic_done_black_24dp :
@@ -255,6 +289,75 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void takePhotoFromCamera() {
+        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File photoFile = null;
+        try {
+            photoFile = createImageFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // TODO: 14.09.2016 Handle exception
+        }
 
+        if (photoFile != null) {
+            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+            startActivityForResult(takePhotoIntent, Constants.REQUEST_CAMERA_PICTURE);
+        }
+    }
+
+    private void hideProfilePlaceHolder() {
+        mPlaceHolderLayout.setVisibility(View.GONE);
+    }
+
+    private void showProfilePlaceHolder() {
+        mPlaceHolderLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void lockToolbar() {
+        mAppBarLayout.setExpanded(true, true);
+        mAppBarParams.setScrollFlags(0);
+        mCollapsingToolbarLayout.setLayoutParams(mAppBarParams);
+    }
+
+    private void unlockToolbar() {
+        mAppBarParams.setScrollFlags(SCROLL_FLAG_SCROLL | SCROLL_FLAG_EXIT_UNTIL_COLLAPSED);
+        mCollapsingToolbarLayout.setLayoutParams(mAppBarParams);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case LOAD_PROFILE_PHOTO :
+                String[] items = {getString(R.string.user_profile_dialog_gallery),
+                        getString(R.string.user_profile_dialog_take_photo),
+                        getString(R.string.user_profile_dialog_cancel)};
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.user_profile_dialog_title);
+                builder.setItems(items, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            loadPhotoFromGallery();
+                            break;
+                        case 1:
+                            takePhotoFromCamera();
+                            break;
+                        case 2:
+                            dialog.cancel();
+                            break;
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.setCanceledOnTouchOutside(false);
+                return dialog;
+            default: return  null;
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH)
+                .format(System.currentTimeMillis());
+        String imageFileName = "JPEG_".concat(timestamp);
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(imageFileName, ".jpg", storageDir);
     }
 }
