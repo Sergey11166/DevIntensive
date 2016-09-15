@@ -16,10 +16,6 @@ public class ChangeProfilePhotoDialog extends DialogFragment {
 
     private DialogInterface.OnClickListener mOnClickListener;
 
-    public static ChangeProfilePhotoDialog newInstance() {
-        return new ChangeProfilePhotoDialog();
-    }
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

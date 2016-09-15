@@ -20,4 +20,5 @@ public interface Constants {
 
     String SHOW_DIALOG_FRAGMENT_TAG = "SHOW_DIALOG_FRAGMENT_TAG";
 
+    String DIALOG_MESSAGE_KEY = "DIALOG_MESSAGE_KEY";
 }
