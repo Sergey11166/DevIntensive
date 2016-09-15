@@ -8,8 +8,7 @@
         android:id="@+id/profile_photo"
         android:layout_width="match_parent"
         android:layout_height="@dimen/size_profile_photo_256"
-        android:scaleType="centerCrop"
-        android:src="@drawable/user_photo"/>
+        android:scaleType="centerCrop"/>
 
     <RelativeLayout
         style="@style/match_parent_all"

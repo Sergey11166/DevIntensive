@@ -3,6 +3,7 @@
 
     <string name="profile.placeholder">Изменить фото профиля</string>
     <string name="profile.placeholder.load_photo_dialog.title">Изменить фото профиля</string>
+    <string name="profile.placeholder.chose_photo_from_gallery">Выберите фото</string>
     <string name="profile.scoreBox.rating">Рейтинг</string>
     <string name="profile.scoreBox.code">Написано строк кода</string>
     <string name="profile.scoreBox.projects">Проектов</string>

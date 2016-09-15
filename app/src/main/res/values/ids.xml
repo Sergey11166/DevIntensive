@@ -3,4 +3,5 @@
 
     <item name="request_code_camera" type="id"/>
     <item name="request_code_gallery" type="id"/>
+    <item name="permission_request_settings_code" type="id"/>
 </resources>
