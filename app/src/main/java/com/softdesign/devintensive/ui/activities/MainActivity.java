@@ -1,7 +1,5 @@
 package com.softdesign.devintensive.ui.activities;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -19,13 +17,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -33,7 +29,7 @@ import android.widget.ImageView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
-import com.softdesign.devintensive.utils.Constants;
+import com.softdesign.devintensive.ui.dialogs.ChangeProfilePhotoDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +43,6 @@ import butterknife.BindViews;
 import butterknife.ButterKnife;
 
 import static com.softdesign.devintensive.utils.Constants.EDIT_MODE_KEY;
-import static com.softdesign.devintensive.utils.Constants.LOAD_PROFILE_PHOTO;
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 
 /**
@@ -172,7 +167,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 changeEditMode(!mCurrentEditorMode);
                 break;
             case R.id.profile_placeholder_layout:
-                showDialog(LOAD_PROFILE_PHOTO);
+                showChangeProfilePhotoDialog();
                 break;
         }
     }
@@ -284,22 +279,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void loadPhotoFromGallery() {
-
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        startActivityForResult(intent, R.id.request_code_gallery);
     }
 
     private void takePhotoFromCamera() {
-        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File photoFile = null;
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File file = null;
         try {
-            photoFile = createImageFile();
+            file = createImageFile();
         } catch (IOException e) {
             e.printStackTrace();
             // TODO: 14.09.2016 Handle exception
         }
 
-        if (photoFile != null) {
-            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
-            startActivityForResult(takePhotoIntent, Constants.REQUEST_CAMERA_PICTURE);
+        if (file != null) {
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+            startActivityForResult(intent, R.id.request_code_camera);
         }
     }
 
@@ -320,33 +317,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-            case LOAD_PROFILE_PHOTO :
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.profile_placeholder_load_photo_dialog_title);
-                final String[] items = getResources()
-                        .getStringArray(R.array.load_photo_dialog);
-                builder.setItems(items, (dialog, which) -> {
-                    switch (which) {
-                        case 0:
-                            loadPhotoFromGallery();
-                            break;
-                        case 1:
-                            takePhotoFromCamera();
-                            break;
-                        case 2:
-                            dialog.cancel();
-                            break;
-                    }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.setCanceledOnTouchOutside(false);
-                return dialog;
-            default: return  null;
-        }
+    private void showChangeProfilePhotoDialog() {
+        ChangeProfilePhotoDialog dialog = ChangeProfilePhotoDialog.newInstance();
+        dialog.setOnClickListener((dialog1, which) -> {
+            switch (which) {
+                case 0:
+                    loadPhotoFromGallery();
+                    break;
+                case 1:
+                    takePhotoFromCamera();
+                    break;
+                case 2:
+                    dialog.dismiss();
+                    break;
+            }
+        });
     }
 
     private File createImageFile() throws IOException {
