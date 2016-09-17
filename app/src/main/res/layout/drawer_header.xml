@@ -7,14 +7,13 @@
                 android:paddingStart="@dimen/space_normal_16"
                 android:paddingEnd="@dimen/space_normal_16"
                 android:paddingBottom="@dimen/space_small_8"
-                android:background="@drawable/nav_head_bg"
+                android:background="@drawable/nav_header_bg"
                 tools:ignore="contentDescription">
 
     <ImageView
         android:id="@+id/avatar"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:src="@drawable/user_photo"
         android:layout_marginTop="@dimen/space_normal_16"/>
 
     <LinearLayout

@@ -18,6 +18,7 @@ public class NeedGrantPermissionDialog extends DialogFragment {
 
     private OnClickListener mOnPositiveButtonClickListener;
     private OnClickListener mOnNegativeButtonClickListener;
+    private OnClickListener mOnNeutralButtonClickListener;
 
     public static NeedGrantPermissionDialog newInstance(int message) {
         NeedGrantPermissionDialog dialog = new NeedGrantPermissionDialog();
@@ -35,7 +36,8 @@ public class NeedGrantPermissionDialog extends DialogFragment {
         builder.setTitle(R.string.dialog_title_need_grant_permission)
                 .setMessage(message)
                 .setPositiveButton(R.string.dialog_positive_button, mOnPositiveButtonClickListener)
-                .setNegativeButton(R.string.dialog_negative_button, mOnNegativeButtonClickListener);
+                .setNegativeButton(R.string.dialog_negative_button, mOnNegativeButtonClickListener)
+                .setNeutralButton(R.string.dialog_settings_button, mOnNeutralButtonClickListener);
 
         AlertDialog dialog = builder.create();
         dialog.setCancelable(false);
@@ -49,5 +51,9 @@ public class NeedGrantPermissionDialog extends DialogFragment {
 
     public void setOnNegativeButtonClickListener(OnClickListener onNegativeButtonClickListener) {
         mOnNegativeButtonClickListener = onNegativeButtonClickListener;
+    }
+
+    public void setOnNeutralButtonClickListener(OnClickListener onNeutralButtonClickListener) {
+        mOnNeutralButtonClickListener = onNeutralButtonClickListener;
     }
 }

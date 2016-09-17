@@ -6,6 +6,7 @@ import android.graphics.Point;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 
 /**
  * @author Sergey Vorobyev
@@ -48,5 +49,19 @@ public class UIHelper {
             result = context.getResources().getDimensionPixelSize(resId);
         }
         return result;
+    }
+
+    public static void showSoftKeyboard(View view) {
+        view.postDelayed(() -> {
+            InputMethodManager keyboard = (InputMethodManager)
+                    view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            keyboard.showSoftInput(view, 0);
+        }, 200);
+    }
+
+    public static void hideSoftKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) view.getContext()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }

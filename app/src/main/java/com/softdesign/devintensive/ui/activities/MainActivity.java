@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -53,9 +54,10 @@ import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static com.softdesign.devintensive.utils.Constants.EDIT_MODE_KEY;
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
-import static com.softdesign.devintensive.utils.Constants.SHOW_DIALOG_FRAGMENT_TAG;
+import static com.softdesign.devintensive.utils.Constants.DIALOG_FRAGMENT_TAG;
+import static com.softdesign.devintensive.utils.UIHelper.hideSoftKeyboard;
+import static com.softdesign.devintensive.utils.UIHelper.showSoftKeyboard;
 
 /**
  * @author Sergey Vorobyev
@@ -65,9 +67,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = LOG_TAG_PREFIX + "MainActivity";
 
+    private static final String EDIT_MODE_KEY = "EDIT_MODE_KEY";
+
     private static final int REQUEST_CODE_CAMERA = 0;
     private static final int REQUEST_CODE_GALLERY = 1;
-    private static final int REQUEST_CODE_SETTING = 2;
+    private static final int REQUEST_CODE_SETTING_CAMERA = 2;
+    private static final int REQUEST_CODE_SETTING_GALLERY = 3;
 
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 0;
     private static final int GALLERY_PERMISSION_REQUEST_CODE = 1;
@@ -105,8 +110,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private DataManager mDataManager;
 
     private boolean mIsEditMode;
-    private File mPhotoFile = null;
-    private Uri mSelectedImage = null;
+    private File mPhotoFile;
+    private Uri mSelectedImage;
+    private  Point mPhotoSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,16 +120,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        mFab.setOnClickListener(this);
+
+        mDataManager = DataManager.getInstance();
+
+        mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
+                getResources().getDimensionPixelSize(R.dimen.size_profile_photo_256));
+
         mPlaceHolderLayout.setOnClickListener(this);
+        mFab.setOnClickListener(this);
+
+        setupInfoLayouts();
         setupToolBar();
         setupDrawer();
 
-        mDataManager = DataManager.getInstance();
-        loadUserInfoValue();
-        Picasso.with(this)
-                .load(mDataManager.getPreferencesManager().loadUserPhoto())
-                .into(mProfilePhoto);
+        loadInfoValues();
+        loadImageFromUriToView(mDataManager.getPreferencesManager().loadUserPhoto());
 
         if (savedInstanceState != null) {
             mIsEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY);
@@ -133,9 +144,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == android.R.id.home) {
-            mDrawerLayout.openDrawer(GravityCompat.START);
-        }
+        if(item.getItemId() == android.R.id.home) mDrawerLayout.openDrawer(GravityCompat.START);
         return super.onOptionsItemSelected(item);
     }
 
@@ -180,16 +189,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_CODE_GALLERY:
-                if (resultCode == RESULT_OK && data != null) {
-                    mSelectedImage = data.getData();
-                }
+                if (resultCode == RESULT_OK && data != null) mSelectedImage = data.getData();
                 insertProfileImage(mSelectedImage);
                 break;
             case REQUEST_CODE_CAMERA:
-                if (resultCode == RESULT_OK && mPhotoFile != null) {
-                    mSelectedImage = Uri.fromFile(mPhotoFile);
-                }
+                if (resultCode == RESULT_OK && mPhotoFile != null) mSelectedImage = Uri.fromFile(mPhotoFile);
                 insertProfileImage(mSelectedImage);
+                break;
+            case REQUEST_CODE_SETTING_CAMERA:
+                checkAndRequestCameraPermission();
+                break;
+            case REQUEST_CODE_SETTING_GALLERY:
+                checkAndRequestGalleryPermission();
                 break;
         }
     }
@@ -203,7 +214,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 } else {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_camera_permission,
                             (dialog, which) -> checkAndRequestCameraPermission(),
-                            (dialog, which) -> dialog.dismiss());
+                            (dialog, which) -> dialog.dismiss(),
+                            (dialog, which) -> openApplicationSettings(REQUEST_CODE_SETTING_CAMERA));
                 }
                 break;
             case GALLERY_PERMISSION_REQUEST_CODE:
@@ -212,7 +224,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 } else {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_gallery_permission,
                             (dialog, which) -> checkAndRequestGalleryPermission(),
-                            (dialog, which) -> dialog.dismiss());
+                            (dialog, which) -> dialog.dismiss(),
+                            (dialog, which) -> openApplicationSettings(REQUEST_CODE_SETTING_GALLERY));
                 }
                 break;
         }
@@ -291,11 +304,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**
      * Load user info from SharedPreferences
      */
-    private void loadUserInfoValue() {
+    private void loadInfoValues() {
         List<String> data = mDataManager.getPreferencesManager().loadUserProfileData();
-        for (int i = 0; i < mUserInfoViews.size(); i++) {
-            mUserInfoViews.get(i).setText(data.get(i));
-        }
+        for (int i = 0; i < mUserInfoViews.size(); i++) mUserInfoViews.get(i).setText(data.get(i));
     }
 
     /**
@@ -303,9 +314,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void saveUserInfoValue() {
         List<String> data = new ArrayList<>(5);
-        for (EditText view : mUserInfoViews) {
-            data.add(view.getText().toString());
-        }
+        for (EditText view : mUserInfoViews) data.add(view.getText().toString());
         mDataManager.getPreferencesManager().saveUserProfileData(data);
     }
 
@@ -410,7 +419,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     break;
             }
         });
-        d.show(getFragmentManager(), SHOW_DIALOG_FRAGMENT_TAG);
+        d.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
     }
 
     /**
@@ -421,12 +430,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void showNeedGrantPermissionDialog(int message,
                                                OnClickListener onPositiveButtonClickListener,
-                                               OnClickListener onNegativeButtonClickListener) {
+                                               OnClickListener onNegativeButtonClickListener,
+                                               OnClickListener onNeutralButtonClickListener) {
 
         NeedGrantPermissionDialog d = NeedGrantPermissionDialog.newInstance(message);
         d.setOnPositiveButtonClickListener(onPositiveButtonClickListener);
         d.setOnNegativeButtonClickListener(onNegativeButtonClickListener);
-        d.show(getFragmentManager(), SHOW_DIALOG_FRAGMENT_TAG);
+        d.setOnNeutralButtonClickListener(onNeutralButtonClickListener);
+        d.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
     }
 
     /**
@@ -457,22 +468,42 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * @param selectedImage {@link Uri} to selected image
      */
     private void insertProfileImage(Uri selectedImage) {
-        Picasso.with(this)
-                .load(selectedImage)
-                .into(mProfilePhoto);
-
-        if (selectedImage != null) {
-            mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
-        }
+        loadImageFromUriToView(selectedImage);
+        if (selectedImage != null) mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
     }
 
     /**
      * Open system settings of this app
      */
-    @SuppressWarnings("unused")
-    public void openApplicationSettings() {
+    public void openApplicationSettings(int requestCode) {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.parse("package:" + getPackageName()));
-        startActivityForResult(intent, REQUEST_CODE_SETTING);
+        startActivityForResult(intent, requestCode);
+    }
+
+    private void setupInfoLayouts() {
+        final View.OnFocusChangeListener listener = (view, hasFocus) -> {
+            if (hasFocus) {
+                if (view instanceof EditText) {
+                    EditText input = (EditText) view;
+                    if (!input.isEnabled() && !input.isFocusable()) return;
+                    input.setSelection(input.getText().length());
+                    showSoftKeyboard(input);
+                }
+            } else {
+                hideSoftKeyboard(view);
+            }
+        };
+        for (EditText input: mUserInfoViews) input.setOnFocusChangeListener(listener);
+    }
+
+    private void loadImageFromUriToView(Uri uri) {
+        Picasso.with(this)
+                .load(uri)
+                .placeholder(R.drawable.user_bg)
+                .resize(mPhotoSize.x, mPhotoSize.y)
+                .onlyScaleDown()
+                .centerCrop()
+                .into(mProfilePhoto);
     }
 }

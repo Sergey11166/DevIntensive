@@ -25,6 +25,7 @@
     <string name="dialog.message.need_grant_gallery_permission">
         You should grant media storage permissions to chose a photo from gallery. Do you want grant?
     </string>
+    <string name="dialog.settings_button">Settings</string>
     <string name="dialog.positive_button">Yes</string>
     <string name="dialog.negative_button">No</string>
 

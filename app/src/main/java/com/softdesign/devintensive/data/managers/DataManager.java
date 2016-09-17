@@ -6,7 +6,7 @@ package com.softdesign.devintensive.data.managers;
 
 public class DataManager {
 
-    private static DataManager instance = null;
+    private static DataManager instance;
 
     private PreferencesManager mPreferencesManager;
 

@@ -22,6 +22,7 @@
     <string name="dialog.message.need_grant_gallery_permission">
         Вы должны разрешить доступ к мультимедиа файлам для выбора фото из галереи. Хотите разрешить?
     </string>
+    <string name="dialog.settings_button">Настройки</string>
     <string name="dialog.positive_button">Да</string>
     <string name="dialog.negative_button">Нет</string>
 </resources>
