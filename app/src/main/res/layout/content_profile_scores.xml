@@ -5,7 +5,7 @@
               android:layout_width="match_parent"
               android:layout_height="@dimen/size_huge_112"
               android:background="@color/color_gray"
-              app:layout_behavior=".ui.view.behaviors.MainHeaderBehavior">
+              app:layout_behavior=".ui.view.behaviors.ProfileScoresLinearLayoutBehavior">
 
     <LinearLayout
         style="@style/header_layout"

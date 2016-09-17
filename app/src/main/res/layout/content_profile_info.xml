@@ -4,7 +4,7 @@
                                             xmlns:tools="http://schemas.android.com/tools"
                                             style="@style/match_parent_all"
                                             android:id="@+id/profile_info_nested_scroll_view"
-                                            app:layout_behavior=".ui.view.behaviors.MainInfoBehavior"
+                                            app:layout_behavior=".ui.view.behaviors.ProfileInfoNestedScrollViewBehavior"
                                             app:layout_anchor="@+id/scores_layout"
                                             tools:ignore="contentDescription">
 

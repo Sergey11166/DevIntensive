@@ -16,15 +16,15 @@ import static com.softdesign.devintensive.utils.UIHelper.getStatusBarHeight;
  */
 
 @SuppressWarnings("unused")
-public class MainHeaderBehavior<Header extends LinearLayout>
+public class ProfileScoresLinearLayoutBehavior<Header extends LinearLayout>
         extends CoordinatorLayout.Behavior<Header> {
 
-    private float mMinHeaderHeight;
-    private float mMaxHeaderHeight;
+    private float mMinScoresHeight;
+    private float mMaxScoresHeight;
     private float mMinAppbarHeight;
     private float mMaxAppbarHeight;
 
-    public MainHeaderBehavior(Context context, AttributeSet attrs) {
+    public ProfileScoresLinearLayoutBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -33,28 +33,24 @@ public class MainHeaderBehavior<Header extends LinearLayout>
         return dependency instanceof AppBarLayout;
     }
 
+    /**
+     * @param child Scores LinearLayout
+     * @param dependency AppBarLayout
+     */
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, Header child, View dependency) {
-        final CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
+        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
 
-        AppBarLayout appBarLayout;
+        AppBarLayout appBarLayout = (AppBarLayout) dependency;
 
-        if (dependency instanceof AppBarLayout) {
-            appBarLayout = (AppBarLayout) dependency;
-            if (lp.getAnchorId() != -1 && lp.getAnchorId() != appBarLayout.getId()) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-
-        if (mMinHeaderHeight == 0.0f) {
+        if (mMinScoresHeight == 0.0f) {
             initProperties(child, appBarLayout);
         }
 
-        final float appBarHeight = appBarLayout.getBottom() - mMinAppbarHeight;
-        final float expandedPercentageFactor = appBarHeight / mMaxAppbarHeight;
-        lp.height = (int) (mMinHeaderHeight + (mMaxHeaderHeight - mMinHeaderHeight) * expandedPercentageFactor);
+        float currentAppBarHeight = appBarLayout.getBottom() - mMinAppbarHeight;
+        float expandedPercentageFactor = currentAppBarHeight / mMaxAppbarHeight;
+        lp.height = (int) (mMinScoresHeight +
+                (mMaxScoresHeight - mMinScoresHeight) * expandedPercentageFactor);
 
         child.setTranslationY(appBarLayout.getBottom());
         child.setLayoutParams(lp);
@@ -62,9 +58,9 @@ public class MainHeaderBehavior<Header extends LinearLayout>
         return super.onDependentViewChanged(parent, child, dependency);
     }
 
-    private void initProperties(Header child, AppBarLayout dependency) {
-        mMaxHeaderHeight = child.getHeight();
-        if (mMinHeaderHeight == 0.0f) mMinHeaderHeight = getMinHeight(child);
+    private void initProperties(View child, AppBarLayout dependency) {
+        mMaxScoresHeight = child.getHeight();
+        mMinScoresHeight = getMinHeight(child);
         mMinAppbarHeight = getStatusBarHeight(child.getContext()) + getAppBarSize(child.getContext());
         mMaxAppbarHeight = dependency.getHeight() - mMinAppbarHeight;
     }
