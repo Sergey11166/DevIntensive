@@ -73,25 +73,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final int GALLERY_PERMISSION_REQUEST_CODE = 1;
 
     private static final ButterKnife.Action<View> EDIT_MODE_TRUE = (view, index) -> {
-        view.setEnabled(true);
-        view.setFocusable(true);
         view.setFocusableInTouchMode(true);
+        view.setFocusable(true);
+        view.setEnabled(true);
     };
 
     private static final ButterKnife.Action<View> EDIT_MODE_FALSE = (view, index) -> {
-        view.setEnabled(false);
-        view.setFocusable(false);
         view.setFocusableInTouchMode(false);
+        view.setFocusable(false);
+        view.setEnabled(false);
     };
 
-    @BindView(R.id.coordinator_layout) CoordinatorLayout mCoordinatorLayout;
-    @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
-    @BindView(R.id.toolbar) Toolbar mToolbar;
-    @BindView(R.id.fab) FloatingActionButton mFab;
-    @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
-    @BindView(R.id.profile_placeholder_layout) View mPlaceHolderLayout;
     @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
+    @BindView(R.id.coordinator_layout) CoordinatorLayout mCoordinatorLayout;
+    @BindView(R.id.profile_placeholder_layout) View mPlaceHolderLayout;
+    @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
+    @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
+    @BindView(R.id.fab) FloatingActionButton mFab;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
 
     @BindViews({
             R.id.phone_edit_text,
@@ -199,7 +199,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         switch (requestCode) {
             case CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults[0] == PERMISSION_GRANTED && grantResults[1] == PERMISSION_GRANTED) {
-                    permissionCameraGranted();
+                    onCameraPermissionGranted();
                 } else {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_camera_permission,
                             (dialog, which) -> checkAndRequestCameraPermission(),
@@ -208,7 +208,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case GALLERY_PERMISSION_REQUEST_CODE:
                 if (grantResults[0] == PERMISSION_GRANTED) {
-                    permissionGalleryGranted();
+                    onGalleryPermissionGranted();
                 } else {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_gallery_permission,
                             (dialog, which) -> checkAndRequestGalleryPermission(),
@@ -227,7 +227,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method for setup {@link #mToolbar}
+     * Setup {@link #mToolbar}
      */
     private void setupToolBar() {
         setSupportActionBar(mToolbar);
@@ -240,7 +240,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method for setup navigation drawer
+     * Setup navigation drawer
      */
     private void setupDrawer() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
@@ -254,11 +254,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method to round avatar of drawer header
+     * Round avatar of drawer header
      *
      * @param navigationView Object of {@link NavigationView}
      */
-
     private void roundAvatar(NavigationView navigationView) {
         Resources res = getResources();
         Bitmap srcBmp = BitmapFactory.decodeResource(res, R.drawable.avatar);
@@ -269,7 +268,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method to change edit mode of {@link #mUserInfoViews )
+     * Change edit mode
      * @param mode Activate edit mode if true, deactivate if false
      */
     private void changeEditMode(boolean mode) {
@@ -290,7 +289,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method to load user info from SharedPreferences
+     * Load user info from SharedPreferences
      */
     private void loadUserInfoValue() {
         List<String> data = mDataManager.getPreferencesManager().loadUserProfileData();
@@ -300,7 +299,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method to save user info to SharedPreferences
+     * Save user info to SharedPreferences
      */
     private void saveUserInfoValue() {
         List<String> data = new ArrayList<>(5);
@@ -318,32 +317,35 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         checkAndRequestCameraPermission();
     }
 
+    /**
+     * Check if camera permissions not granted make request permissions
+     */
     private void checkAndRequestCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, CAMERA) == PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
-            permissionCameraGranted();
+            onCameraPermissionGranted();
         } else {
-            showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_camera_permission,
-                    (dialog, which) -> ActivityCompat.requestPermissions(this,
-                            new String[] {CAMERA, WRITE_EXTERNAL_STORAGE},
-                            CAMERA_PERMISSION_REQUEST_CODE),
-                    (dialog, which) -> dialog.dismiss());
+            ActivityCompat.requestPermissions(this, new String[] {CAMERA, WRITE_EXTERNAL_STORAGE},
+                    CAMERA_PERMISSION_REQUEST_CODE);
         }
-
     }
 
+    /**
+     * Check if gallery permissions not granted make request permissions
+     */
     private void checkAndRequestGalleryPermission() {
         if (ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
-            permissionGalleryGranted();
+            onGalleryPermissionGranted();
         } else {
-            showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_gallery_permission,
-                    (dialog, which) -> ActivityCompat.requestPermissions(this,
-                            new String[] {READ_EXTERNAL_STORAGE}, GALLERY_PERMISSION_REQUEST_CODE),
-                    (dialog, which) -> dialog.dismiss());
+            ActivityCompat.requestPermissions(this, new String[] {READ_EXTERNAL_STORAGE},
+                    GALLERY_PERMISSION_REQUEST_CODE);
         }
     }
 
-    private void permissionCameraGranted() {
+    /**
+     * Call when camera permissions have been granted
+     */
+    private void onCameraPermissionGranted() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         try {
@@ -359,7 +361,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
-    private void permissionGalleryGranted() {
+    /**
+     * Call when gallery permissions have been granted
+     */
+    private void onGalleryPermissionGranted() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         startActivityForResult(Intent.createChooser(intent,
@@ -375,6 +380,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mPlaceHolderLayout.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Scroll down always when change edit mode
+     */
     private void fullScrollDown() {
         CoordinatorLayout.LayoutParams params =
                 (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
@@ -384,6 +392,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
+    /**
+     * Show {@link ChangeProfilePhotoDialog}. Called when we want change profile photo
+     */
     private void showChangeProfilePhotoDialog() {
         ChangeProfilePhotoDialog d = new ChangeProfilePhotoDialog();
         d.setOnClickListener((dialog, which) -> {
@@ -402,6 +413,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         d.show(getFragmentManager(), SHOW_DIALOG_FRAGMENT_TAG);
     }
 
+    /**
+     * Show {@link NeedGrantPermissionDialog} to explain to users why needed permissions.
+     * @param message Message for users
+     * @param onPositiveButtonClickListener Actions to handle press on positive button
+     * @param onNegativeButtonClickListener Actions to handle press on negative button
+     */
     private void showNeedGrantPermissionDialog(int message,
                                                OnClickListener onPositiveButtonClickListener,
                                                OnClickListener onNegativeButtonClickListener) {
@@ -412,6 +429,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         d.show(getFragmentManager(), SHOW_DIALOG_FRAGMENT_TAG);
     }
 
+    /**
+     * Create image file to save photo when we took photo
+     *
+     * @return Object of {@link File}
+     * @throws IOException
+     */
     private File createImageFile() throws IOException {
         String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH)
                 .format(System.currentTimeMillis());
@@ -428,6 +451,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         return image;
     }
 
+    /**
+     * Load selected image to ImageView
+     *
+     * @param selectedImage {@link Uri} to selected image
+     */
     private void insertProfileImage(Uri selectedImage) {
         Picasso.with(this)
                 .load(selectedImage)
@@ -438,6 +466,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
+    /**
+     * Open system settings of this app
+     */
+    @SuppressWarnings("unused")
     public void openApplicationSettings() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.parse("package:" + getPackageName()));
