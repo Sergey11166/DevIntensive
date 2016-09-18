@@ -28,5 +28,8 @@
     <string name="dialog.settings_button">Settings</string>
     <string name="dialog.positive_button">Yes</string>
     <string name="dialog.negative_button">No</string>
+    <string name="error.edit_text.wrong_symbols">Tape only digits</string>
+    <string name="error.edit_text.phone_wrong_length">Count symbols should be 11</string>
+    <string name="error_edit_text_phone_wrong_code">Phone code should be 7 or 8</string>
 
 </resources>

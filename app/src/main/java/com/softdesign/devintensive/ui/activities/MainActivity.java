@@ -19,6 +19,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -37,6 +38,7 @@ import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.ui.dialogs.ChangeProfilePhotoDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
+import com.softdesign.devintensive.ui.view.behaviors.validators.PhoneTextWatcher;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -102,10 +104,36 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             R.id.phone_edit_text,
             R.id.email_edit_text,
             R.id.vk_edit_text,
-            R.id.git_edit_text,
+            R.id.github_edit_text,
             R.id.about_edit_text
     })
-    List<EditText> mUserInfoViews;
+    List<EditText> mEditTextList;
+
+    @BindViews({
+            R.id.phone_text_input_layout,
+            R.id.email_text_input_layout,
+            R.id.vk_text_input_layout,
+            R.id.github_text_input_layout,
+            R.id.about_text_input_layout
+    })
+    List<TextInputLayout> mTextInputLayoutList;
+
+    @BindViews({
+            R.id.ic_phone_left,
+            R.id.ic_email_left,
+            R.id.ic_vk_left,
+            R.id.ic_github_left,
+            R.id.ic_about_left
+    })
+    List<ImageView> mIconLeftList;
+
+    @BindViews({
+            R.id.ic_phone_right,
+            R.id.ic_email_right,
+            R.id.ic_vk_right,
+            R.id.ic_github_right,
+    })
+    List<ImageView> mIconRightList;
 
     private DataManager mDataManager;
 
@@ -291,11 +319,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 R.drawable.ic_done_black_24dp :
                 R.drawable.ic_mode_edit_black_24dp);
         if (mode) {
-            ButterKnife.apply(mUserInfoViews, EDIT_MODE_TRUE);
+            ButterKnife.apply(mEditTextList, EDIT_MODE_TRUE);
             showProfilePlaceHolder();
             mCollapsingToolbarLayout.setTitle(" ");
         } else {
-            ButterKnife.apply(mUserInfoViews, EDIT_MODE_FALSE);
+            ButterKnife.apply(mEditTextList, EDIT_MODE_FALSE);
             hideProfilePlaceHolder();
             mCollapsingToolbarLayout.setTitle(getString(R.string.app_name));
         }
@@ -306,7 +334,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void loadInfoValues() {
         List<String> data = mDataManager.getPreferencesManager().loadUserProfileData();
-        for (int i = 0; i < mUserInfoViews.size(); i++) mUserInfoViews.get(i).setText(data.get(i));
+        for (int i = 0; i < mEditTextList.size(); i++) mEditTextList.get(i).setText(data.get(i));
     }
 
     /**
@@ -314,7 +342,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void saveUserInfoValue() {
         List<String> data = new ArrayList<>(5);
-        for (EditText view : mUserInfoViews) data.add(view.getText().toString());
+        for (EditText view : mEditTextList) data.add(view.getText().toString());
         mDataManager.getPreferencesManager().saveUserProfileData(data);
     }
 
@@ -494,7 +522,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 hideSoftKeyboard(view);
             }
         };
-        for (EditText input: mUserInfoViews) input.setOnFocusChangeListener(listener);
+        for (EditText input: mEditTextList) input.setOnFocusChangeListener(listener);
+
+        mEditTextList.get(0).addTextChangedListener(
+                new PhoneTextWatcher(mTextInputLayoutList.get(0), mEditTextList.get(0)));
     }
 
     private void loadImageFromUriToView(Uri uri) {

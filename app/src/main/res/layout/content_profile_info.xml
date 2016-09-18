@@ -16,107 +16,120 @@
         <LinearLayout style="@style/main_item_layout">
 
             <ImageView
-                style="@style/main_icon.left"
+                style="@style/profile_icon.left"
+                android:id="@+id/ic_phone_left"
                 android:src="@drawable/ic_call_black_24dp"/>
 
             <android.support.design.widget.TextInputLayout
-                style="@style/main_text_input_layout">
+                style="@style/profile_text_input_layout"
+                android:id="@+id/phone_text_input_layout">
 
                 <EditText
-                    style="@style/main_edit_text"
+                    style="@style/profile_edit_text"
                     android:id="@+id/phone_edit_text"
                     android:inputType="phone"
                     android:hint="@string/profile.info.phone"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
-                style="@style/main_icon.right"
+                style="@style/profile_icon.right"
+                android:id="@+id/ic_phone_right"
                 android:src="@drawable/ic_phone_in_talk_black_24dp"/>
         </LinearLayout>
 
-        <View style="@style/line.horizontal.main"/>
+        <View style="@style/line.horizontal.profile"/>
 
         <LinearLayout style="@style/main_item_layout">
 
             <ImageView
-                style="@style/main_icon.left"
-                android:src="@drawable/ic_email_black_24dp"
-                android:layout_height="wrap_content"/>
+                style="@style/profile_icon.left"
+                android:id="@+id/ic_email_left"
+                android:src="@drawable/ic_email_black_24dp"/>
 
             <android.support.design.widget.TextInputLayout
-                style="@style/main_text_input_layout">
+                style="@style/profile_text_input_layout"
+                android:id="@+id/email_text_input_layout">
 
                 <EditText
-                    style="@style/main_edit_text"
+                    style="@style/profile_edit_text"
                     android:id="@+id/email_edit_text"
                     android:inputType="textEmailAddress"
                     android:hint="@string/profile.info.email"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
-                style="@style/main_icon.right"
+                style="@style/profile_icon.right"
+                android:id="@+id/ic_email_right"
                 android:src="@drawable/ic_send_black_24dp"/>
         </LinearLayout>
 
-        <View style="@style/line.horizontal.main"/>
+        <View style="@style/line.horizontal.profile"/>
 
         <LinearLayout style="@style/main_item_layout">
 
             <ImageView
-                style="@style/main_icon.left"
+                style="@style/profile_icon.left"
+                android:id="@+id/ic_vk_left"
                 android:src="@drawable/ic_vk_circle"/>
 
             <android.support.design.widget.TextInputLayout
-                style="@style/main_text_input_layout">
+                style="@style/profile_text_input_layout"
+                android:id="@+id/vk_text_input_layout">
 
                 <EditText
-                    style="@style/main_edit_text"
+                    style="@style/profile_edit_text"
                     android:id="@+id/vk_edit_text"
                     android:inputType="textUri|textMultiLine"
                     android:hint="@string/profile.info.vk"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
-                style="@style/main_icon.right"
+                style="@style/profile_icon.right"
+                android:id="@+id/ic_vk_right"
                 android:src="@drawable/ic_visibility_black_24dp"/>
         </LinearLayout>
 
-        <View style="@style/line.horizontal.main"/>
+        <View style="@style/line.horizontal.profile"/>
 
         <LinearLayout style="@style/main_item_layout">
 
             <ImageView
-                style="@style/main_icon.left"
+                style="@style/profile_icon.left"
+                android:id="@+id/ic_github_left"
                 android:src="@drawable/ic_github_circle"/>
 
             <android.support.design.widget.TextInputLayout
-                style="@style/main_text_input_layout">
+                style="@style/profile_text_input_layout"
+                android:id="@+id/github_text_input_layout">
 
                 <EditText
-                    style="@style/main_edit_text"
-                    android:id="@+id/git_edit_text"
+                    style="@style/profile_edit_text"
+                    android:id="@+id/github_edit_text"
                     android:inputType="textMultiLine"
                     android:hint="@string/profile.info.github"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
-                style="@style/main_icon.right"
+                style="@style/profile_icon.right"
+                android:id="@+id/ic_github_right"
                 android:src="@drawable/ic_visibility_black_24dp"/>
         </LinearLayout>
 
-        <View style="@style/line.horizontal.main"/>
+        <View style="@style/line.horizontal.profile"/>
 
         <LinearLayout style="@style/main_item_layout">
 
             <ImageView
-                style="@style/main_icon.left"
+                style="@style/profile_icon.left"
+                android:id="@+id/ic_about_left"
                 android:src="@drawable/ic_account_circle"/>
 
             <android.support.design.widget.TextInputLayout
-                style="@style/main_text_input_layout">
+                style="@style/profile_text_input_layout"
+                android:id="@+id/about_text_input_layout">
 
                 <EditText
-                    style="@style/main_edit_text"
+                    style="@style/profile_edit_text"
                     android:id="@+id/about_edit_text"
                     android:inputType="textMultiLine"
                     android:hint="@string/profile.info.about"/>

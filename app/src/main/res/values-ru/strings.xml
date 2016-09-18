@@ -25,4 +25,7 @@
     <string name="dialog.settings_button">Настройки</string>
     <string name="dialog.positive_button">Да</string>
     <string name="dialog.negative_button">Нет</string>
+    <string name="error.edit_text.wrong_symbols">Вводите только цифры</string>
+    <string name="error.edit_text.phone_wrong_length">Колличество цифр должно быть 11</string>
+    <string name="error_edit_text_phone_wrong_code">Номер должен начинаться с 7 или 8</string>
 </resources>
