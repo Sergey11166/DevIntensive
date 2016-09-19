@@ -40,6 +40,4 @@ abstract class AbstractProfileTextWatcher implements TextWatcher {
         mTextInputLayout.setError(null);
         mTextInputLayout.setErrorEnabled(false);
     }
-
-
 }

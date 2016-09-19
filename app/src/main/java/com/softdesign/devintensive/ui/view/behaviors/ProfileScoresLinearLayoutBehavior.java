@@ -7,9 +7,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import static com.softdesign.devintensive.utils.UIHelper.getAppBarSize;
-import static com.softdesign.devintensive.utils.UIHelper.getMinHeight;
-import static com.softdesign.devintensive.utils.UIHelper.getStatusBarHeight;
+import static com.softdesign.devintensive.utils.UIUtils.getAppBarSize;
+import static com.softdesign.devintensive.utils.UIUtils.getMinHeight;
+import static com.softdesign.devintensive.utils.UIUtils.getStatusBarHeight;
 
 /**
  * @author Sergey Vorobyev

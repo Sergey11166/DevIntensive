@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -42,6 +41,7 @@ import com.softdesign.devintensive.ui.view.behaviors.watchers.EmailTextWatcher;
 import com.softdesign.devintensive.ui.view.behaviors.watchers.GithubTextWatcher;
 import com.softdesign.devintensive.ui.view.behaviors.watchers.PhoneTextWatcher;
 import com.softdesign.devintensive.ui.view.behaviors.watchers.VkTextWatcher;
+import com.softdesign.devintensive.utils.NavUtils;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -59,10 +59,15 @@ import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 import static com.softdesign.devintensive.utils.Constants.DIALOG_FRAGMENT_TAG;
-import static com.softdesign.devintensive.utils.UIHelper.hideSoftKeyboard;
-import static com.softdesign.devintensive.utils.UIHelper.showSoftKeyboard;
+import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
+import static com.softdesign.devintensive.utils.NavUtils.goToAppSettings;
+import static com.softdesign.devintensive.utils.NavUtils.goToGalleryApp;
+import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
+import static com.softdesign.devintensive.utils.NavUtils.openPhoneApp;
+import static com.softdesign.devintensive.utils.NavUtils.sendEmail;
+import static com.softdesign.devintensive.utils.UIUtils.hideSoftKeyboard;
+import static com.softdesign.devintensive.utils.UIUtils.showSoftKeyboard;
 
 /**
  * @author Sergey Vorobyev
@@ -148,6 +153,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
                 getResources().getDimensionPixelSize(R.dimen.size_profile_photo_256));
 
+        for (View icon: mIconRightList) icon.setOnClickListener(this);
         mPlaceHolderLayout.setOnClickListener(this);
         mFab.setOnClickListener(this);
 
@@ -193,6 +199,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case R.id.profile_placeholder_layout:
                 showChangeProfilePhotoDialog();
                 break;
+            case R.id.ic_phone_right:
+                openPhoneApp(this, mEditTextList.get(0).getText().toString());
+                break;
+            case R.id.ic_email_right:
+                sendEmail(this, mEditTextList.get(1).getText().toString());
+                break;
+            case R.id.ic_vk_right:
+                goToUrl(this, mEditTextList.get(2).getText().toString());
+                break;
+            case R.id.ic_github_right:
+                goToUrl(this, mEditTextList.get(3).getText().toString());
         }
     }
 
@@ -237,7 +254,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_camera_permission,
                             (dialog, which) -> checkAndRequestCameraPermission(),
                             (dialog, which) -> dialog.dismiss(),
-                            (dialog, which) -> openApplicationSettings(REQUEST_CODE_SETTING_CAMERA));
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_CAMERA));
                 }
                 break;
             case GALLERY_PERMISSION_REQUEST_CODE:
@@ -247,7 +264,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_gallery_permission,
                             (dialog, which) -> checkAndRequestGalleryPermission(),
                             (dialog, which) -> dialog.dismiss(),
-                            (dialog, which) -> openApplicationSettings(REQUEST_CODE_SETTING_GALLERY));
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_GALLERY));
                 }
                 break;
         }
@@ -377,30 +394,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * Call when camera permissions have been granted
      */
     private void onCameraPermissionGranted() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
         try {
             mPhotoFile = createImageFile();
         } catch (IOException e) {
             e.printStackTrace();
             // TODO: 14.09.2016 Handle exception
         }
-
-        if (mPhotoFile != null) {
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mPhotoFile));
-            startActivityForResult(intent, REQUEST_CODE_CAMERA);
-        }
+        NavUtils.goToCameraApp(this, mPhotoFile, REQUEST_CODE_CAMERA);
     }
 
     /**
      * Call when gallery permissions have been granted
      */
     private void onGalleryPermissionGranted() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/*");
-        startActivityForResult(Intent.createChooser(intent,
-                getString(R.string.profile_placeholder_chose_photo_from_gallery)),
-                REQUEST_CODE_GALLERY);
+        goToGalleryApp(this, REQUEST_CODE_GALLERY);
     }
 
     private void hideProfilePlaceHolder() {
@@ -492,15 +499,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void insertProfileImage(Uri selectedImage) {
         loadImageFromUriToView(selectedImage);
         if (selectedImage != null) mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
-    }
-
-    /**
-     * Open system settings of this app
-     */
-    public void openApplicationSettings(int requestCode) {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.parse("package:" + getPackageName()));
-        startActivityForResult(intent, requestCode);
     }
 
     private void setupInfoLayouts() {

@@ -17,7 +17,6 @@
 
             <ImageView
                 style="@style/profile_icon.left"
-                android:id="@+id/ic_phone_left"
                 android:src="@drawable/ic_call_black_24dp"/>
 
             <android.support.design.widget.TextInputLayout
@@ -43,7 +42,6 @@
 
             <ImageView
                 style="@style/profile_icon.left"
-                android:id="@+id/ic_email_left"
                 android:src="@drawable/ic_email_black_24dp"/>
 
             <android.support.design.widget.TextInputLayout
@@ -69,7 +67,6 @@
 
             <ImageView
                 style="@style/profile_icon.left"
-                android:id="@+id/ic_vk_left"
                 android:src="@drawable/ic_vk_circle"/>
 
             <android.support.design.widget.TextInputLayout
@@ -95,7 +92,6 @@
 
             <ImageView
                 style="@style/profile_icon.left"
-                android:id="@+id/ic_github_left"
                 android:src="@drawable/ic_github_circle"/>
 
             <android.support.design.widget.TextInputLayout
@@ -121,7 +117,6 @@
 
             <ImageView
                 style="@style/profile_icon.left"
-                android:id="@+id/ic_about_left"
                 android:src="@drawable/ic_account_circle"/>
 
             <android.support.design.widget.TextInputLayout
