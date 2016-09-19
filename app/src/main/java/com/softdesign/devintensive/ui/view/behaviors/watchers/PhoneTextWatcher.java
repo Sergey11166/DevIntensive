@@ -1,10 +1,7 @@
-package com.softdesign.devintensive.ui.view.behaviors.validators;
+package com.softdesign.devintensive.ui.view.behaviors.watchers;
 
-import android.content.res.Resources;
-import android.os.Handler;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.widget.EditText;
 
 import com.softdesign.devintensive.R;
@@ -13,28 +10,16 @@ import com.softdesign.devintensive.R;
  * @author Sergey Vorobyev
  */
 
-public class PhoneTextWatcher implements TextWatcher {
+public class PhoneTextWatcher extends AbstractProfileTextWatcher {
 
     private static final int MAX_DIGITS_COUNT = 11;
     private static final int MAX_SYMBOLS_COUNT = 16;
-    private static final int ERROR_TIMER_LENGTH = 3000;
     private static final String RUSSIAN_PHONE_CODE_7 = "7";
     private static final String RUSSIAN_PHONE_CODE_8 = "8";
-    private static final Handler ERROR_STOP_HANDLER = new Handler();
-
-
-    private TextInputLayout mTextInputLayout;
-    private EditText mEditText;
-    private Resources mResources;
 
     public PhoneTextWatcher(TextInputLayout textInputLayout, EditText editText) {
-        mResources = editText.getContext().getResources();
-        mTextInputLayout = textInputLayout;
-        mEditText = editText;
+        super(textInputLayout, editText);
     }
-
-    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
     @Override
     public void afterTextChanged(Editable s) {
@@ -81,7 +66,12 @@ public class PhoneTextWatcher implements TextWatcher {
             mEditText.setSelection(cursorPosition);
         }
         mEditText.addTextChangedListener(this);
-        errorHandler(errorText);
+
+        if(errorText != null) {
+            setError(errorText);
+        } else {
+            removeError();
+        }
     }
 
     /**
@@ -102,32 +92,10 @@ public class PhoneTextWatcher implements TextWatcher {
     }
 
     /**
-     * Displays or removes error at TextInputLayout.
-     * Add error if message != null, remove error if message == null
+     * Reformat phone number into +7(***)***-**-**
      *
-     * @param message Error message
-     */
-    private void errorHandler(String message) {
-        if (message != null) {
-            mTextInputLayout.setErrorEnabled(true);
-            mTextInputLayout.setError(message);
-
-            ERROR_STOP_HANDLER.removeCallbacksAndMessages(null);
-            ERROR_STOP_HANDLER.postDelayed(() -> {
-                mTextInputLayout.setError(null);
-                mTextInputLayout.setErrorEnabled(false);
-            }, ERROR_TIMER_LENGTH);
-        } else {
-            mTextInputLayout.setError(null);
-            mTextInputLayout.setErrorEnabled(false);
-        }
-    }
-
-    /**
-     * Reformats phone number into +7(***)***-**-**
-     *
-     * @param phone cellphone number
-     * @return String reformatted phone
+     * @param phone Phone number
+     * @return String of reformatted phone
      */
     private String getFormattedPhone(String phone) {
         String countryCode = "";

@@ -38,7 +38,8 @@ import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.ui.dialogs.ChangeProfilePhotoDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
-import com.softdesign.devintensive.ui.view.behaviors.validators.PhoneTextWatcher;
+import com.softdesign.devintensive.ui.view.behaviors.watchers.EmailTextWatcher;
+import com.softdesign.devintensive.ui.view.behaviors.watchers.PhoneTextWatcher;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -117,15 +118,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             R.id.about_text_input_layout
     })
     List<TextInputLayout> mTextInputLayoutList;
-
-    @BindViews({
-            R.id.ic_phone_left,
-            R.id.ic_email_left,
-            R.id.ic_vk_left,
-            R.id.ic_github_left,
-            R.id.ic_about_left
-    })
-    List<ImageView> mIconLeftList;
 
     @BindViews({
             R.id.ic_phone_right,
@@ -526,6 +518,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         mEditTextList.get(0).addTextChangedListener(
                 new PhoneTextWatcher(mTextInputLayoutList.get(0), mEditTextList.get(0)));
+        mEditTextList.get(1).addTextChangedListener(
+                new EmailTextWatcher(mTextInputLayoutList.get(1), mEditTextList.get(1)));
     }
 
     private void loadImageFromUriToView(Uri uri) {

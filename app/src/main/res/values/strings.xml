@@ -2,6 +2,8 @@
     <string name="app_name">Vorobyev Sergey</string>
     <string name="sevoro_sv_gmail_com">sevoro.sv@gmail.com</string>
 
+    <string name="regex_pattern.email">^[\\w\\+\\.\\%\\-]{3,}\\@[a-zA-Z0-9][a-zA-Z0-9\\-]{1,64}(\\.[a-zA-Z0-9][a-zA-Z0-9\\-]{1,25})+$</string>
+
     <string name="profile.placeholder">Change profile photo</string>
     <string name="profile.placeholder.load_photo_dialog.title">Change profile photo</string>
     <string name="profile.placeholder.chose_photo_from_gallery">Chose photo</string>
@@ -31,5 +33,6 @@
     <string name="error.edit_text.wrong_symbols">Tape only digits</string>
     <string name="error.edit_text.phone_wrong_length">Count symbols should be 11</string>
     <string name="error_edit_text_phone_wrong_code">Phone code should be 7 or 8</string>
+    <string name="error.edit_text.email_wrong_format">Wrong email format</string>
 
 </resources>
