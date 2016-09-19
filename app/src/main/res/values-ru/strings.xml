@@ -29,4 +29,7 @@
     <string name="error.edit_text.phone_wrong_length">Колличество цифр должно быть 11</string>
     <string name="error_edit_text_phone_wrong_code">Номер должен начинаться с 7 или 8</string>
     <string name="error.edit_text.email_wrong_format">Не правильный формат Email</string>
+    <string name="error.edit_text.vk_wrong_format">Не прафильный формат Vk</string>
+    <string name="error.edit_text.github_wrong_format">Не правильный формат github</string>
+
 </resources>

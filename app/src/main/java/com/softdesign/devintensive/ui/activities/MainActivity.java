@@ -39,7 +39,9 @@ import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.ui.dialogs.ChangeProfilePhotoDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
 import com.softdesign.devintensive.ui.view.behaviors.watchers.EmailTextWatcher;
+import com.softdesign.devintensive.ui.view.behaviors.watchers.GithubTextWatcher;
 import com.softdesign.devintensive.ui.view.behaviors.watchers.PhoneTextWatcher;
+import com.softdesign.devintensive.ui.view.behaviors.watchers.VkTextWatcher;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -518,8 +520,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         mEditTextList.get(0).addTextChangedListener(
                 new PhoneTextWatcher(mTextInputLayoutList.get(0), mEditTextList.get(0)));
+
         mEditTextList.get(1).addTextChangedListener(
                 new EmailTextWatcher(mTextInputLayoutList.get(1), mEditTextList.get(1)));
+
+        mEditTextList.get(2).addTextChangedListener(
+                new VkTextWatcher(mTextInputLayoutList.get(2), mEditTextList.get(2)));
+
+        mEditTextList.get(3).addTextChangedListener(
+                new GithubTextWatcher(mTextInputLayoutList.get(3), mEditTextList.get(3)));
     }
 
     private void loadImageFromUriToView(Uri uri) {
