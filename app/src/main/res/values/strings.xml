@@ -8,6 +8,10 @@
     <string name="regex_pattern.link_vk">^vk.com\\/\\w{3,}$</string>
     <string name="regex_pattern.link_gitHub">^github.com\\/\\w{3,}([\\/]\\w*)*$</string>
 
+    <string name="login.hint.username">Username</string>
+    <string name="login.hint.password">Password</string>
+    <string name="login.button.log_in">Log in</string>
+
     <string name="profile.placeholder">Change profile photo</string>
     <string name="profile.placeholder.load_photo_dialog.title">Change profile photo</string>
     <string name="profile.placeholder.chose_photo_from_gallery">Chose photo</string>
@@ -15,11 +19,11 @@
     <string name="profile.scoreBox.rating">Rating</string>
     <string name="profile.scoreBox.code">Wrote code lines</string>
     <string name="profile.scoreBox.projects">Projects</string>
-    <string name="profile.info.phone">Mobile phone</string>
-    <string name="profile.info.email">Email</string>
-    <string name="profile.info.vk">VK profile</string>
-    <string name="profile.info.github">Repositories</string>
-    <string name="profile.info.about">About Me</string>
+    <string name="profile.hint.phone">Mobile phone</string>
+    <string name="profile.hint.email">Email</string>
+    <string name="profile.hint.vk">VK profile</string>
+    <string name="profile.hint.github">Repositories</string>
+    <string name="profile.hint.about">About Me</string>
 
     <string name="drawer.menu.my_profile">My profile</string>
     <string name="drawer.menu.my_team">Team</string>
@@ -34,11 +38,13 @@
     <string name="dialog.settings_button">Settings</string>
     <string name="dialog.positive_button">Yes</string>
     <string name="dialog.negative_button">No</string>
+
     <string name="error.edit_text.wrong_symbols">Tape only digits</string>
     <string name="error.edit_text.phone_wrong_length">Count symbols should be 11</string>
     <string name="error_edit_text_phone_wrong_code">Phone code should be 7 or 8</string>
     <string name="error.edit_text.email_wrong_format">Wrong email format</string>
     <string name="error.edit_text.vk_wrong_format">Wrong vk format</string>
     <string name="error.edit_text.github_wrong_format">Wrong github format</string>
+    <string name="error.toast.creation_file">Error creation file</string>
 
 </resources>

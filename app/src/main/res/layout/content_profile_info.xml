@@ -27,7 +27,7 @@
                     style="@style/profile_edit_text"
                     android:id="@+id/phone_edit_text"
                     android:inputType="phone"
-                    android:hint="@string/profile.info.phone"/>
+                    android:hint="@string/profile.hint.phone"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
@@ -52,7 +52,7 @@
                     style="@style/profile_edit_text"
                     android:id="@+id/email_edit_text"
                     android:inputType="textEmailAddress"
-                    android:hint="@string/profile.info.email"/>
+                    android:hint="@string/profile.hint.email"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
@@ -77,7 +77,7 @@
                     style="@style/profile_edit_text"
                     android:id="@+id/vk_edit_text"
                     android:inputType="textUri|textMultiLine"
-                    android:hint="@string/profile.info.vk"/>
+                    android:hint="@string/profile.hint.vk"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
@@ -102,7 +102,7 @@
                     style="@style/profile_edit_text"
                     android:id="@+id/github_edit_text"
                     android:inputType="textMultiLine"
-                    android:hint="@string/profile.info.github"/>
+                    android:hint="@string/profile.hint.github"/>
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
@@ -127,7 +127,7 @@
                     style="@style/profile_edit_text"
                     android:id="@+id/about_edit_text"
                     android:inputType="textMultiLine"
-                    android:hint="@string/profile.info.about"/>
+                    android:hint="@string/profile.hint.about"/>
             </android.support.design.widget.TextInputLayout>
         </LinearLayout>
     </LinearLayout>

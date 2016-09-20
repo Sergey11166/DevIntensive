@@ -41,7 +41,7 @@ import com.softdesign.devintensive.ui.view.behaviors.watchers.EmailTextWatcher;
 import com.softdesign.devintensive.ui.view.behaviors.watchers.GithubTextWatcher;
 import com.softdesign.devintensive.ui.view.behaviors.watchers.PhoneTextWatcher;
 import com.softdesign.devintensive.ui.view.behaviors.watchers.VkTextWatcher;
-import com.softdesign.devintensive.utils.NavUtils;
+import com.softdesign.devintensive.utils.UIUtils;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -54,6 +54,7 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -62,6 +63,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.softdesign.devintensive.utils.Constants.DIALOG_FRAGMENT_TAG;
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 import static com.softdesign.devintensive.utils.NavUtils.goToAppSettings;
+import static com.softdesign.devintensive.utils.NavUtils.goToCameraApp;
 import static com.softdesign.devintensive.utils.NavUtils.goToGalleryApp;
 import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
 import static com.softdesign.devintensive.utils.NavUtils.openPhoneApp;
@@ -73,7 +75,7 @@ import static com.softdesign.devintensive.utils.UIUtils.showSoftKeyboard;
  * @author Sergey Vorobyev
  */
 
-public class MainActivity extends BaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = LOG_TAG_PREFIX + "MainActivity";
 
@@ -126,14 +128,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     })
     List<TextInputLayout> mTextInputLayoutList;
 
-    @BindViews({
-            R.id.ic_phone_right,
-            R.id.ic_email_right,
-            R.id.ic_vk_right,
-            R.id.ic_github_right,
-    })
-    List<ImageView> mIconRightList;
-
     private DataManager mDataManager;
 
     private boolean mIsEditMode;
@@ -152,10 +146,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
                 getResources().getDimensionPixelSize(R.dimen.size_profile_photo_256));
-
-        for (View icon: mIconRightList) icon.setOnClickListener(this);
-        mPlaceHolderLayout.setOnClickListener(this);
-        mFab.setOnClickListener(this);
 
         setupInfoLayouts();
         setupToolBar();
@@ -190,7 +180,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         outState.putBoolean(EDIT_MODE_KEY, mIsEditMode);
     }
 
-    @Override
+    @OnClick({
+            R.id.fab,
+            R.id.ic_vk_right,
+            R.id.ic_phone_right,
+            R.id.ic_email_right,
+            R.id.ic_github_right,
+            R.id.profile_placeholder_layout
+    })
+    @SuppressWarnings("unused")
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:
@@ -200,16 +198,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 showChangeProfilePhotoDialog();
                 break;
             case R.id.ic_phone_right:
-                openPhoneApp(this, mEditTextList.get(0).getText().toString());
+                if (!mTextInputLayoutList.get(0).isErrorEnabled())
+                    openPhoneApp(this, mEditTextList.get(0).getText().toString());
                 break;
             case R.id.ic_email_right:
-                sendEmail(this, mEditTextList.get(1).getText().toString());
+                if (mTextInputLayoutList.get(1).isErrorEnabled())
+                    sendEmail(this, mEditTextList.get(1).getText().toString());
                 break;
             case R.id.ic_vk_right:
-                goToUrl(this, mEditTextList.get(2).getText().toString());
+                if (mTextInputLayoutList.get(2).isErrorEnabled())
+                    goToUrl(this, mEditTextList.get(2).getText().toString());
                 break;
             case R.id.ic_github_right:
-                goToUrl(this, mEditTextList.get(3).getText().toString());
+                if (mTextInputLayoutList.get(3).isErrorEnabled())
+                    goToUrl(this, mEditTextList.get(3).getText().toString());
         }
     }
 
@@ -397,10 +399,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         try {
             mPhotoFile = createImageFile();
         } catch (IOException e) {
-            e.printStackTrace();
-            // TODO: 14.09.2016 Handle exception
+            Log.e(TAG, "Error creation file", e);
+            UIUtils.showToast(this, getString(R.string.error_toast_creation_file));
         }
-        NavUtils.goToCameraApp(this, mPhotoFile, REQUEST_CODE_CAMERA);
+        goToCameraApp(this, mPhotoFile, REQUEST_CODE_CAMERA);
     }
 
     /**
