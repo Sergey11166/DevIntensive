@@ -1,9 +1,10 @@
 <resources>
     <string name="app_name">Воробьёв Сергей</string>
 
-    <string name="login.hint.username">Имя пользователя</string>
-    <string name="login.hint.password">Пароль</string>
-    <string name="login.button.log_in">Войти</string>
+    <string name="auth.hint.username">Имя пользователя</string>
+    <string name="auth.hint.password">Пароль</string>
+    <string name="auth.button.log_in">Войти</string>
+    <string name="auth.forgot_password">Забыли пароль?</string>
 
     <string name="profile.placeholder">Изменить фото профиля</string>
     <string name="profile.placeholder.load_photo_dialog.title">Изменить фото профиля</string>

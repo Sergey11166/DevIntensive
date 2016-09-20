@@ -145,7 +145,7 @@ public class MainActivity extends BaseActivity {
         mDataManager = DataManager.getInstance();
 
         mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
-                getResources().getDimensionPixelSize(R.dimen.size_profile_photo_256));
+                getResources().getDimensionPixelSize(R.dimen.size_profile_photo_240));
 
         setupInfoLayouts();
         setupToolBar();
@@ -202,15 +202,15 @@ public class MainActivity extends BaseActivity {
                     openPhoneApp(this, mEditTextList.get(0).getText().toString());
                 break;
             case R.id.ic_email_right:
-                if (mTextInputLayoutList.get(1).isErrorEnabled())
+                if (!mTextInputLayoutList.get(1).isErrorEnabled())
                     sendEmail(this, mEditTextList.get(1).getText().toString());
                 break;
             case R.id.ic_vk_right:
-                if (mTextInputLayoutList.get(2).isErrorEnabled())
+                if (!mTextInputLayoutList.get(2).isErrorEnabled())
                     goToUrl(this, mEditTextList.get(2).getText().toString());
                 break;
             case R.id.ic_github_right:
-                if (mTextInputLayoutList.get(3).isErrorEnabled())
+                if (!mTextInputLayoutList.get(3).isErrorEnabled())
                     goToUrl(this, mEditTextList.get(3).getText().toString());
         }
     }

@@ -4,9 +4,14 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 
 import com.softdesign.devintensive.utils.App;
+import com.softdesign.devintensive.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.SharedPreferences.Editor;
+import static com.softdesign.devintensive.utils.Constants.AUTH_TOKEN_KEY;
+import static com.softdesign.devintensive.utils.Constants.USER_ID_KEY;
 
 /**
  * Class to manage {@link android.content.SharedPreferences}
@@ -37,7 +42,7 @@ public class PreferencesManager {
     }
 
     public void saveUserProfileData(List<String> data) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        Editor editor = mPreferences.edit();
         for (int i = 0 ; i < USER_FIELDS.length; i++) {
             editor.putString(USER_FIELDS[i], data.get(i));
         }
@@ -51,12 +56,32 @@ public class PreferencesManager {
     }
 
     public void saveUserPhoto(Uri uri) {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        Editor editor = mPreferences.edit();
         editor.putString(USER_PHOTO_KEY, uri.toString());
         editor.apply();
     }
 
     public Uri loadUserPhoto() {
-        return Uri.parse(mPreferences.getString(USER_PHOTO_KEY, ""));
+        return Uri.parse(mPreferences.getString(USER_PHOTO_KEY, "null"));
+    }
+
+    public void saveAuthToken(String token) {
+        Editor editor = mPreferences.edit();
+        editor.putString(AUTH_TOKEN_KEY, token);
+        editor.apply();
+    }
+
+    public String getAuthToken() {
+        return mPreferences.getString(AUTH_TOKEN_KEY, "null");
+    }
+
+    public void saveUserId(int id) {
+        Editor editor = mPreferences.edit();
+        editor.putInt(Constants.USER_ID_KEY, id);
+        editor.apply();
+    }
+
+    public int getUserId() {
+        return mPreferences.getInt(USER_ID_KEY, 0);
     }
 }
