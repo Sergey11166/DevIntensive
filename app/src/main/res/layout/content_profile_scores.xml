@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_header"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/size_huge_112"
-    android:background="@color/gray"
-    app:layout_behavior=".ui.view.behaviors.MainHeaderBehavior"
-    tools:ignore="Overdraw">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:id="@+id/scores_layout"
+              android:layout_width="match_parent"
+              android:layout_height="@dimen/size_huge_112"
+              android:background="@color/color_gray"
+              app:layout_behavior=".ui.view.behaviors.ProfileScoresLinearLayoutBehavior">
 
     <LinearLayout
         style="@style/header_layout"
@@ -20,7 +17,7 @@
 
         <TextView
             style="@style/header_text"
-            android:text="@string/rating"/>
+            android:text="@string/profile.scoreBox.rating"/>
     </LinearLayout>
 
     <View style="@style/line.vertical.main_header"/>
@@ -35,7 +32,7 @@
 
         <TextView
             style="@style/header_text"
-            android:text="@string/wrote_code_lines"/>
+            android:text="@string/profile.scoreBox.code"/>
     </LinearLayout>
 
     <View style="@style/line.vertical.main_header"/>
@@ -46,10 +43,10 @@
 
         <TextView
             style="@style/header_text.number"
-            android:text="5"/>
+            android:text="7"/>
 
         <TextView
             style="@style/header_text"
-            android:text="@string/projects"/>
+            android:text="@string/profile.scoreBox.projects"/>
     </LinearLayout>
 </LinearLayout>

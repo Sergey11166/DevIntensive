@@ -5,10 +5,11 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.Constants;
+
+import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
  * @author Sergey Vorobyev.
@@ -38,10 +39,6 @@ public class BaseActivity extends AppCompatActivity {
     public void showError(String message, Exception exception) {
         Log.d(TAG, "Message: ".concat(message).concat("\n")
                 .concat("Exception: ".concat(exception.toString())));
-        showToast(message);
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        showToast(this, message);
     }
 }

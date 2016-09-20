@@ -3,6 +3,16 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <dimen name="font_small_12">12sp</dimen>
+    <dimen name="font_normal_14">14sp</dimen>
+    <dimen name="font_normal_16">16sp</dimen>
+    <dimen name="font_medium_20">20sp</dimen>
+    <dimen name="font_medium_24">24sp</dimen>
+    <dimen name="font_medium_34">34sp</dimen>
+    <dimen name="font_large_45">45sp</dimen>
+    <dimen name="font_larger_56">56sp</dimen>
+    <dimen name="font_largest_112">112sp</dimen>
+
     <!-- Sizes-->
 
     <dimen name="size_small_24">24dp</dimen>
@@ -10,15 +20,17 @@
     <dimen name="size_large_72">72dp</dimen>
     <dimen name="size_huge_112">112dp</dimen>
     <dimen name="size_line_thickness">1dp</dimen>
+    <dimen name="size_profile_photo_256">256dp</dimen>
+    <dimen name="size_placeholder_icon_90">90dp</dimen>
     
     <!-- Spaces -->
     
-    <dimen name="spacing_small_8">8dp</dimen>
-    <dimen name="spacing_normal_16">16dp</dimen>
-    <dimen name="spacing_medial_24">24dp</dimen>
-    <dimen name="spacing_medium_32">32dp</dimen>
-    <dimen name="spacing_large_56">56dp</dimen>
-    <dimen name="spacing_largest_72">72dp</dimen>
-    <dimen name="profile_image_size">256dp</dimen>
-    <dimen name="fab_right_space">8dp</dimen>
+    <dimen name="space_small_8">8dp</dimen>
+    <dimen name="space_normal_16">16dp</dimen>
+    <dimen name="space_medial_24">24dp</dimen>
+    <dimen name="space_medium_32">32dp</dimen>
+    <dimen name="space_large_56">56dp</dimen>
+    <dimen name="space_largest_72">72dp</dimen>
+
+    <dimen name="space_fab_right">8dp</dimen>
 </resources>

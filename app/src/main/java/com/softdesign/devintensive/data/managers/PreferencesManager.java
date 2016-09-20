@@ -1,17 +1,12 @@
 package com.softdesign.devintensive.data.managers;
 
 import android.content.SharedPreferences;
+import android.net.Uri;
 
 import com.softdesign.devintensive.utils.App;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.softdesign.devintensive.utils.Constants.USER_BIO_KEY;
-import static com.softdesign.devintensive.utils.Constants.USER_EMAIL_KEY;
-import static com.softdesign.devintensive.utils.Constants.USER_GIT_KEY;
-import static com.softdesign.devintensive.utils.Constants.USER_PHONE_KEY;
-import static com.softdesign.devintensive.utils.Constants.USER_VK_KEY;
 
 /**
  * Class to manage {@link android.content.SharedPreferences}
@@ -20,6 +15,13 @@ import static com.softdesign.devintensive.utils.Constants.USER_VK_KEY;
  */
 
 public class PreferencesManager {
+
+    private static final String USER_PHONE_KEY = "USER_PHONE_KEY";
+    private static final String USER_EMAIL_KEY = "USER_EMAIL_KEY";
+    private static final String USER_VK_KEY = "USER_VK_KEY";
+    private static final String USER_GIT_KEY = "USER_GIT_KEY";
+    private static final String USER_BIO_KEY = "USER_BIO_KEY";
+    private static final String USER_PHOTO_KEY = "USER_PHOTO_KEY";
 
     private static final String[] USER_FIELDS = {
             USER_PHONE_KEY,
@@ -44,9 +46,17 @@ public class PreferencesManager {
 
     public List<String> loadUserProfileData() {
         List<String> data = new ArrayList<>(5);
-        for (String field : USER_FIELDS) {
-            data.add(mPreferences.getString(field, null));
-        }
+        for (String field : USER_FIELDS) data.add(mPreferences.getString(field, null));
         return data;
+    }
+
+    public void saveUserPhoto(Uri uri) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(USER_PHOTO_KEY, uri.toString());
+        editor.apply();
+    }
+
+    public Uri loadUserPhoto() {
+        return Uri.parse(mPreferences.getString(USER_PHOTO_KEY, ""));
     }
 }

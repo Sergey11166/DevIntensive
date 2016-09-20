@@ -15,18 +15,18 @@
     
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
-    <style name="match_parent_only">
+    <style name="match_parent_all">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
     </style>
 
-    <style name="wrap_content_only">
+    <style name="wrap_content_all">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
 
     <style name="line">
-        <item name="android:background">@color/gray_light</item>
+        <item name="android:background">@color/color_gray_light</item>
     </style>
 
     <style name="line.horizontal">
@@ -49,7 +49,7 @@
         <item name="android:theme">@style/AppTheme.PopupOverlay</item>
     </style>
 
-    <style name="wrap_content_only.fab">
+    <style name="wrap_content_all.fab">
         <item name="android:layout_marginEnd">@dimen/fab_right_space</item>
     </style>
 </resources>

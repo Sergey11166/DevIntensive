@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                      xmlns:tools="http://schemas.android.com/tools"
+                      style="@style/match_parent_all"
+                      android:background="@drawable/login_bg"
+                      tools:ignore="contentDescription">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:layout_margin="@dimen/space_large_56"
+        android:padding="@dimen/space_normal_16"
+        android:background="@android:color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/space_small_8"
+            android:gravity="end">
+
+            <ImageView
+                android:id="@+id/ic_google"
+                android:layout_width="@dimen/size_small_24"
+                android:layout_height="@dimen/size_small_24"
+                android:layout_marginEnd="@dimen/space_small_8"
+                android:src="@drawable/ic_google_plus_box_colored_24"/>
+
+            <ImageView
+                android:id="@+id/ic_vk"
+                android:layout_width="@dimen/size_small_24"
+                android:layout_height="@dimen/size_small_24"
+                android:layout_marginEnd="@dimen/space_small_8"
+                android:src="@drawable/ic_vk_box_colored_24"/>
+
+            <ImageView
+                android:id="@+id/ic_fb"
+                android:layout_width="@dimen/size_small_24"
+                android:layout_height="@dimen/size_small_24"
+                android:src="@drawable/ic_facebook_box_colored_24"/>
+        </LinearLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/space_small_8">
+
+            <EditText
+                android:id="@+id/username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:hint="@string/login.hint.username"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:hint="@string/login.hint.password"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/login_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_small_8"
+            android:text="@string/login.button.log_in"/>
+    </LinearLayout>
+</RelativeLayout>

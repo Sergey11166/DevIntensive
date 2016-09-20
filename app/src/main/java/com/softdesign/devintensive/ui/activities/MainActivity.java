@@ -1,13 +1,26 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.content.ContentValues;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
@@ -22,54 +35,105 @@ import android.widget.ImageView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
+import com.softdesign.devintensive.ui.dialogs.ChangeProfilePhotoDialog;
+import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
+import com.softdesign.devintensive.ui.view.behaviors.watchers.EmailTextWatcher;
+import com.softdesign.devintensive.ui.view.behaviors.watchers.GithubTextWatcher;
+import com.softdesign.devintensive.ui.view.behaviors.watchers.PhoneTextWatcher;
+import com.softdesign.devintensive.ui.view.behaviors.watchers.VkTextWatcher;
+import com.softdesign.devintensive.utils.UIUtils;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-import static com.softdesign.devintensive.utils.Constants.EDIT_MODE_KEY;
+import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static com.softdesign.devintensive.utils.Constants.DIALOG_FRAGMENT_TAG;
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
+import static com.softdesign.devintensive.utils.NavUtils.goToAppSettings;
+import static com.softdesign.devintensive.utils.NavUtils.goToCameraApp;
+import static com.softdesign.devintensive.utils.NavUtils.goToGalleryApp;
+import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
+import static com.softdesign.devintensive.utils.NavUtils.openPhoneApp;
+import static com.softdesign.devintensive.utils.NavUtils.sendEmail;
+import static com.softdesign.devintensive.utils.UIUtils.hideSoftKeyboard;
+import static com.softdesign.devintensive.utils.UIUtils.showSoftKeyboard;
 
 /**
  * @author Sergey Vorobyev
  */
 
-public class MainActivity extends BaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = LOG_TAG_PREFIX + "MainActivity";
 
+    private static final String EDIT_MODE_KEY = "EDIT_MODE_KEY";
+
+    private static final int REQUEST_CODE_CAMERA = 0;
+    private static final int REQUEST_CODE_GALLERY = 1;
+    private static final int REQUEST_CODE_SETTING_CAMERA = 2;
+    private static final int REQUEST_CODE_SETTING_GALLERY = 3;
+
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 0;
+    private static final int GALLERY_PERMISSION_REQUEST_CODE = 1;
+
     private static final ButterKnife.Action<View> EDIT_MODE_TRUE = (view, index) -> {
-        view.setEnabled(true);
-        view.setFocusable(true);
         view.setFocusableInTouchMode(true);
+        view.setFocusable(true);
+        view.setEnabled(true);
     };
 
     private static final ButterKnife.Action<View> EDIT_MODE_FALSE = (view, index) -> {
-        view.setEnabled(false);
-        view.setFocusable(false);
         view.setFocusableInTouchMode(false);
+        view.setFocusable(false);
+        view.setEnabled(false);
     };
 
-    @BindView(R.id.coordinator_container) CoordinatorLayout mCoordinatorLayout;
+    @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
+    @BindView(R.id.coordinator_layout) CoordinatorLayout mCoordinatorLayout;
+    @BindView(R.id.profile_placeholder_layout) View mPlaceHolderLayout;
+    @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
-    @BindView(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.profile_photo) ImageView mProfilePhoto;
     @BindView(R.id.fab) FloatingActionButton mFab;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
 
     @BindViews({
             R.id.phone_edit_text,
             R.id.email_edit_text,
             R.id.vk_edit_text,
-            R.id.git_edit_text,
-            R.id.bio_edit_text
+            R.id.github_edit_text,
+            R.id.about_edit_text
     })
-    List<EditText> mUserInfoViews;
+    List<EditText> mEditTextList;
+
+    @BindViews({
+            R.id.phone_text_input_layout,
+            R.id.email_text_input_layout,
+            R.id.vk_text_input_layout,
+            R.id.github_text_input_layout,
+            R.id.about_text_input_layout
+    })
+    List<TextInputLayout> mTextInputLayoutList;
 
     private DataManager mDataManager;
 
-    private boolean mCurrentEditorMode;
+    private boolean mIsEditMode;
+    private File mPhotoFile;
+    private Uri mSelectedImage;
+    private  Point mPhotoSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,37 +141,29 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        mFab.setOnClickListener(this);
+
+        mDataManager = DataManager.getInstance();
+
+        mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
+                getResources().getDimensionPixelSize(R.dimen.size_profile_photo_256));
+
+        setupInfoLayouts();
         setupToolBar();
         setupDrawer();
 
-        mDataManager = DataManager.getInstance();
-        loadUserInfoValue();
+        loadInfoValues();
+        loadImageFromUriToView(mDataManager.getPreferencesManager().loadUserPhoto());
 
         if (savedInstanceState != null) {
-            mCurrentEditorMode = savedInstanceState.getBoolean(EDIT_MODE_KEY);
-            changeEditMode(mCurrentEditorMode);
+            mIsEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY);
+            changeEditMode(mIsEditMode);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == android.R.id.home) {
-            mDrawerLayout.openDrawer(GravityCompat.START);
-        }
+        if(item.getItemId() == android.R.id.home) mDrawerLayout.openDrawer(GravityCompat.START);
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG, "onStart");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
     }
 
     @Override
@@ -118,36 +174,44 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.d(TAG, "onRestart");
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.d(TAG, "onSaveInstanceState");
-        outState.putBoolean(EDIT_MODE_KEY, mCurrentEditorMode);
+        outState.putBoolean(EDIT_MODE_KEY, mIsEditMode);
     }
 
-    @Override
+    @OnClick({
+            R.id.fab,
+            R.id.ic_vk_right,
+            R.id.ic_phone_right,
+            R.id.ic_email_right,
+            R.id.ic_github_right,
+            R.id.profile_placeholder_layout
+    })
+    @SuppressWarnings("unused")
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:
-                changeEditMode(!mCurrentEditorMode);
+                changeEditMode(!mIsEditMode);
                 break;
+            case R.id.profile_placeholder_layout:
+                showChangeProfilePhotoDialog();
+                break;
+            case R.id.ic_phone_right:
+                if (!mTextInputLayoutList.get(0).isErrorEnabled())
+                    openPhoneApp(this, mEditTextList.get(0).getText().toString());
+                break;
+            case R.id.ic_email_right:
+                if (mTextInputLayoutList.get(1).isErrorEnabled())
+                    sendEmail(this, mEditTextList.get(1).getText().toString());
+                break;
+            case R.id.ic_vk_right:
+                if (mTextInputLayoutList.get(2).isErrorEnabled())
+                    goToUrl(this, mEditTextList.get(2).getText().toString());
+                break;
+            case R.id.ic_github_right:
+                if (mTextInputLayoutList.get(3).isErrorEnabled())
+                    goToUrl(this, mEditTextList.get(3).getText().toString());
         }
     }
 
@@ -155,8 +219,56 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
+        } else if (mIsEditMode){
+            changeEditMode(false);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CODE_GALLERY:
+                if (resultCode == RESULT_OK && data != null) mSelectedImage = data.getData();
+                insertProfileImage(mSelectedImage);
+                break;
+            case REQUEST_CODE_CAMERA:
+                if (resultCode == RESULT_OK && mPhotoFile != null) mSelectedImage = Uri.fromFile(mPhotoFile);
+                insertProfileImage(mSelectedImage);
+                break;
+            case REQUEST_CODE_SETTING_CAMERA:
+                checkAndRequestCameraPermission();
+                break;
+            case REQUEST_CODE_SETTING_GALLERY:
+                checkAndRequestGalleryPermission();
+                break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case CAMERA_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PERMISSION_GRANTED && grantResults[1] == PERMISSION_GRANTED) {
+                    onCameraPermissionGranted();
+                } else {
+                    showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_camera_permission,
+                            (dialog, which) -> checkAndRequestCameraPermission(),
+                            (dialog, which) -> dialog.dismiss(),
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_CAMERA));
+                }
+                break;
+            case GALLERY_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PERMISSION_GRANTED) {
+                    onGalleryPermissionGranted();
+                } else {
+                    showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_gallery_permission,
+                            (dialog, which) -> checkAndRequestGalleryPermission(),
+                            (dialog, which) -> dialog.dismiss(),
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_GALLERY));
+                }
+                break;
         }
     }
 
@@ -169,7 +281,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method for setup {@link #mToolbar}
+     * Setup {@link #mToolbar}
      */
     private void setupToolBar() {
         setSupportActionBar(mToolbar);
@@ -182,7 +294,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method for setup navigation drawer
+     * Setup navigation drawer
      */
     private void setupDrawer() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
@@ -196,11 +308,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method to round avatar of drawer header
+     * Round avatar of drawer header
      *
      * @param navigationView Object of {@link NavigationView}
      */
-
     private void roundAvatar(NavigationView navigationView) {
         Resources res = getResources();
         Bitmap srcBmp = BitmapFactory.decodeResource(res, R.drawable.avatar);
@@ -211,36 +322,222 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * Method to change edit mode of {@link #mUserInfoViews )
+     * Change edit mode
      * @param mode Activate edit mode if true, deactivate if false
      */
     private void changeEditMode(boolean mode) {
-        if (mode) ButterKnife.apply(mUserInfoViews, EDIT_MODE_TRUE);
-        else  ButterKnife.apply(mUserInfoViews, EDIT_MODE_FALSE);
-        mCurrentEditorMode = mode;
-        mFab.setImageResource(mCurrentEditorMode ?
+        fullScrollDown();
+        mIsEditMode = mode;
+        mFab.setImageResource(mIsEditMode ?
                 R.drawable.ic_done_black_24dp :
                 R.drawable.ic_mode_edit_black_24dp);
-    }
-
-    /**
-     * Method to load user info from SharedPreferences
-     */
-    private void loadUserInfoValue() {
-        List<String> data = mDataManager.getPreferencesManager().loadUserProfileData();
-        for (int i = 0; i < mUserInfoViews.size(); i++) {
-            mUserInfoViews.get(i).setText(data.get(i));
+        if (mode) {
+            ButterKnife.apply(mEditTextList, EDIT_MODE_TRUE);
+            showProfilePlaceHolder();
+            mCollapsingToolbarLayout.setTitle(" ");
+        } else {
+            ButterKnife.apply(mEditTextList, EDIT_MODE_FALSE);
+            hideProfilePlaceHolder();
+            mCollapsingToolbarLayout.setTitle(getString(R.string.app_name));
         }
     }
 
     /**
-     * Method to save user info to SharedPreferences
+     * Load user info from SharedPreferences
+     */
+    private void loadInfoValues() {
+        List<String> data = mDataManager.getPreferencesManager().loadUserProfileData();
+        for (int i = 0; i < mEditTextList.size(); i++) mEditTextList.get(i).setText(data.get(i));
+    }
+
+    /**
+     * Save user info to SharedPreferences
      */
     private void saveUserInfoValue() {
         List<String> data = new ArrayList<>(5);
-        for (EditText view : mUserInfoViews) {
-            data.add(view.getText().toString());
-        }
+        for (EditText view : mEditTextList) data.add(view.getText().toString());
         mDataManager.getPreferencesManager().saveUserProfileData(data);
+    }
+
+    private void loadPhotoFromGallery() {
+        checkAndRequestGalleryPermission();
+    }
+
+    private void takePhotoFromCamera() {
+        checkAndRequestCameraPermission();
+    }
+
+    /**
+     * Check if camera permissions not granted make request permissions
+     */
+    private void checkAndRequestCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this, CAMERA) == PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
+            onCameraPermissionGranted();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[] {CAMERA, WRITE_EXTERNAL_STORAGE},
+                    CAMERA_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    /**
+     * Check if gallery permissions not granted make request permissions
+     */
+    private void checkAndRequestGalleryPermission() {
+        if (ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
+            onGalleryPermissionGranted();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[] {READ_EXTERNAL_STORAGE},
+                    GALLERY_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    /**
+     * Call when camera permissions have been granted
+     */
+    private void onCameraPermissionGranted() {
+        try {
+            mPhotoFile = createImageFile();
+        } catch (IOException e) {
+            Log.e(TAG, "Error creation file", e);
+            UIUtils.showToast(this, getString(R.string.error_toast_creation_file));
+        }
+        goToCameraApp(this, mPhotoFile, REQUEST_CODE_CAMERA);
+    }
+
+    /**
+     * Call when gallery permissions have been granted
+     */
+    private void onGalleryPermissionGranted() {
+        goToGalleryApp(this, REQUEST_CODE_GALLERY);
+    }
+
+    private void hideProfilePlaceHolder() {
+        mPlaceHolderLayout.setVisibility(View.GONE);
+    }
+
+    private void showProfilePlaceHolder() {
+        mPlaceHolderLayout.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Scroll down always when change edit mode
+     */
+    private void fullScrollDown() {
+        CoordinatorLayout.LayoutParams params =
+                (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
+        AppBarLayout.Behavior behavior = (AppBarLayout.Behavior) params.getBehavior();
+        if (behavior != null) {
+            behavior.onNestedFling(mCoordinatorLayout, mAppBarLayout, null, 0, -1000000, false);
+        }
+    }
+
+    /**
+     * Show {@link ChangeProfilePhotoDialog}. Called when we want change profile photo
+     */
+    private void showChangeProfilePhotoDialog() {
+        ChangeProfilePhotoDialog d = new ChangeProfilePhotoDialog();
+        d.setOnClickListener((dialog, which) -> {
+            switch (which) {
+                case 0:
+                    takePhotoFromCamera();
+                    break;
+                case 1:
+                    loadPhotoFromGallery();
+                    break;
+                case 2:
+                    dialog.dismiss();
+                    break;
+            }
+        });
+        d.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+    }
+
+    /**
+     * Show {@link NeedGrantPermissionDialog} to explain to users why needed permissions.
+     * @param message Message for users
+     * @param onPositiveButtonClickListener Actions to handle press on positive button
+     * @param onNegativeButtonClickListener Actions to handle press on negative button
+     */
+    private void showNeedGrantPermissionDialog(int message,
+                                               OnClickListener onPositiveButtonClickListener,
+                                               OnClickListener onNegativeButtonClickListener,
+                                               OnClickListener onNeutralButtonClickListener) {
+
+        NeedGrantPermissionDialog d = NeedGrantPermissionDialog.newInstance(message);
+        d.setOnPositiveButtonClickListener(onPositiveButtonClickListener);
+        d.setOnNegativeButtonClickListener(onNegativeButtonClickListener);
+        d.setOnNeutralButtonClickListener(onNeutralButtonClickListener);
+        d.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+    }
+
+    /**
+     * Create image file to save photo when we took photo
+     *
+     * @return Object of {@link File}
+     * @throws IOException
+     */
+    private File createImageFile() throws IOException {
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH)
+                .format(System.currentTimeMillis());
+        String imageFileName = "JPEG_".concat(timestamp);
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.Images.Media.DATA, image.getAbsolutePath());
+        getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        return image;
+    }
+
+    /**
+     * Load selected image to ImageView
+     *
+     * @param selectedImage {@link Uri} to selected image
+     */
+    private void insertProfileImage(Uri selectedImage) {
+        loadImageFromUriToView(selectedImage);
+        if (selectedImage != null) mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
+    }
+
+    private void setupInfoLayouts() {
+        final View.OnFocusChangeListener listener = (view, hasFocus) -> {
+            if (hasFocus) {
+                if (view instanceof EditText) {
+                    EditText input = (EditText) view;
+                    if (!input.isEnabled() && !input.isFocusable()) return;
+                    input.setSelection(input.getText().length());
+                    showSoftKeyboard(input);
+                }
+            } else {
+                hideSoftKeyboard(view);
+            }
+        };
+        for (EditText input: mEditTextList) input.setOnFocusChangeListener(listener);
+
+        mEditTextList.get(0).addTextChangedListener(
+                new PhoneTextWatcher(mTextInputLayoutList.get(0), mEditTextList.get(0)));
+
+        mEditTextList.get(1).addTextChangedListener(
+                new EmailTextWatcher(mTextInputLayoutList.get(1), mEditTextList.get(1)));
+
+        mEditTextList.get(2).addTextChangedListener(
+                new VkTextWatcher(mTextInputLayoutList.get(2), mEditTextList.get(2)));
+
+        mEditTextList.get(3).addTextChangedListener(
+                new GithubTextWatcher(mTextInputLayoutList.get(3), mEditTextList.get(3)));
+    }
+
+    private void loadImageFromUriToView(Uri uri) {
+        Picasso.with(this)
+                .load(uri)
+                .placeholder(R.drawable.user_bg)
+                .resize(mPhotoSize.x, mPhotoSize.y)
+                .onlyScaleDown()
+                .centerCrop()
+                .into(mProfilePhoto);
     }
 }

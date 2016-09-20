@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="load_photo_dialog">
+        <item>Сделать снимок</item>
+        <item>Выбрать из галереи</item>
+        <item>Отмена</item>
+    </string-array>
+</resources>

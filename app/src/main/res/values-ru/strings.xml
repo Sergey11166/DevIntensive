@@ -1,13 +1,41 @@
 <resources>
     <string name="app_name">Воробьёв Сергей</string>
 
-    <string name="rating">Рейтинг</string>
-    <string name="wrote_code_lines">Написано строк кода</string>
-    <string name="projects">Проектов</string>
-    <string name="phone">Мобильный телефон</string>
-    <string name="vk_profile">Профиль VK</string>
-    <string name="repository">Репозиторий</string>
-    <string name="about_me">О себе</string>
-    <string name="my_profile">Мой профиль</string>
-    <string name="team">Команда</string>
+    <string name="login.hint.username">Имя пользователя</string>
+    <string name="login.hint.password">Пароль</string>
+    <string name="login.button.log_in">Войти</string>
+
+    <string name="profile.placeholder">Изменить фото профиля</string>
+    <string name="profile.placeholder.load_photo_dialog.title">Изменить фото профиля</string>
+    <string name="profile.placeholder.chose_photo_from_gallery">Выберите фото</string>
+    <string name="profile.scoreBox.rating">Рейтинг</string>
+    <string name="profile.scoreBox.code">Написано строк кода</string>
+    <string name="profile.scoreBox.projects">Проектов</string>
+    <string name="profile.hint.phone">Мобильный телефон</string>
+    <string name="profile.hint.vk">Профиль VK</string>
+    <string name="profile.hint.github">Репозитории</string>
+    <string name="profile.hint.about">Обо мне</string>
+
+    <string name="drawer.menu.my_profile">Мой профиль</string>
+    <string name="drawer.menu.my_team">Команда</string>
+
+    <string name="dialog.title.need_grant_permission">Приложению необходимо разрешение</string>
+    <string name="dialog.message.need_grant_camera_permission">
+        Вы должны разрешить доступ к камере и к мультимедиа файлам для фотографирования. Хотите разрешить?
+    </string>
+    <string name="dialog.message.need_grant_gallery_permission">
+        Вы должны разрешить доступ к мультимедиа файлам для выбора фото из галереи. Хотите разрешить?
+    </string>
+    <string name="dialog.settings_button">Настройки</string>
+    <string name="dialog.positive_button">Да</string>
+    <string name="dialog.negative_button">Нет</string>
+
+    <string name="error.edit_text.wrong_symbols">Вводите только цифры</string>
+    <string name="error.edit_text.phone_wrong_length">Колличество цифр должно быть 11</string>
+    <string name="error_edit_text_phone_wrong_code">Номер должен начинаться с 7 или 8</string>
+    <string name="error.edit_text.email_wrong_format">Не правильный формат Email</string>
+    <string name="error.edit_text.vk_wrong_format">Не прафильный формат Vk</string>
+    <string name="error.edit_text.github_wrong_format">Не правильный формат github</string>
+    <string name="error.toast.creation_file">Ошибка создания файла</string>
+
 </resources>
