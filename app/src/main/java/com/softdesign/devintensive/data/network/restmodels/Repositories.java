@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-class Repositories {
+public class Repositories {
 
     @Expose
     @SerializedName("repo")

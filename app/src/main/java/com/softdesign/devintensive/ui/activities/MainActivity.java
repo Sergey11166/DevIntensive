@@ -35,6 +35,11 @@ import android.widget.ImageView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
+import com.softdesign.devintensive.data.network.restmodels.Contacts;
+import com.softdesign.devintensive.data.network.restmodels.PublicInfo;
+import com.softdesign.devintensive.data.network.restmodels.Repo;
+import com.softdesign.devintensive.data.network.restmodels.Repositories;
+import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.ui.dialogs.ChangeProfilePhotoDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
 import com.softdesign.devintensive.ui.view.behaviors.watchers.EmailTextWatcher;
@@ -151,8 +156,7 @@ public class MainActivity extends BaseActivity {
         setupToolBar();
         setupDrawer();
 
-        loadInfoValues();
-        loadImageFromUriToView(mDataManager.getPreferencesManager().loadUserPhoto());
+        loadUser();
 
         if (savedInstanceState != null) {
             mIsEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY);
@@ -169,7 +173,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        saveUserInfoValue();
+        saveUser();
         Log.d(TAG, "onPause");
     }
 
@@ -231,11 +235,11 @@ public class MainActivity extends BaseActivity {
         switch (requestCode) {
             case REQUEST_CODE_GALLERY:
                 if (resultCode == RESULT_OK && data != null) mSelectedImage = data.getData();
-                insertProfileImage(mSelectedImage);
+                loadImageFromUriToView(mSelectedImage);
                 break;
             case REQUEST_CODE_CAMERA:
                 if (resultCode == RESULT_OK && mPhotoFile != null) mSelectedImage = Uri.fromFile(mPhotoFile);
-                insertProfileImage(mSelectedImage);
+                loadImageFromUriToView(mSelectedImage);
                 break;
             case REQUEST_CODE_SETTING_CAMERA:
                 checkAndRequestCameraPermission();
@@ -342,21 +346,51 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    /**
-     * Load user info from SharedPreferences
-     */
-    private void loadInfoValues() {
-        List<String> data = mDataManager.getPreferencesManager().loadUserProfileData();
-        for (int i = 0; i < mEditTextList.size(); i++) mEditTextList.get(i).setText(data.get(i));
+    private void saveUser() {
+        User user = mDataManager.getPreferencesManager().loadUser();
+        if (user == null) {
+            user = new User();
+            PublicInfo publicInfo = new PublicInfo();
+            Contacts constants = new Contacts();
+            Repositories repositories = new Repositories();
+
+            user.setPublicInfo(publicInfo);
+            user.setContacts(constants);
+            user.setRepositories(repositories);
+        }
+
+        if (mSelectedImage != null) user.getPublicInfo().setPhoto(mSelectedImage.toString());
+        user.getContacts().setPhone(mEditTextList.get(0).getText().toString());
+        user.getContacts().setEmail(mEditTextList.get(1).getText().toString());
+        user.getContacts().setVk(mEditTextList.get(2).getText().toString());
+        List<Repo> repos = new ArrayList<>();
+        Repo repo = new Repo();
+        repo.setGit(mEditTextList.get(3).getText().toString());
+        repos.add(repo);
+        user.getRepositories().setRepo(repos);
+        user.getPublicInfo().setBio(mEditTextList.get(4).getText().toString());
+        mDataManager.getPreferencesManager().saveUser(user);
     }
 
-    /**
-     * Save user info to SharedPreferences
-     */
-    private void saveUserInfoValue() {
-        List<String> data = new ArrayList<>(5);
-        for (EditText view : mEditTextList) data.add(view.getText().toString());
-        mDataManager.getPreferencesManager().saveUserProfileData(data);
+    private void loadUser() {
+        User user = mDataManager.getPreferencesManager().loadUser();
+        if (user == null) return;
+
+        String photo = user.getPublicInfo().getPhoto();
+        Uri photoUri = photo != null ? Uri.parse(photo) : Uri.parse("");
+        loadImageFromUriToView(photoUri);
+
+        String phone = user.getContacts().getPhone();
+        String email = user.getContacts().getEmail();
+        String vk = user.getContacts().getVk();
+        List<Repo> repos = user.getRepositories().getRepo();
+        String bio = user.getPublicInfo().getBio();
+
+        mEditTextList.get(0).setText(!phone.isEmpty() ? phone : "");
+        mEditTextList.get(1).setText(!email.isEmpty() ? email : "");
+        mEditTextList.get(2).setText(!vk.isEmpty() ? vk : "");
+        mEditTextList.get(3).setText(repos.size() > 0 ? repos.get(0).getGit() : "");
+        mEditTextList.get(4).setText(!bio.isEmpty() ? bio : "");
     }
 
     private void loadPhotoFromGallery() {
@@ -491,16 +525,6 @@ public class MainActivity extends BaseActivity {
         getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
         return image;
-    }
-
-    /**
-     * Load selected image to ImageView
-     *
-     * @param selectedImage {@link Uri} to selected image
-     */
-    private void insertProfileImage(Uri selectedImage) {
-        loadImageFromUriToView(selectedImage);
-        if (selectedImage != null) mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
     }
 
     private void setupInfoLayouts() {

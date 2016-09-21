@@ -5,10 +5,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class App extends Application {
 
     private static App app;
     private static SharedPreferences sSharedPreferences;
+    private static Gson sGson;
 
 
     @Override
@@ -16,6 +20,7 @@ public class App extends Application {
         super.onCreate();
         app = this;
         sSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sGson = new GsonBuilder().create();
     }
 
     public static App get() {
@@ -24,5 +29,9 @@ public class App extends Application {
 
     public static SharedPreferences getSharedPreferences() {
         return sSharedPreferences;
+    }
+
+    public static Gson getGson() {
+        return sGson;
     }
 }

@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @SuppressWarnings("unused")
-class Repo {
+public class Repo {
 
     @Expose
     @SerializedName("_id")

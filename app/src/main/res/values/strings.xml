@@ -47,5 +47,8 @@
     <string name="error.edit_text.vk_wrong_format">Wrong vk format</string>
     <string name="error.edit_text.github_wrong_format">Wrong github format</string>
     <string name="error.toast.creation_file">Error creation file</string>
+    <string name="error.wrong_username_or_password">Wrong username or password</string>
+    <string name="error.unknown_error">Unknown error</string>
+    <string name="error.no_connection">No internet connection</string>
 
 </resources>

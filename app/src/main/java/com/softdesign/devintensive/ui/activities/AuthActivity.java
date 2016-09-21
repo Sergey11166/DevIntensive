@@ -1,19 +1,26 @@
 package com.softdesign.devintensive.ui.activities;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.view.View;
+import android.widget.EditText;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.managers.DataManager;
+import com.softdesign.devintensive.data.network.request.UserLoginRequest;
+import com.softdesign.devintensive.data.network.response.UserModelResponse;
+import com.softdesign.devintensive.utils.NetworkStatusChecker;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
+import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
  * @author Sergey Vorobyev.
@@ -21,14 +28,18 @@ import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
 
 public class AuthActivity extends BaseActivity {
 
-    @BindView(R.id.username_til) TextInputLayout mUsernameLayout;
-    @BindView(R.id.password_til) TextInputLayout mPasswordLayout;
+    @BindView(R.id.username_et) EditText mUsernameET;
+    @BindView(R.id.password_et) EditText mPasswordET;
+
+    private DataManager mDataManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
         ButterKnife.bind(this);
+
+        mDataManager = DataManager.getInstance();
     }
 
     @OnClick({
@@ -42,7 +53,7 @@ public class AuthActivity extends BaseActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.login_btn:
-                loginSuccess();
+                startMainActivity();
                 break;
             case R.id.forgot_tv:
                 rememberPassword();
@@ -60,8 +71,43 @@ public class AuthActivity extends BaseActivity {
         goToUrl(this, "https://google.com");
     }
 
-    private void loginSuccess() {
+    private void loginSuccess(Response<UserModelResponse> response) {
+        mDataManager.getPreferencesManager().saveAuthToken(response.body().getData().getToken());
+        mDataManager.getPreferencesManager().saveUser(response.body().getData().getUser());
+        startMainActivity();
+    }
+
+    private void startMainActivity() {
         startActivity(new Intent(this, MainActivity.class));
         AuthActivity.this.finish();
+    }
+
+    private void signIn() {
+        if (!NetworkStatusChecker.isNetworkAvailable(this)) {
+            showToast(this, getString(R.string.error_no_connection));
+            return;
+        }
+
+        UserLoginRequest request = new UserLoginRequest();
+        request.setEmail(mUsernameET.getText().toString());
+        request.setPassword(mPasswordET.getText().toString());
+        Call<UserModelResponse> call = mDataManager.loginUser(request);
+        call.enqueue(new Callback<UserModelResponse>() {
+            @Override
+            public void onResponse(Call<UserModelResponse> call, Response<UserModelResponse> response) {
+                if (response.code() == 200) {
+                    loginSuccess(response);
+                } else if (response.code() == 403) {
+                    showToast(AuthActivity.this, getString(R.string.error_wrong_username_or_password));
+                } else {
+                    showToast(AuthActivity.this, getString(R.string.error_unknown_error));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserModelResponse> call, Throwable t) {
+                //// TODO: 21.09.2016 Handle error
+            }
+        });
     }
 }
