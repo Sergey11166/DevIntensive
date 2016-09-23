@@ -10,11 +10,11 @@ public class User {
     private int id;
 
     @Expose
-    @SerializedName("first_name")
+    @SerializedName("firstName")
     private String firstName;
 
     @Expose
-    @SerializedName("second_name")
+    @SerializedName("secondName")
     private String secondName;
 
     @Expose

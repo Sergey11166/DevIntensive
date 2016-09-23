@@ -53,7 +53,7 @@ public class AuthActivity extends BaseActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.login_btn:
-                startMainActivity();
+                signIn();
                 break;
             case R.id.forgot_tv:
                 rememberPassword();

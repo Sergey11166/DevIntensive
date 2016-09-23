@@ -1,4 +1,4 @@
-package com.softdesign.devintensive.ui.view.behaviors.watchers;
+package com.softdesign.devintensive.ui.view.watchers;
 
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
@@ -83,7 +83,7 @@ public class PhoneTextWatcher extends AbstractProfileTextWatcher {
         String checkPhone = phone.replaceAll("[\\(\\)\\-\\+]", "");
         if (checkPhone.matches("(\\d*\\D\\d*)*")) {
             return mResources.getString(R.string.error_edit_text_wrong_symbols);
-        } else if (checkPhone.length() != MAX_DIGITS_COUNT) {
+        } else if (checkPhone.length() < MAX_DIGITS_COUNT) {
             return mResources.getString(R.string.error_edit_text_phone_wrong_length);
         } else if (!checkPhone.startsWith(RUSSIAN_PHONE_CODE_7) && !checkPhone.startsWith(RUSSIAN_PHONE_CODE_8)) {
             return mResources.getString(R.string.error_edit_text_phone_wrong_code);

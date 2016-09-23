@@ -3,9 +3,6 @@ package com.softdesign.devintensive.ui.activities;
 import android.content.ContentValues;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,8 +18,6 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -32,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
@@ -42,10 +38,11 @@ import com.softdesign.devintensive.data.network.restmodels.Repositories;
 import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.ui.dialogs.ChangeProfilePhotoDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
-import com.softdesign.devintensive.ui.view.behaviors.watchers.EmailTextWatcher;
-import com.softdesign.devintensive.ui.view.behaviors.watchers.GithubTextWatcher;
-import com.softdesign.devintensive.ui.view.behaviors.watchers.PhoneTextWatcher;
-import com.softdesign.devintensive.ui.view.behaviors.watchers.VkTextWatcher;
+import com.softdesign.devintensive.ui.view.transformations.CircleTransformation;
+import com.softdesign.devintensive.ui.view.watchers.EmailTextWatcher;
+import com.softdesign.devintensive.ui.view.watchers.GithubTextWatcher;
+import com.softdesign.devintensive.ui.view.watchers.PhoneTextWatcher;
+import com.softdesign.devintensive.ui.view.watchers.VkTextWatcher;
 import com.softdesign.devintensive.utils.UIUtils;
 import com.squareup.picasso.Picasso;
 
@@ -149,6 +146,13 @@ public class MainActivity extends BaseActivity {
 
         mDataManager = DataManager.getInstance();
 
+        if (!isAuthorized()) {
+            Intent i = new Intent(this, AuthActivity.class);
+            startActivity(i);
+            MainActivity.this.finish();
+            return;
+        }
+
         mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
                 getResources().getDimensionPixelSize(R.dimen.size_profile_photo_240));
 
@@ -162,6 +166,10 @@ public class MainActivity extends BaseActivity {
             mIsEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY);
             changeEditMode(mIsEditMode);
         }
+    }
+
+    private boolean isAuthorized() {
+        return !mDataManager.getPreferencesManager().getAuthToken().isEmpty();
     }
 
     @Override
@@ -308,21 +316,21 @@ public class MainActivity extends BaseActivity {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return false;
         });
-        roundAvatar(navigationView);
-    }
 
-    /**
-     * Round avatar of drawer header
-     *
-     * @param navigationView Object of {@link NavigationView}
-     */
-    private void roundAvatar(NavigationView navigationView) {
-        Resources res = getResources();
-        Bitmap srcBmp = BitmapFactory.decodeResource(res, R.drawable.avatar);
-        RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(res, srcBmp);
-        rbd.setCircular(true);
-        ImageView view = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
-        view.setImageDrawable(rbd);
+        User user = mDataManager.getPreferencesManager().loadUser();
+
+        TextView username = (TextView) navigationView.getHeaderView(0).findViewById(R.id.username);
+        TextView email = (TextView) navigationView.getHeaderView(0).findViewById(R.id.email);
+        ImageView avatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
+
+        username.setText(user.getFirstName() + " " + user.getSecondName());
+        email.setText(user.getContacts().getEmail());
+        Picasso.with(this)
+                .load(user.getPublicInfo().getAvatar())
+                .resizeDimen(R.dimen.size_avatar, R.dimen.size_avatar)
+                .centerCrop()
+                .transform(new CircleTransformation())
+                .into(avatar);
     }
 
     /**
