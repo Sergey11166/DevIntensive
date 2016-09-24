@@ -73,6 +73,7 @@ public class AuthActivity extends BaseActivity {
 
     private void loginSuccess(Response<UserModelResponse> response) {
         mDataManager.getPreferencesManager().saveAuthToken(response.body().getData().getToken());
+        mDataManager.getPreferencesManager().saveUserId(response.body().getData().getUser().getId());
         mDataManager.getPreferencesManager().saveUser(response.body().getData().getUser());
         startMainActivity();
     }

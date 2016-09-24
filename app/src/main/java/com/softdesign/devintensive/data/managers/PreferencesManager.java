@@ -5,9 +5,11 @@ import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.utils.App;
+import com.softdesign.devintensive.utils.Constants;
 
 import static android.content.SharedPreferences.Editor;
 import static com.softdesign.devintensive.utils.Constants.AUTH_TOKEN_KEY;
+import static com.softdesign.devintensive.utils.Constants.USER_ID_KEY;
 
 /**
  * Class to manage {@link android.content.SharedPreferences}
@@ -44,7 +46,17 @@ public class PreferencesManager {
         editor.apply();
     }
 
+    public void saveUserId(String userId) {
+        Editor editor = mPreferences.edit();
+        editor.putString(USER_ID_KEY, userId);
+        editor.apply();
+    }
+
     public String getAuthToken() {
         return mPreferences.getString(AUTH_TOKEN_KEY, "");
+    }
+
+    public String getUserId() {
+        return mPreferences.getString(Constants.USER_ID_KEY, "");
     }
 }

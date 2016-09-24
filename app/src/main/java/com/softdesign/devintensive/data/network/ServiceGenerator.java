@@ -1,6 +1,7 @@
 package com.softdesign.devintensive.data.network;
 
 import com.softdesign.devintensive.BuildConfig;
+import com.softdesign.devintensive.data.network.interceptors.HeaderInterceptor;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -24,6 +25,7 @@ public class ServiceGenerator {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
+        sHttpClient.addInterceptor(new HeaderInterceptor());
         sHttpClient.addInterceptor(interceptor);
 
         Retrofit retrofit = sBuilder
