@@ -6,8 +6,8 @@ import com.google.gson.annotations.SerializedName;
 @SuppressWarnings("unused")
 public class User {
     @Expose
-    @SerializedName("_id")
-    private int id;
+    @SerializedName("id")
+    private String id;
 
     @Expose
     @SerializedName("firstName")
@@ -49,10 +49,10 @@ public class User {
     @SerializedName("updated")
     private String updated;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

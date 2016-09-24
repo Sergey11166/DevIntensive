@@ -2,23 +2,23 @@ package com.softdesign.devintensive.data.network.response;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.softdesign.devintensive.data.network.restmodels.UsedData;
+import com.softdesign.devintensive.data.network.restmodels.ImageData;
 
 /**
  * @author Sergey Vorobyev.
  */
 
 @SuppressWarnings("unused")
-public class UserModelResponse extends AbsResponse {
+public class ImageUploadedResponse extends AbsResponse {
 
     @Expose
     @SerializedName("data")
-    private UsedData data;
+    private ImageData data;
 
-    public UsedData getData() {
+    public ImageData getData() {
         return data;
     }
-    public void setData(UsedData data) {
+    public void setData(ImageData data) {
         this.data = data;
     }
 }

@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
+import com.softdesign.devintensive.data.network.response.ImageUploadedResponse;
 import com.softdesign.devintensive.data.network.restmodels.Contacts;
 import com.softdesign.devintensive.data.network.restmodels.PublicInfo;
 import com.softdesign.devintensive.data.network.restmodels.Repo;
@@ -43,6 +44,7 @@ import com.softdesign.devintensive.ui.view.watchers.EmailTextWatcher;
 import com.softdesign.devintensive.ui.view.watchers.GithubTextWatcher;
 import com.softdesign.devintensive.ui.view.watchers.PhoneTextWatcher;
 import com.softdesign.devintensive.ui.view.watchers.VkTextWatcher;
+import com.softdesign.devintensive.utils.IOUtils;
 import com.softdesign.devintensive.utils.UIUtils;
 import com.squareup.picasso.Picasso;
 
@@ -57,6 +59,9 @@ import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -64,6 +69,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.softdesign.devintensive.utils.Constants.DIALOG_FRAGMENT_TAG;
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
+import static com.softdesign.devintensive.utils.IOUtils.filePathFromUri;
 import static com.softdesign.devintensive.utils.NavUtils.goToAppSettings;
 import static com.softdesign.devintensive.utils.NavUtils.goToCameraApp;
 import static com.softdesign.devintensive.utils.NavUtils.goToGalleryApp;
@@ -179,13 +185,6 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        saveUser();
-        Log.d(TAG, "onPause");
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.d(TAG, "onSaveInstanceState");
@@ -204,6 +203,7 @@ public class MainActivity extends BaseActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:
+                if (mIsEditMode) saveUser();
                 changeEditMode(!mIsEditMode);
                 break;
             case R.id.profile_placeholder_layout:
@@ -367,7 +367,6 @@ public class MainActivity extends BaseActivity {
             user.setRepositories(repositories);
         }
 
-        if (mSelectedImage != null) user.getPublicInfo().setPhoto(mSelectedImage.toString());
         user.getContacts().setPhone(mEditTextList.get(0).getText().toString());
         user.getContacts().setEmail(mEditTextList.get(1).getText().toString());
         user.getContacts().setVk(mEditTextList.get(2).getText().toString());
@@ -377,7 +376,30 @@ public class MainActivity extends BaseActivity {
         repos.add(repo);
         user.getRepositories().setRepo(repos);
         user.getPublicInfo().setBio(mEditTextList.get(4).getText().toString());
-        mDataManager.getPreferencesManager().saveUser(user);
+
+        if (mSelectedImage != null) {
+            File file = new File(filePathFromUri(mSelectedImage));
+            Call<ImageUploadedResponse> call = mDataManager.uploadUserPhoto(file);
+            User finalUser = user;
+            call.enqueue(new Callback<ImageUploadedResponse>() {
+                @Override
+                public void onResponse(Call<ImageUploadedResponse> call, Response<ImageUploadedResponse> response) {
+                    if (response.code() == 200) {
+                        finalUser.getPublicInfo().setPhoto(response.body().getData().getPhoto());
+                        finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
+                        mDataManager.getPreferencesManager().saveUser(finalUser);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ImageUploadedResponse> call, Throwable t) {
+                    // TODO: 24.09.2016 Handle error
+                    System.out.print("");
+                }
+            });
+        } else {
+            mDataManager.getPreferencesManager().saveUser(user);
+        }
     }
 
     private void loadUser() {
