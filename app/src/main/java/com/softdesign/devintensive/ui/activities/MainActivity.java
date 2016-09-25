@@ -93,8 +93,10 @@ public class MainActivity extends BaseActivity {
     private static final int REQUEST_CODE_SETTING_CAMERA = 2;
     private static final int REQUEST_CODE_SETTING_GALLERY = 3;
 
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 0;
-    private static final int GALLERY_PERMISSION_REQUEST_CODE = 1;
+    private static final int USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE = 0;
+    private static final int AVATAR_CAMERA_PERMISSION_REQUEST_CODE = 1;
+    private static final int USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE = 2;
+    private static final int AVATAR_GALLERY_PERMISSION_REQUEST_CODE = 3;
 
     private static final ButterKnife.Action<View> EDIT_MODE_TRUE = (view, index) -> {
         view.setFocusableInTouchMode(true);
@@ -192,6 +194,7 @@ public class MainActivity extends BaseActivity {
 
     @OnClick({
             R.id.fab,
+            R.id.avatar,
             R.id.ic_vk_right,
             R.id.ic_phone_right,
             R.id.ic_email_right,
@@ -204,6 +207,9 @@ public class MainActivity extends BaseActivity {
             case R.id.fab:
                 if (mIsEditMode) saveUser();
                 changeEditMode(!mIsEditMode);
+                break;
+            case R.id.avatar:
+
                 break;
             case R.id.profile_placeholder_layout:
                 showChangeProfilePhotoDialog();
@@ -260,7 +266,7 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            case CAMERA_PERMISSION_REQUEST_CODE:
+            case USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults[0] == PERMISSION_GRANTED && grantResults[1] == PERMISSION_GRANTED) {
                     onCameraPermissionGranted();
                 } else {
@@ -270,7 +276,7 @@ public class MainActivity extends BaseActivity {
                             (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_CAMERA));
                 }
                 break;
-            case GALLERY_PERMISSION_REQUEST_CODE:
+            case USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE:
                 if (grantResults[0] == PERMISSION_GRANTED) {
                     onGalleryPermissionGranted();
                 } else {
@@ -321,7 +327,6 @@ public class MainActivity extends BaseActivity {
         TextView username = (TextView) navigationView.getHeaderView(0).findViewById(R.id.username);
         TextView email = (TextView) navigationView.getHeaderView(0).findViewById(R.id.email);
         ImageView avatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
-
         username.setText(user.getFirstName() + " " + user.getSecondName());
         email.setText(user.getContacts().getEmail());
         Picasso.with(this)
@@ -438,7 +443,7 @@ public class MainActivity extends BaseActivity {
             onCameraPermissionGranted();
         } else {
             ActivityCompat.requestPermissions(this, new String[] {CAMERA, WRITE_EXTERNAL_STORAGE},
-                    CAMERA_PERMISSION_REQUEST_CODE);
+                    USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE);
         }
     }
 
@@ -450,7 +455,7 @@ public class MainActivity extends BaseActivity {
             onGalleryPermissionGranted();
         } else {
             ActivityCompat.requestPermissions(this, new String[] {READ_EXTERNAL_STORAGE},
-                    GALLERY_PERMISSION_REQUEST_CODE);
+                    USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE);
         }
     }
 
