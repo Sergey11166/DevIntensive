@@ -44,7 +44,6 @@ import com.softdesign.devintensive.ui.view.watchers.EmailTextWatcher;
 import com.softdesign.devintensive.ui.view.watchers.GithubTextWatcher;
 import com.softdesign.devintensive.ui.view.watchers.PhoneTextWatcher;
 import com.softdesign.devintensive.ui.view.watchers.VkTextWatcher;
-import com.softdesign.devintensive.utils.App;
 import com.softdesign.devintensive.utils.UIUtils;
 import com.squareup.picasso.Picasso;
 
@@ -388,14 +387,12 @@ public class MainActivity extends BaseActivity {
                         finalUser.getPublicInfo().setPhoto(response.body().getData().getPhoto());
                         finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
                         mDataManager.getPreferencesManager().saveUser(finalUser);
-                        Picasso.with(App.get()).invalidate("http://localhost:8080/files/user_photo.jpg");
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ImageUploadedResponse> call, Throwable t) {
-                    // TODO: 24.09.2016 Handle error
-                    System.out.print("");
+                    Log.e(TAG, "Upload image error", t);
                 }
             });
         } else {

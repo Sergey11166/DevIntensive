@@ -48,7 +48,8 @@ public class DataManager {
     public Call<ImageUploadedResponse> uploadUserPhoto(File file) {
 
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", "user_photo.jpg", requestFile);
+        String fileName = String.valueOf(System.currentTimeMillis()) + "_" + "user_photo.jpg";
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", fileName, requestFile);
         User user = mPreferencesManager.loadUser();
         return mRestService.uploadUserPhoto(user.getId(), body);
     }

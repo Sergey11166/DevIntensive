@@ -2,7 +2,6 @@ package com.softdesign.devintensive.data.network.interceptors;
 
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.managers.PreferencesManager;
-import com.softdesign.devintensive.data.network.restmodels.User;
 
 import java.io.IOException;
 
