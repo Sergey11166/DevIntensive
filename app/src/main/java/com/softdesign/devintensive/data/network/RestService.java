@@ -5,7 +5,6 @@ import com.softdesign.devintensive.data.network.response.ImageUploadedResponse;
 import com.softdesign.devintensive.data.network.response.UserModelResponse;
 
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Multipart;
@@ -22,16 +21,11 @@ public interface RestService {
     @POST("login")
     Call<UserModelResponse> loginUser(@Body UserLoginRequest request);
 
-    /*@Multipart
-    @POST("user/{userId}/publicValues/profilePhoto")
-    Call<ImageUploadedResponse> uploadUserPhoto(@Part("fileToUpload\"; filename=\"log_file") RequestBody file,
-                                                @Part("fileName") String fileName,
-                                                @Path("userId") String userId);*/
-
     @Multipart
     @POST("user/{userId}/publicValues/profilePhoto")
     Call<ImageUploadedResponse> uploadUserPhoto(@Path("userId") String userId, @Part MultipartBody.Part file);
+
     @Multipart
     @POST("user/{userId}/publicValues/profileAvatar")
-    Call<ImageUploadedResponse> uploadUserAvatar(@Path("userId") String userId, @Part MultipartBody.Part file);
+    Call<ImageUploadedResponse> uploadAvatar(@Path("userId") String userId, @Part MultipartBody.Part file);
 }

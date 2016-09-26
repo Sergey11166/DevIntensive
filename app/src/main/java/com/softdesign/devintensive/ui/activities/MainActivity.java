@@ -37,7 +37,7 @@ import com.softdesign.devintensive.data.network.restmodels.PublicInfo;
 import com.softdesign.devintensive.data.network.restmodels.Repo;
 import com.softdesign.devintensive.data.network.restmodels.Repositories;
 import com.softdesign.devintensive.data.network.restmodels.User;
-import com.softdesign.devintensive.ui.dialogs.ChangeProfilePhotoDialog;
+import com.softdesign.devintensive.ui.dialogs.ChangeImageDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
 import com.softdesign.devintensive.ui.view.transformations.CircleTransformation;
 import com.softdesign.devintensive.ui.view.watchers.EmailTextWatcher;
@@ -88,15 +88,21 @@ public class MainActivity extends BaseActivity {
 
     private static final String EDIT_MODE_KEY = "EDIT_MODE_KEY";
 
-    private static final int REQUEST_CODE_CAMERA = 0;
-    private static final int REQUEST_CODE_GALLERY = 1;
-    private static final int REQUEST_CODE_SETTING_CAMERA = 2;
-    private static final int REQUEST_CODE_SETTING_GALLERY = 3;
+    // Activity requests
+    private static final int REQUEST_CODE_CAMERA_AVATAR = 0;
+    private static final int REQUEST_CODE_GALLERY_AVATAR = 1;
+    private static final int REQUEST_CODE_CAMERA_USER_PHOTO = 2;
+    private static final int REQUEST_CODE_GALLERY_USER_PHOTO = 3;
+    private static final int REQUEST_CODE_SETTING_CAMERA_AVATAR = 4;
+    private static final int REQUEST_CODE_SETTING_GALLERY_AVATAR = 5;
+    private static final int REQUEST_CODE_SETTING_CAMERA_USER_PHOTO = 6;
+    private static final int REQUEST_CODE_SETTING_GALLERY_USER_PHOTO = 7;
 
-    private static final int USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE = 0;
-    private static final int AVATAR_CAMERA_PERMISSION_REQUEST_CODE = 1;
-    private static final int USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE = 2;
-    private static final int AVATAR_GALLERY_PERMISSION_REQUEST_CODE = 3;
+    // Permissions requests
+    private static final int AVATAR_CAMERA_PERMISSION_REQUEST_CODE = 0;
+    private static final int AVATAR_GALLERY_PERMISSION_REQUEST_CODE = 1;
+    private static final int USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE = 2;
+    private static final int USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE = 3;
 
     private static final ButterKnife.Action<View> EDIT_MODE_TRUE = (view, index) -> {
         view.setFocusableInTouchMode(true);
@@ -118,6 +124,7 @@ public class MainActivity extends BaseActivity {
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
     @BindView(R.id.fab) FloatingActionButton mFab;
     @BindView(R.id.toolbar) Toolbar mToolbar;
+    private ImageView mAvatar;
 
     @BindViews({
             R.id.phone_edit_text,
@@ -140,9 +147,10 @@ public class MainActivity extends BaseActivity {
     private DataManager mDataManager;
 
     private boolean mIsEditMode;
-    private File mPhotoFile;
-    private Uri mSelectedImage;
-    private  Point mPhotoSize;
+    private File mImageFile;
+    private Uri mSelectedUserPhoto;
+    private Uri mSelectedAvatar;
+    private Point mPhotoSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,7 +202,6 @@ public class MainActivity extends BaseActivity {
 
     @OnClick({
             R.id.fab,
-            R.id.avatar,
             R.id.ic_vk_right,
             R.id.ic_phone_right,
             R.id.ic_email_right,
@@ -207,9 +214,6 @@ public class MainActivity extends BaseActivity {
             case R.id.fab:
                 if (mIsEditMode) saveUser();
                 changeEditMode(!mIsEditMode);
-                break;
-            case R.id.avatar:
-
                 break;
             case R.id.profile_placeholder_layout:
                 showChangeProfilePhotoDialog();
@@ -238,6 +242,7 @@ public class MainActivity extends BaseActivity {
             mDrawerLayout.closeDrawer(GravityCompat.START);
         } else if (mIsEditMode){
             changeEditMode(false);
+            loadUser();
         } else {
             super.onBackPressed();
         }
@@ -246,19 +251,35 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case REQUEST_CODE_GALLERY:
-                if (resultCode == RESULT_OK && data != null) mSelectedImage = data.getData();
-                loadImageFromUriToView(mSelectedImage);
+            case REQUEST_CODE_GALLERY_USER_PHOTO:
+                if (resultCode == RESULT_OK && data != null) mSelectedUserPhoto = data.getData();
+                loadImageUserPhoto(mSelectedUserPhoto);
                 break;
-            case REQUEST_CODE_CAMERA:
-                if (resultCode == RESULT_OK && mPhotoFile != null) mSelectedImage = Uri.fromFile(mPhotoFile);
-                loadImageFromUriToView(mSelectedImage);
+            case REQUEST_CODE_GALLERY_AVATAR:
+                if (resultCode == RESULT_OK && data != null) mSelectedAvatar = data.getData();
+                loadImageAvatar(mSelectedAvatar);
+                uploadAvatar();
                 break;
-            case REQUEST_CODE_SETTING_CAMERA:
-                checkAndRequestCameraPermission();
+            case REQUEST_CODE_CAMERA_USER_PHOTO:
+                if (resultCode == RESULT_OK && mImageFile != null) mSelectedUserPhoto = Uri.fromFile(mImageFile);
+                loadImageUserPhoto(mSelectedUserPhoto);
                 break;
-            case REQUEST_CODE_SETTING_GALLERY:
-                checkAndRequestGalleryPermission();
+            case REQUEST_CODE_CAMERA_AVATAR:
+                if (resultCode == RESULT_OK && mImageFile != null) mSelectedAvatar = Uri.fromFile(mImageFile);
+                loadImageAvatar(mSelectedAvatar);
+                uploadAvatar();
+                break;
+            case REQUEST_CODE_SETTING_CAMERA_USER_PHOTO:
+                checkAndRequestCameraPermission(USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE);
+                break;
+            case REQUEST_CODE_SETTING_CAMERA_AVATAR:
+                checkAndRequestCameraPermission(AVATAR_CAMERA_PERMISSION_REQUEST_CODE);
+                break;
+            case REQUEST_CODE_SETTING_GALLERY_USER_PHOTO:
+                checkAndRequestGalleryPermission(USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE);
+                break;
+            case REQUEST_CODE_SETTING_GALLERY_AVATAR:
+                checkAndRequestGalleryPermission(AVATAR_GALLERY_PERMISSION_REQUEST_CODE);
                 break;
         }
     }
@@ -268,22 +289,42 @@ public class MainActivity extends BaseActivity {
         switch (requestCode) {
             case USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults[0] == PERMISSION_GRANTED && grantResults[1] == PERMISSION_GRANTED) {
-                    onCameraPermissionGranted();
+                    onCameraPermissionGranted(REQUEST_CODE_CAMERA_USER_PHOTO);
                 } else {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_camera_permission,
-                            (dialog, which) -> checkAndRequestCameraPermission(),
+                            (dialog, which) -> checkAndRequestCameraPermission(USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE),
                             (dialog, which) -> dialog.dismiss(),
-                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_CAMERA));
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_CAMERA_USER_PHOTO));
+                }
+                break;
+            case AVATAR_CAMERA_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PERMISSION_GRANTED && grantResults[1] == PERMISSION_GRANTED) {
+                    onCameraPermissionGranted(REQUEST_CODE_CAMERA_AVATAR);
+                } else {
+                    showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_camera_permission,
+                            (dialog, which) -> checkAndRequestCameraPermission(AVATAR_CAMERA_PERMISSION_REQUEST_CODE),
+                            (dialog, which) -> dialog.dismiss(),
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_CAMERA_AVATAR));
                 }
                 break;
             case USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE:
                 if (grantResults[0] == PERMISSION_GRANTED) {
-                    onGalleryPermissionGranted();
+                    onGalleryPermissionGranted(REQUEST_CODE_GALLERY_USER_PHOTO);
                 } else {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_gallery_permission,
-                            (dialog, which) -> checkAndRequestGalleryPermission(),
+                            (dialog, which) -> checkAndRequestGalleryPermission(USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE),
                             (dialog, which) -> dialog.dismiss(),
-                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_GALLERY));
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_GALLERY_USER_PHOTO));
+                }
+                break;
+            case AVATAR_GALLERY_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PERMISSION_GRANTED) {
+                    onGalleryPermissionGranted(REQUEST_CODE_GALLERY_AVATAR);
+                } else {
+                    showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_gallery_permission,
+                            (dialog, which) -> checkAndRequestGalleryPermission(AVATAR_GALLERY_PERMISSION_REQUEST_CODE),
+                            (dialog, which) -> dialog.dismiss(),
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_GALLERY_AVATAR));
                 }
                 break;
         }
@@ -326,15 +367,11 @@ public class MainActivity extends BaseActivity {
 
         TextView username = (TextView) navigationView.getHeaderView(0).findViewById(R.id.username);
         TextView email = (TextView) navigationView.getHeaderView(0).findViewById(R.id.email);
-        ImageView avatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
+        mAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
+        mAvatar.setOnClickListener(v -> showChangeAvatarDialog());
+
         username.setText(user.getFirstName() + " " + user.getSecondName());
         email.setText(user.getContacts().getEmail());
-        Picasso.with(this)
-                .load(user.getPublicInfo().getAvatar())
-                .resizeDimen(R.dimen.size_avatar, R.dimen.size_avatar)
-                .centerCrop()
-                .transform(new CircleTransformation())
-                .into(avatar);
     }
 
     /**
@@ -358,18 +395,22 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    private User createEmptyUser() {
+        User user = new User();
+        PublicInfo publicInfo = new PublicInfo();
+        Contacts constants = new Contacts();
+        Repositories repositories = new Repositories();
+
+        user.setPublicInfo(publicInfo);
+        user.setContacts(constants);
+        user.setRepositories(repositories);
+
+        return user;
+    }
+
     private void saveUser() {
         User user = mDataManager.getPreferencesManager().loadUser();
-        if (user == null) {
-            user = new User();
-            PublicInfo publicInfo = new PublicInfo();
-            Contacts constants = new Contacts();
-            Repositories repositories = new Repositories();
-
-            user.setPublicInfo(publicInfo);
-            user.setContacts(constants);
-            user.setRepositories(repositories);
-        }
+        if (user == null) user = createEmptyUser();
 
         user.getContacts().setPhone(mEditTextList.get(0).getText().toString());
         user.getContacts().setEmail(mEditTextList.get(1).getText().toString());
@@ -380,9 +421,10 @@ public class MainActivity extends BaseActivity {
         repos.add(repo);
         user.getRepositories().setRepo(repos);
         user.getPublicInfo().setBio(mEditTextList.get(4).getText().toString());
+        mDataManager.getPreferencesManager().saveUser(user);
 
-        if (mSelectedImage != null) {
-            File file = new File(filePathFromUri(mSelectedImage));
+        if (mSelectedUserPhoto != null) {
+            File file = new File(filePathFromUri(mSelectedUserPhoto));
             Call<ImageUploadedResponse> call = mDataManager.uploadUserPhoto(file);
             User finalUser = user;
             call.enqueue(new Callback<ImageUploadedResponse>() {
@@ -400,8 +442,6 @@ public class MainActivity extends BaseActivity {
                     Log.e(TAG, "Upload image error", t);
                 }
             });
-        } else {
-            mDataManager.getPreferencesManager().saveUser(user);
         }
     }
 
@@ -411,7 +451,11 @@ public class MainActivity extends BaseActivity {
 
         String photo = user.getPublicInfo().getPhoto();
         Uri photoUri = photo != null ? Uri.parse(photo) : Uri.parse("");
-        loadImageFromUriToView(photoUri);
+        loadImageUserPhoto(photoUri);
+
+        String avatar = user.getPublicInfo().getAvatar();
+        Uri avatarUri = avatar != null ? Uri.parse(avatar) : Uri.parse("");
+        loadImageAvatar(avatarUri);
 
         String phone = user.getContacts().getPhone();
         String email = user.getContacts().getEmail();
@@ -426,57 +470,49 @@ public class MainActivity extends BaseActivity {
         mEditTextList.get(4).setText(!bio.isEmpty() ? bio : "");
     }
 
-    private void loadPhotoFromGallery() {
-        checkAndRequestGalleryPermission();
-    }
-
-    private void takePhotoFromCamera() {
-        checkAndRequestCameraPermission();
-    }
-
     /**
      * Check if camera permissions not granted make request permissions
      */
-    private void checkAndRequestCameraPermission() {
+    private void checkAndRequestCameraPermission(int requestCode) {
         if (ContextCompat.checkSelfPermission(this, CAMERA) == PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
-            onCameraPermissionGranted();
+            onCameraPermissionGranted(requestCode);
         } else {
             ActivityCompat.requestPermissions(this, new String[] {CAMERA, WRITE_EXTERNAL_STORAGE},
-                    USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE);
+                    requestCode);
         }
     }
 
     /**
      * Check if gallery permissions not granted make request permissions
      */
-    private void checkAndRequestGalleryPermission() {
+    private void checkAndRequestGalleryPermission(int requestCode) {
         if (ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
-            onGalleryPermissionGranted();
+            onGalleryPermissionGranted(requestCode);
         } else {
             ActivityCompat.requestPermissions(this, new String[] {READ_EXTERNAL_STORAGE},
-                    USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE);
+                    requestCode);
         }
     }
 
     /**
      * Call when camera permissions have been granted
      */
-    private void onCameraPermissionGranted() {
+    private void onCameraPermissionGranted(int requestCode) {
         try {
-            mPhotoFile = createImageFile();
+            mImageFile = createImageFile();
         } catch (IOException e) {
             Log.e(TAG, "Error creation file", e);
             UIUtils.showToast(this, getString(R.string.error_toast_creation_file));
         }
-        goToCameraApp(this, mPhotoFile, REQUEST_CODE_CAMERA);
+        goToCameraApp(this, mImageFile, requestCode);
     }
 
     /**
      * Call when gallery permissions have been granted
      */
-    private void onGalleryPermissionGranted() {
-        goToGalleryApp(this, REQUEST_CODE_GALLERY);
+    private void onGalleryPermissionGranted(int requestCode) {
+        goToGalleryApp(this, requestCode);
     }
 
     private void hideProfilePlaceHolder() {
@@ -500,17 +536,38 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * Show {@link ChangeProfilePhotoDialog}. Called when we want change profile photo
+     * Show {@link ChangeImageDialog}. Called when we want change profile photo
      */
     private void showChangeProfilePhotoDialog() {
-        ChangeProfilePhotoDialog d = new ChangeProfilePhotoDialog();
+        ChangeImageDialog d = new ChangeImageDialog();
         d.setOnClickListener((dialog, which) -> {
             switch (which) {
                 case 0:
-                    takePhotoFromCamera();
+                    checkAndRequestCameraPermission(USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE);
                     break;
                 case 1:
-                    loadPhotoFromGallery();
+                    checkAndRequestGalleryPermission(USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE);
+                    break;
+                case 2:
+                    dialog.dismiss();
+                    break;
+            }
+        });
+        d.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+    }
+
+    /**
+     * Show {@link ChangeImageDialog}. Called when we want change avatar
+     */
+    private void showChangeAvatarDialog() {
+        ChangeImageDialog d = new ChangeImageDialog();
+        d.setOnClickListener((dialog, which) -> {
+            switch (which) {
+                case 0:
+                    checkAndRequestCameraPermission(AVATAR_CAMERA_PERMISSION_REQUEST_CODE);
+                    break;
+                case 1:
+                    checkAndRequestGalleryPermission(AVATAR_GALLERY_PERMISSION_REQUEST_CODE);
                     break;
                 case 2:
                     dialog.dismiss();
@@ -588,7 +645,7 @@ public class MainActivity extends BaseActivity {
                 new GithubTextWatcher(mTextInputLayoutList.get(3), mEditTextList.get(3)));
     }
 
-    private void loadImageFromUriToView(Uri uri) {
+    private void loadImageUserPhoto(Uri uri) {
         Picasso.with(this)
                 .load(uri)
                 .placeholder(R.drawable.user_bg)
@@ -596,5 +653,41 @@ public class MainActivity extends BaseActivity {
                 .onlyScaleDown()
                 .centerCrop()
                 .into(mProfilePhoto);
+    }
+
+    private void loadImageAvatar(Uri uri) {
+        Picasso.with(this)
+                .load(uri)
+                .placeholder(R.drawable.ic_account_circle)
+                .resizeDimen(R.dimen.size_avatar, R.dimen.size_avatar)
+                .onlyScaleDown()
+                .centerCrop()
+                .transform(new CircleTransformation())
+                .into(mAvatar);
+    }
+
+    private void uploadAvatar() {
+        if (mSelectedAvatar != null) {
+            File file = new File(filePathFromUri(mSelectedAvatar));
+            Call<ImageUploadedResponse> call = mDataManager.uploadAvatar(file);
+            User user = mDataManager.getPreferencesManager().loadUser();
+            if (user == null) user = createEmptyUser();
+            User finalUser = user;
+            call.enqueue(new Callback<ImageUploadedResponse>() {
+                @Override
+                public void onResponse(Call<ImageUploadedResponse> call, Response<ImageUploadedResponse> response) {
+                    if (response.code() == 200) {
+                        finalUser.getPublicInfo().setAvatar(response.body().getData().getPhoto());
+                        finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
+                        mDataManager.getPreferencesManager().saveUser(finalUser);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ImageUploadedResponse> call, Throwable t) {
+                    Log.e(TAG, "Upload image error", t);
+                }
+            });
+        }
     }
 }

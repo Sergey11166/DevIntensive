@@ -53,4 +53,13 @@ public class DataManager {
         User user = mPreferencesManager.loadUser();
         return mRestService.uploadUserPhoto(user.getId(), body);
     }
+
+    public Call<ImageUploadedResponse> uploadAvatar(File file) {
+
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        String fileName = String.valueOf(System.currentTimeMillis()) + "_" + "avatar.jpg";
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", fileName, requestFile);
+        User user = mPreferencesManager.loadUser();
+        return mRestService.uploadAvatar(user.getId(), body);
+    }
 }

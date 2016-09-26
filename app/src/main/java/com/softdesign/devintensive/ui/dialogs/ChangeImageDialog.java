@@ -12,7 +12,7 @@ import com.softdesign.devintensive.R;
  * @author Sergey Vorobyev.
  */
 
-public class ChangeProfilePhotoDialog extends DialogFragment {
+public class ChangeImageDialog extends DialogFragment {
 
     private DialogInterface.OnClickListener mOnClickListener;
 
