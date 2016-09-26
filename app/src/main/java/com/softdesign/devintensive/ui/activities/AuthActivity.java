@@ -92,10 +92,11 @@ public class AuthActivity extends BaseActivity {
         UserLoginRequest request = new UserLoginRequest();
         request.setEmail(mUsernameET.getText().toString());
         request.setPassword(mPasswordET.getText().toString());
-        Call<UserModelResponse> call = mDataManager.loginUser(request);
-        call.enqueue(new Callback<UserModelResponse>() {
+        showProgress();
+        mDataManager.loginUser(request).enqueue(new Callback<UserModelResponse>() {
             @Override
             public void onResponse(Call<UserModelResponse> call, Response<UserModelResponse> response) {
+                hideProgress();
                 if (response.code() == 200) {
                     loginSuccess(response);
                 } else if (response.code() == 403) {
@@ -107,7 +108,8 @@ public class AuthActivity extends BaseActivity {
 
             @Override
             public void onFailure(Call<UserModelResponse> call, Throwable t) {
-                //// TODO: 21.09.2016 Handle error
+                hideProgress();
+                showError(getString(R.string.error_unknown_error), t);
             }
         });
     }

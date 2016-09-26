@@ -36,9 +36,8 @@ public class BaseActivity extends AppCompatActivity {
         if (mProgressDialog != null && mProgressDialog.isShowing()) mProgressDialog.hide();
     }
 
-    public void showError(String message, Exception exception) {
-        Log.d(TAG, "Message: ".concat(message).concat("\n")
-                .concat("Exception: ".concat(exception.toString())));
+    public void showError(String message, Throwable t) {
+        Log.d(TAG, "Message: "+ message + "\n" + "Exception: " + t.toString());
         showToast(this, message);
     }
 }

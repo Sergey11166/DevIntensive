@@ -1,29 +1,12 @@
 package com.softdesign.devintensive.data.network.restmodels;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 @SuppressWarnings("unused")
 public class ProfileValues {
 
-    @Expose
-    @SerializedName("homeTask")
     private int homeTask;
-
-    @Expose
-    @SerializedName("projects")
     private int projects;
-
-    @Expose
-    @SerializedName("linesCode")
     private int linesCode;
-
-    @Expose
-    @SerializedName("rait")
     private int rating;
-
-    @Expose
-    @SerializedName("updated")
     private String updated;
 
     public int getHomeTask() {

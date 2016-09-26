@@ -41,5 +41,7 @@
     <string name="error.wrong_username_or_password">Неверные имя пользователя или пароль</string>
     <string name="error.unknown_error">Неизвестная ошибка</string>
     <string name="error.no_connection">Нет подключения к интернету</string>
+    <string name="error.upload_image">Ошибка загрузки изображения на сервер</string>
+    <string name="error.creation_file">Ошибка записи файла</string>
 
 </resources>

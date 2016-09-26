@@ -8,7 +8,6 @@ package com.softdesign.devintensive.data.network.request;
 public class UserLoginRequest {
 
     private String email;
-
     private String password;
 
     public String getEmail() {

@@ -1,52 +1,18 @@
 package com.softdesign.devintensive.data.network.restmodels;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 @SuppressWarnings("unused")
 public class User {
-    @Expose
-    @SerializedName("id")
+
     private String id;
-
-    @Expose
-    @SerializedName("firstName")
     private String firstName;
-
-    @Expose
-    @SerializedName("secondName")
     private String secondName;
-
-    @Expose
-    @SerializedName("__v")
     private int v;
-
-    @Expose
-    @SerializedName("repositories")
     private Repositories repositories;
-
-    @Expose
-    @SerializedName("contacts")
     private Contacts contacts;
-
-    @Expose
-    @SerializedName("profileValues")
     private ProfileValues profileValues;
-
-    @Expose
-    @SerializedName("publicInfo")
-    private PublicInfo PublicInfo;
-
-    @Expose
-    @SerializedName("specialization")
+    private PublicInfo publicInfo;
     private String specialization;
-
-    @Expose
-    @SerializedName("role")
     private String role;
-
-    @Expose
-    @SerializedName("updated")
     private String updated;
 
     public String getId() {
@@ -99,10 +65,10 @@ public class User {
     }
 
     public PublicInfo getPublicInfo() {
-        return PublicInfo;
+        return publicInfo;
     }
     public void setPublicInfo(PublicInfo publicInfo) {
-        PublicInfo = publicInfo;
+        this.publicInfo = publicInfo;
     }
 
     public String getSpecialization() {

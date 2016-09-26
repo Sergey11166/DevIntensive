@@ -1,25 +1,11 @@
 package com.softdesign.devintensive.data.network.restmodels;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 @SuppressWarnings("unused")
 public class PublicInfo {
 
-    @Expose
-    @SerializedName("bio")
     private String bio;
-
-    @Expose
-    @SerializedName("avatar")
     private String avatar;
-
-    @Expose
-    @SerializedName("photo")
     private String photo;
-
-    @Expose
-    @SerializedName("updated")
     private String updated;
 
     public String getBio() {

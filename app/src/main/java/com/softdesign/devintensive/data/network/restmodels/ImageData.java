@@ -1,8 +1,5 @@
 package com.softdesign.devintensive.data.network.restmodels;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 /**
  * @author Sergey Vorobyev.
  */
@@ -10,12 +7,7 @@ import com.google.gson.annotations.SerializedName;
 @SuppressWarnings("unused")
 public class ImageData {
 
-    @Expose
-    @SerializedName("photo")
     private String photo;
-
-    @Expose
-    @SerializedName("updated")
     private String updated;
 
     public String getPhoto() {

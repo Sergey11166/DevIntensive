@@ -50,5 +50,7 @@
     <string name="error.wrong_username_or_password">Wrong username or password</string>
     <string name="error.unknown_error">Unknown error</string>
     <string name="error.no_connection">No internet connection</string>
+    <string name="error.upload_image">Upload image to server</string>
+    <string name="error.creation_file">Error creation file</string>
 
 </resources>

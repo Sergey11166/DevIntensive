@@ -1,7 +1,5 @@
 package com.softdesign.devintensive.data.network.response;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import com.softdesign.devintensive.data.network.restmodels.UsedData;
 
 /**
@@ -11,8 +9,6 @@ import com.softdesign.devintensive.data.network.restmodels.UsedData;
 @SuppressWarnings("unused")
 public class UserModelResponse extends AbsResponse {
 
-    @Expose
-    @SerializedName("data")
     private UsedData data;
 
     public UsedData getData() {

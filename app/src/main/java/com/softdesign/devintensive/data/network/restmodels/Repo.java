@@ -1,21 +1,10 @@
 package com.softdesign.devintensive.data.network.restmodels;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 @SuppressWarnings("unused")
 public class Repo {
 
-    @Expose
-    @SerializedName("_id")
     private String id;
-
-    @Expose
-    @SerializedName("git")
     private String git;
-
-    @Expose
-    @SerializedName("title")
     private String title;
 
     public String getId() {

@@ -124,6 +124,9 @@ public class MainActivity extends BaseActivity {
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
     @BindView(R.id.fab) FloatingActionButton mFab;
     @BindView(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.rating) TextView mRating;
+    @BindView(R.id.code_lines) TextView mLinesCode;
+    @BindView(R.id.count_projects) TextView mCountProjects;
     private ImageView mAvatar;
 
     @BindViews({
@@ -168,9 +171,6 @@ public class MainActivity extends BaseActivity {
             return;
         }
 
-        mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
-                getResources().getDimensionPixelSize(R.dimen.size_profile_photo_240));
-
         setupInfoLayouts();
         setupToolBar();
         setupDrawer();
@@ -212,7 +212,10 @@ public class MainActivity extends BaseActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:
-                if (mIsEditMode) saveUser();
+                if (mIsEditMode) {
+                    saveUser();
+                    uploadUserPhoto();
+                }
                 changeEditMode(!mIsEditMode);
                 break;
             case R.id.profile_placeholder_layout:
@@ -395,6 +398,10 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    /**
+     * Create object {@link User} with empty properties
+     * @return {@link User}
+     */
     private User createEmptyUser() {
         User user = new User();
         PublicInfo publicInfo = new PublicInfo();
@@ -408,6 +415,9 @@ public class MainActivity extends BaseActivity {
         return user;
     }
 
+    /**
+     * Save object {@link User} to {@link android.content.SharedPreferences}
+     */
     private void saveUser() {
         User user = mDataManager.getPreferencesManager().loadUser();
         if (user == null) user = createEmptyUser();
@@ -415,47 +425,40 @@ public class MainActivity extends BaseActivity {
         user.getContacts().setPhone(mEditTextList.get(0).getText().toString());
         user.getContacts().setEmail(mEditTextList.get(1).getText().toString());
         user.getContacts().setVk(mEditTextList.get(2).getText().toString());
+
         List<Repo> repos = new ArrayList<>();
         Repo repo = new Repo();
         repo.setGit(mEditTextList.get(3).getText().toString());
         repos.add(repo);
         user.getRepositories().setRepo(repos);
+
         user.getPublicInfo().setBio(mEditTextList.get(4).getText().toString());
+
         mDataManager.getPreferencesManager().saveUser(user);
-
-        if (mSelectedUserPhoto != null) {
-            File file = new File(filePathFromUri(mSelectedUserPhoto));
-            Call<ImageUploadedResponse> call = mDataManager.uploadUserPhoto(file);
-            User finalUser = user;
-            call.enqueue(new Callback<ImageUploadedResponse>() {
-                @Override
-                public void onResponse(Call<ImageUploadedResponse> call, Response<ImageUploadedResponse> response) {
-                    if (response.code() == 200) {
-                        finalUser.getPublicInfo().setPhoto(response.body().getData().getPhoto());
-                        finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
-                        mDataManager.getPreferencesManager().saveUser(finalUser);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ImageUploadedResponse> call, Throwable t) {
-                    Log.e(TAG, "Upload image error", t);
-                }
-            });
-        }
     }
 
+    /**
+     * Load object {@link User} from {@link android.content.SharedPreferences}
+     */
     private void loadUser() {
         User user = mDataManager.getPreferencesManager().loadUser();
         if (user == null) return;
 
         String photo = user.getPublicInfo().getPhoto();
-        Uri photoUri = photo != null ? Uri.parse(photo) : Uri.parse("");
-        loadImageUserPhoto(photoUri);
+        mSelectedUserPhoto = (photo != null) ? Uri.parse(photo) : Uri.parse("");
+        loadImageUserPhoto(mSelectedUserPhoto);
 
         String avatar = user.getPublicInfo().getAvatar();
-        Uri avatarUri = avatar != null ? Uri.parse(avatar) : Uri.parse("");
-        loadImageAvatar(avatarUri);
+        mSelectedAvatar = (avatar != null) ? Uri.parse(avatar) : Uri.parse("");
+        loadImageAvatar(mSelectedAvatar);
+
+        int rating = user.getProfileValues().getRating();
+        int linesCode = user.getProfileValues().getLinesCode();
+        int countProjects = user.getProfileValues().getProjects();
+
+        mRating.setText(String.valueOf(rating));
+        mLinesCode.setText(String.valueOf(linesCode));
+        mCountProjects.setText(String.valueOf(countProjects));
 
         String phone = user.getContacts().getPhone();
         String email = user.getContacts().getEmail();
@@ -502,7 +505,7 @@ public class MainActivity extends BaseActivity {
         try {
             mImageFile = createImageFile();
         } catch (IOException e) {
-            Log.e(TAG, "Error creation file", e);
+            showError(getString(R.string.error_creation_file), e);
             UIUtils.showToast(this, getString(R.string.error_toast_creation_file));
         }
         goToCameraApp(this, mImageFile, requestCode);
@@ -617,6 +620,9 @@ public class MainActivity extends BaseActivity {
         return image;
     }
 
+    /**
+     * Setup user info fields
+     */
     private void setupInfoLayouts() {
         final View.OnFocusChangeListener listener = (view, hasFocus) -> {
             if (hasFocus) {
@@ -645,7 +651,15 @@ public class MainActivity extends BaseActivity {
                 new GithubTextWatcher(mTextInputLayoutList.get(3), mEditTextList.get(3)));
     }
 
+    /**
+     * Load image from server or cache or disc to {@link #mProfilePhoto} by Picasso library
+     * @param uri Object {@link Uri} of image
+     */
     private void loadImageUserPhoto(Uri uri) {
+        if (mPhotoSize == null) {
+            mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
+                    getResources().getDimensionPixelSize(R.dimen.size_profile_photo_240));
+        }
         Picasso.with(this)
                 .load(uri)
                 .placeholder(R.drawable.user_bg)
@@ -655,6 +669,10 @@ public class MainActivity extends BaseActivity {
                 .into(mProfilePhoto);
     }
 
+    /**
+     * Load image from server or cache or disc to {@link #mAvatar} by Picasso library
+     * @param uri Object {@link Uri} of image
+     */
     private void loadImageAvatar(Uri uri) {
         Picasso.with(this)
                 .load(uri)
@@ -666,16 +684,22 @@ public class MainActivity extends BaseActivity {
                 .into(mAvatar);
     }
 
+    /**
+     * Upload avatar to server
+     */
     private void uploadAvatar() {
         if (mSelectedAvatar != null) {
             File file = new File(filePathFromUri(mSelectedAvatar));
-            Call<ImageUploadedResponse> call = mDataManager.uploadAvatar(file);
+
             User user = mDataManager.getPreferencesManager().loadUser();
             if (user == null) user = createEmptyUser();
-            User finalUser = user;
-            call.enqueue(new Callback<ImageUploadedResponse>() {
+            final User finalUser = user;
+
+            showProgress();
+            mDataManager.uploadAvatar(file).enqueue(new Callback<ImageUploadedResponse>() {
                 @Override
                 public void onResponse(Call<ImageUploadedResponse> call, Response<ImageUploadedResponse> response) {
+                    hideProgress();
                     if (response.code() == 200) {
                         finalUser.getPublicInfo().setAvatar(response.body().getData().getPhoto());
                         finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
@@ -685,7 +709,40 @@ public class MainActivity extends BaseActivity {
 
                 @Override
                 public void onFailure(Call<ImageUploadedResponse> call, Throwable t) {
-                    Log.e(TAG, "Upload image error", t);
+                    hideProgress();
+                    showError(getString(R.string.error_upload_image), t);
+                }
+            });
+        }
+    }
+
+    /**
+     * Upload user photo to server
+     */
+    private void uploadUserPhoto() {
+        if (mSelectedUserPhoto != null) {
+            File file = new File(filePathFromUri(mSelectedUserPhoto));
+
+            User user = mDataManager.getPreferencesManager().loadUser();
+            if (user == null) user = createEmptyUser();
+            final User finalUser = user;
+
+            showProgress();
+            mDataManager.uploadUserPhoto(file).enqueue(new Callback<ImageUploadedResponse>() {
+                @Override
+                public void onResponse(Call<ImageUploadedResponse> call, Response<ImageUploadedResponse> response) {
+                    hideProgress();
+                    if (response.code() == 200) {
+                        finalUser.getPublicInfo().setPhoto(response.body().getData().getPhoto());
+                        finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
+                        mDataManager.getPreferencesManager().saveUser(finalUser);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ImageUploadedResponse> call, Throwable t) {
+                    hideProgress();
+                    showError(getString(R.string.error_upload_image), t);
                 }
             });
         }

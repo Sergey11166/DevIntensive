@@ -1,16 +1,12 @@
 package com.softdesign.devintensive.data.network.response;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 /**
  * @author Sergey Vorobyev
  */
 
+@SuppressWarnings("unused")
 public abstract class AbsResponse {
 
-    @Expose
-    @SerializedName("success")
     private boolean success;
 
     public boolean isSuccess() {
