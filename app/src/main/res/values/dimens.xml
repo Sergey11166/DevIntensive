@@ -20,8 +20,9 @@
     <dimen name="size_large_72">72dp</dimen>
     <dimen name="size_huge_112">112dp</dimen>
     <dimen name="size_line_thickness">1dp</dimen>
-    <dimen name="size_profile_photo_256">256dp</dimen>
+    <dimen name="size_profile_photo_240">240dp</dimen>
     <dimen name="size_placeholder_icon_90">90dp</dimen>
+    <dimen name="size_avatar">60dp</dimen>
     
     <!-- Spaces -->
     

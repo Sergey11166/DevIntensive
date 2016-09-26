@@ -3,9 +3,6 @@ package com.softdesign.devintensive.ui.activities;
 import android.content.ContentValues;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,8 +18,6 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -32,15 +27,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
-import com.softdesign.devintensive.ui.dialogs.ChangeProfilePhotoDialog;
+import com.softdesign.devintensive.data.network.response.ImageUploadedResponse;
+import com.softdesign.devintensive.data.network.restmodels.Contacts;
+import com.softdesign.devintensive.data.network.restmodels.PublicInfo;
+import com.softdesign.devintensive.data.network.restmodels.Repo;
+import com.softdesign.devintensive.data.network.restmodels.Repositories;
+import com.softdesign.devintensive.data.network.restmodels.User;
+import com.softdesign.devintensive.ui.dialogs.ChangeImageDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
-import com.softdesign.devintensive.ui.view.behaviors.watchers.EmailTextWatcher;
-import com.softdesign.devintensive.ui.view.behaviors.watchers.GithubTextWatcher;
-import com.softdesign.devintensive.ui.view.behaviors.watchers.PhoneTextWatcher;
-import com.softdesign.devintensive.ui.view.behaviors.watchers.VkTextWatcher;
+import com.softdesign.devintensive.ui.view.transformations.CircleTransformation;
+import com.softdesign.devintensive.ui.view.watchers.EmailTextWatcher;
+import com.softdesign.devintensive.ui.view.watchers.GithubTextWatcher;
+import com.softdesign.devintensive.ui.view.watchers.PhoneTextWatcher;
+import com.softdesign.devintensive.ui.view.watchers.VkTextWatcher;
 import com.softdesign.devintensive.utils.UIUtils;
 import com.squareup.picasso.Picasso;
 
@@ -55,6 +58,9 @@ import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -62,6 +68,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.softdesign.devintensive.utils.Constants.DIALOG_FRAGMENT_TAG;
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
+import static com.softdesign.devintensive.utils.IOUtils.filePathFromUri;
 import static com.softdesign.devintensive.utils.NavUtils.goToAppSettings;
 import static com.softdesign.devintensive.utils.NavUtils.goToCameraApp;
 import static com.softdesign.devintensive.utils.NavUtils.goToGalleryApp;
@@ -81,13 +88,21 @@ public class MainActivity extends BaseActivity {
 
     private static final String EDIT_MODE_KEY = "EDIT_MODE_KEY";
 
-    private static final int REQUEST_CODE_CAMERA = 0;
-    private static final int REQUEST_CODE_GALLERY = 1;
-    private static final int REQUEST_CODE_SETTING_CAMERA = 2;
-    private static final int REQUEST_CODE_SETTING_GALLERY = 3;
+    // Activity requests
+    private static final int REQUEST_CODE_CAMERA_AVATAR = 0;
+    private static final int REQUEST_CODE_GALLERY_AVATAR = 1;
+    private static final int REQUEST_CODE_CAMERA_USER_PHOTO = 2;
+    private static final int REQUEST_CODE_GALLERY_USER_PHOTO = 3;
+    private static final int REQUEST_CODE_SETTING_CAMERA_AVATAR = 4;
+    private static final int REQUEST_CODE_SETTING_GALLERY_AVATAR = 5;
+    private static final int REQUEST_CODE_SETTING_CAMERA_USER_PHOTO = 6;
+    private static final int REQUEST_CODE_SETTING_GALLERY_USER_PHOTO = 7;
 
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 0;
-    private static final int GALLERY_PERMISSION_REQUEST_CODE = 1;
+    // Permissions requests
+    private static final int AVATAR_CAMERA_PERMISSION_REQUEST_CODE = 0;
+    private static final int AVATAR_GALLERY_PERMISSION_REQUEST_CODE = 1;
+    private static final int USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE = 2;
+    private static final int USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE = 3;
 
     private static final ButterKnife.Action<View> EDIT_MODE_TRUE = (view, index) -> {
         view.setFocusableInTouchMode(true);
@@ -109,6 +124,10 @@ public class MainActivity extends BaseActivity {
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
     @BindView(R.id.fab) FloatingActionButton mFab;
     @BindView(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.rating) TextView mRating;
+    @BindView(R.id.code_lines) TextView mLinesCode;
+    @BindView(R.id.count_projects) TextView mCountProjects;
+    private ImageView mAvatar;
 
     @BindViews({
             R.id.phone_edit_text,
@@ -131,9 +150,10 @@ public class MainActivity extends BaseActivity {
     private DataManager mDataManager;
 
     private boolean mIsEditMode;
-    private File mPhotoFile;
-    private Uri mSelectedImage;
-    private  Point mPhotoSize;
+    private File mImageFile;
+    private Uri mSelectedUserPhoto;
+    private Uri mSelectedAvatar;
+    private Point mPhotoSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,15 +164,18 @@ public class MainActivity extends BaseActivity {
 
         mDataManager = DataManager.getInstance();
 
-        mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
-                getResources().getDimensionPixelSize(R.dimen.size_profile_photo_256));
+        if (!isAuthorized()) {
+            Intent i = new Intent(this, AuthActivity.class);
+            startActivity(i);
+            MainActivity.this.finish();
+            return;
+        }
 
         setupInfoLayouts();
         setupToolBar();
         setupDrawer();
 
-        loadInfoValues();
-        loadImageFromUriToView(mDataManager.getPreferencesManager().loadUserPhoto());
+        loadUser();
 
         if (savedInstanceState != null) {
             mIsEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY);
@@ -160,17 +183,14 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    private boolean isAuthorized() {
+        return !mDataManager.getPreferencesManager().getAuthToken().isEmpty();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == android.R.id.home) mDrawerLayout.openDrawer(GravityCompat.START);
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        saveUserInfoValue();
-        Log.d(TAG, "onPause");
     }
 
     @Override
@@ -192,6 +212,10 @@ public class MainActivity extends BaseActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:
+                if (mIsEditMode) {
+                    saveUser();
+                    uploadUserPhoto();
+                }
                 changeEditMode(!mIsEditMode);
                 break;
             case R.id.profile_placeholder_layout:
@@ -202,15 +226,15 @@ public class MainActivity extends BaseActivity {
                     openPhoneApp(this, mEditTextList.get(0).getText().toString());
                 break;
             case R.id.ic_email_right:
-                if (mTextInputLayoutList.get(1).isErrorEnabled())
+                if (!mTextInputLayoutList.get(1).isErrorEnabled())
                     sendEmail(this, mEditTextList.get(1).getText().toString());
                 break;
             case R.id.ic_vk_right:
-                if (mTextInputLayoutList.get(2).isErrorEnabled())
+                if (!mTextInputLayoutList.get(2).isErrorEnabled())
                     goToUrl(this, mEditTextList.get(2).getText().toString());
                 break;
             case R.id.ic_github_right:
-                if (mTextInputLayoutList.get(3).isErrorEnabled())
+                if (!mTextInputLayoutList.get(3).isErrorEnabled())
                     goToUrl(this, mEditTextList.get(3).getText().toString());
         }
     }
@@ -221,6 +245,7 @@ public class MainActivity extends BaseActivity {
             mDrawerLayout.closeDrawer(GravityCompat.START);
         } else if (mIsEditMode){
             changeEditMode(false);
+            loadUser();
         } else {
             super.onBackPressed();
         }
@@ -229,19 +254,35 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case REQUEST_CODE_GALLERY:
-                if (resultCode == RESULT_OK && data != null) mSelectedImage = data.getData();
-                insertProfileImage(mSelectedImage);
+            case REQUEST_CODE_GALLERY_USER_PHOTO:
+                if (resultCode == RESULT_OK && data != null) mSelectedUserPhoto = data.getData();
+                loadImageUserPhoto(mSelectedUserPhoto);
                 break;
-            case REQUEST_CODE_CAMERA:
-                if (resultCode == RESULT_OK && mPhotoFile != null) mSelectedImage = Uri.fromFile(mPhotoFile);
-                insertProfileImage(mSelectedImage);
+            case REQUEST_CODE_GALLERY_AVATAR:
+                if (resultCode == RESULT_OK && data != null) mSelectedAvatar = data.getData();
+                loadImageAvatar(mSelectedAvatar);
+                uploadAvatar();
                 break;
-            case REQUEST_CODE_SETTING_CAMERA:
-                checkAndRequestCameraPermission();
+            case REQUEST_CODE_CAMERA_USER_PHOTO:
+                if (resultCode == RESULT_OK && mImageFile != null) mSelectedUserPhoto = Uri.fromFile(mImageFile);
+                loadImageUserPhoto(mSelectedUserPhoto);
                 break;
-            case REQUEST_CODE_SETTING_GALLERY:
-                checkAndRequestGalleryPermission();
+            case REQUEST_CODE_CAMERA_AVATAR:
+                if (resultCode == RESULT_OK && mImageFile != null) mSelectedAvatar = Uri.fromFile(mImageFile);
+                loadImageAvatar(mSelectedAvatar);
+                uploadAvatar();
+                break;
+            case REQUEST_CODE_SETTING_CAMERA_USER_PHOTO:
+                checkAndRequestCameraPermission(USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE);
+                break;
+            case REQUEST_CODE_SETTING_CAMERA_AVATAR:
+                checkAndRequestCameraPermission(AVATAR_CAMERA_PERMISSION_REQUEST_CODE);
+                break;
+            case REQUEST_CODE_SETTING_GALLERY_USER_PHOTO:
+                checkAndRequestGalleryPermission(USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE);
+                break;
+            case REQUEST_CODE_SETTING_GALLERY_AVATAR:
+                checkAndRequestGalleryPermission(AVATAR_GALLERY_PERMISSION_REQUEST_CODE);
                 break;
         }
     }
@@ -249,24 +290,44 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            case CAMERA_PERMISSION_REQUEST_CODE:
+            case USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults[0] == PERMISSION_GRANTED && grantResults[1] == PERMISSION_GRANTED) {
-                    onCameraPermissionGranted();
+                    onCameraPermissionGranted(REQUEST_CODE_CAMERA_USER_PHOTO);
                 } else {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_camera_permission,
-                            (dialog, which) -> checkAndRequestCameraPermission(),
+                            (dialog, which) -> checkAndRequestCameraPermission(USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE),
                             (dialog, which) -> dialog.dismiss(),
-                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_CAMERA));
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_CAMERA_USER_PHOTO));
                 }
                 break;
-            case GALLERY_PERMISSION_REQUEST_CODE:
+            case AVATAR_CAMERA_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PERMISSION_GRANTED && grantResults[1] == PERMISSION_GRANTED) {
+                    onCameraPermissionGranted(REQUEST_CODE_CAMERA_AVATAR);
+                } else {
+                    showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_camera_permission,
+                            (dialog, which) -> checkAndRequestCameraPermission(AVATAR_CAMERA_PERMISSION_REQUEST_CODE),
+                            (dialog, which) -> dialog.dismiss(),
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_CAMERA_AVATAR));
+                }
+                break;
+            case USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE:
                 if (grantResults[0] == PERMISSION_GRANTED) {
-                    onGalleryPermissionGranted();
+                    onGalleryPermissionGranted(REQUEST_CODE_GALLERY_USER_PHOTO);
                 } else {
                     showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_gallery_permission,
-                            (dialog, which) -> checkAndRequestGalleryPermission(),
+                            (dialog, which) -> checkAndRequestGalleryPermission(USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE),
                             (dialog, which) -> dialog.dismiss(),
-                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_GALLERY));
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_GALLERY_USER_PHOTO));
+                }
+                break;
+            case AVATAR_GALLERY_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PERMISSION_GRANTED) {
+                    onGalleryPermissionGranted(REQUEST_CODE_GALLERY_AVATAR);
+                } else {
+                    showNeedGrantPermissionDialog(R.string.dialog_message_need_grant_gallery_permission,
+                            (dialog, which) -> checkAndRequestGalleryPermission(AVATAR_GALLERY_PERMISSION_REQUEST_CODE),
+                            (dialog, which) -> dialog.dismiss(),
+                            (dialog, which) -> goToAppSettings(this, REQUEST_CODE_SETTING_GALLERY_AVATAR));
                 }
                 break;
         }
@@ -304,21 +365,16 @@ public class MainActivity extends BaseActivity {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return false;
         });
-        roundAvatar(navigationView);
-    }
 
-    /**
-     * Round avatar of drawer header
-     *
-     * @param navigationView Object of {@link NavigationView}
-     */
-    private void roundAvatar(NavigationView navigationView) {
-        Resources res = getResources();
-        Bitmap srcBmp = BitmapFactory.decodeResource(res, R.drawable.avatar);
-        RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(res, srcBmp);
-        rbd.setCircular(true);
-        ImageView view = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
-        view.setImageDrawable(rbd);
+        User user = mDataManager.getPreferencesManager().loadUser();
+
+        TextView username = (TextView) navigationView.getHeaderView(0).findViewById(R.id.username);
+        TextView email = (TextView) navigationView.getHeaderView(0).findViewById(R.id.email);
+        mAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
+        mAvatar.setOnClickListener(v -> showChangeAvatarDialog());
+
+        username.setText(user.getFirstName() + " " + user.getSecondName());
+        email.setText(user.getContacts().getEmail());
     }
 
     /**
@@ -343,73 +399,123 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * Load user info from SharedPreferences
+     * Create object {@link User} with empty properties
+     * @return {@link User}
      */
-    private void loadInfoValues() {
-        List<String> data = mDataManager.getPreferencesManager().loadUserProfileData();
-        for (int i = 0; i < mEditTextList.size(); i++) mEditTextList.get(i).setText(data.get(i));
+    private User createEmptyUser() {
+        User user = new User();
+        PublicInfo publicInfo = new PublicInfo();
+        Contacts constants = new Contacts();
+        Repositories repositories = new Repositories();
+
+        user.setPublicInfo(publicInfo);
+        user.setContacts(constants);
+        user.setRepositories(repositories);
+
+        return user;
     }
 
     /**
-     * Save user info to SharedPreferences
+     * Save object {@link User} to {@link android.content.SharedPreferences}
      */
-    private void saveUserInfoValue() {
-        List<String> data = new ArrayList<>(5);
-        for (EditText view : mEditTextList) data.add(view.getText().toString());
-        mDataManager.getPreferencesManager().saveUserProfileData(data);
+    private void saveUser() {
+        User user = mDataManager.getPreferencesManager().loadUser();
+        if (user == null) user = createEmptyUser();
+
+        user.getContacts().setPhone(mEditTextList.get(0).getText().toString());
+        user.getContacts().setEmail(mEditTextList.get(1).getText().toString());
+        user.getContacts().setVk(mEditTextList.get(2).getText().toString());
+
+        List<Repo> repos = new ArrayList<>();
+        Repo repo = new Repo();
+        repo.setGit(mEditTextList.get(3).getText().toString());
+        repos.add(repo);
+        user.getRepositories().setRepo(repos);
+
+        user.getPublicInfo().setBio(mEditTextList.get(4).getText().toString());
+
+        mDataManager.getPreferencesManager().saveUser(user);
     }
 
-    private void loadPhotoFromGallery() {
-        checkAndRequestGalleryPermission();
-    }
+    /**
+     * Load object {@link User} from {@link android.content.SharedPreferences}
+     */
+    private void loadUser() {
+        User user = mDataManager.getPreferencesManager().loadUser();
+        if (user == null) return;
 
-    private void takePhotoFromCamera() {
-        checkAndRequestCameraPermission();
+        String photo = user.getPublicInfo().getPhoto();
+        mSelectedUserPhoto = (photo != null) ? Uri.parse(photo) : Uri.parse("");
+        loadImageUserPhoto(mSelectedUserPhoto);
+
+        String avatar = user.getPublicInfo().getAvatar();
+        mSelectedAvatar = (avatar != null) ? Uri.parse(avatar) : Uri.parse("");
+        loadImageAvatar(mSelectedAvatar);
+
+        int rating = user.getProfileValues().getRating();
+        int linesCode = user.getProfileValues().getLinesCode();
+        int countProjects = user.getProfileValues().getProjects();
+
+        mRating.setText(String.valueOf(rating));
+        mLinesCode.setText(String.valueOf(linesCode));
+        mCountProjects.setText(String.valueOf(countProjects));
+
+        String phone = user.getContacts().getPhone();
+        String email = user.getContacts().getEmail();
+        String vk = user.getContacts().getVk();
+        List<Repo> repos = user.getRepositories().getRepo();
+        String bio = user.getPublicInfo().getBio();
+
+        mEditTextList.get(0).setText(!phone.isEmpty() ? phone : "");
+        mEditTextList.get(1).setText(!email.isEmpty() ? email : "");
+        mEditTextList.get(2).setText(!vk.isEmpty() ? vk : "");
+        mEditTextList.get(3).setText(repos.size() > 0 ? repos.get(0).getGit() : "");
+        mEditTextList.get(4).setText(!bio.isEmpty() ? bio : "");
     }
 
     /**
      * Check if camera permissions not granted make request permissions
      */
-    private void checkAndRequestCameraPermission() {
+    private void checkAndRequestCameraPermission(int requestCode) {
         if (ContextCompat.checkSelfPermission(this, CAMERA) == PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
-            onCameraPermissionGranted();
+            onCameraPermissionGranted(requestCode);
         } else {
             ActivityCompat.requestPermissions(this, new String[] {CAMERA, WRITE_EXTERNAL_STORAGE},
-                    CAMERA_PERMISSION_REQUEST_CODE);
+                    requestCode);
         }
     }
 
     /**
      * Check if gallery permissions not granted make request permissions
      */
-    private void checkAndRequestGalleryPermission() {
+    private void checkAndRequestGalleryPermission(int requestCode) {
         if (ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
-            onGalleryPermissionGranted();
+            onGalleryPermissionGranted(requestCode);
         } else {
             ActivityCompat.requestPermissions(this, new String[] {READ_EXTERNAL_STORAGE},
-                    GALLERY_PERMISSION_REQUEST_CODE);
+                    requestCode);
         }
     }
 
     /**
      * Call when camera permissions have been granted
      */
-    private void onCameraPermissionGranted() {
+    private void onCameraPermissionGranted(int requestCode) {
         try {
-            mPhotoFile = createImageFile();
+            mImageFile = createImageFile();
         } catch (IOException e) {
-            Log.e(TAG, "Error creation file", e);
+            showError(getString(R.string.error_creation_file), e);
             UIUtils.showToast(this, getString(R.string.error_toast_creation_file));
         }
-        goToCameraApp(this, mPhotoFile, REQUEST_CODE_CAMERA);
+        goToCameraApp(this, mImageFile, requestCode);
     }
 
     /**
      * Call when gallery permissions have been granted
      */
-    private void onGalleryPermissionGranted() {
-        goToGalleryApp(this, REQUEST_CODE_GALLERY);
+    private void onGalleryPermissionGranted(int requestCode) {
+        goToGalleryApp(this, requestCode);
     }
 
     private void hideProfilePlaceHolder() {
@@ -433,17 +539,38 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * Show {@link ChangeProfilePhotoDialog}. Called when we want change profile photo
+     * Show {@link ChangeImageDialog}. Called when we want change profile photo
      */
     private void showChangeProfilePhotoDialog() {
-        ChangeProfilePhotoDialog d = new ChangeProfilePhotoDialog();
+        ChangeImageDialog d = new ChangeImageDialog();
         d.setOnClickListener((dialog, which) -> {
             switch (which) {
                 case 0:
-                    takePhotoFromCamera();
+                    checkAndRequestCameraPermission(USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE);
                     break;
                 case 1:
-                    loadPhotoFromGallery();
+                    checkAndRequestGalleryPermission(USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE);
+                    break;
+                case 2:
+                    dialog.dismiss();
+                    break;
+            }
+        });
+        d.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+    }
+
+    /**
+     * Show {@link ChangeImageDialog}. Called when we want change avatar
+     */
+    private void showChangeAvatarDialog() {
+        ChangeImageDialog d = new ChangeImageDialog();
+        d.setOnClickListener((dialog, which) -> {
+            switch (which) {
+                case 0:
+                    checkAndRequestCameraPermission(AVATAR_CAMERA_PERMISSION_REQUEST_CODE);
+                    break;
+                case 1:
+                    checkAndRequestGalleryPermission(AVATAR_GALLERY_PERMISSION_REQUEST_CODE);
                     break;
                 case 2:
                     dialog.dismiss();
@@ -494,15 +621,8 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * Load selected image to ImageView
-     *
-     * @param selectedImage {@link Uri} to selected image
+     * Setup user info fields
      */
-    private void insertProfileImage(Uri selectedImage) {
-        loadImageFromUriToView(selectedImage);
-        if (selectedImage != null) mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
-    }
-
     private void setupInfoLayouts() {
         final View.OnFocusChangeListener listener = (view, hasFocus) -> {
             if (hasFocus) {
@@ -531,7 +651,15 @@ public class MainActivity extends BaseActivity {
                 new GithubTextWatcher(mTextInputLayoutList.get(3), mEditTextList.get(3)));
     }
 
-    private void loadImageFromUriToView(Uri uri) {
+    /**
+     * Load image from server or cache or disc to {@link #mProfilePhoto} by Picasso library
+     * @param uri Object {@link Uri} of image
+     */
+    private void loadImageUserPhoto(Uri uri) {
+        if (mPhotoSize == null) {
+            mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
+                    getResources().getDimensionPixelSize(R.dimen.size_profile_photo_240));
+        }
         Picasso.with(this)
                 .load(uri)
                 .placeholder(R.drawable.user_bg)
@@ -539,5 +667,84 @@ public class MainActivity extends BaseActivity {
                 .onlyScaleDown()
                 .centerCrop()
                 .into(mProfilePhoto);
+    }
+
+    /**
+     * Load image from server or cache or disc to {@link #mAvatar} by Picasso library
+     * @param uri Object {@link Uri} of image
+     */
+    private void loadImageAvatar(Uri uri) {
+        Picasso.with(this)
+                .load(uri)
+                .placeholder(R.drawable.ic_account_circle)
+                .resizeDimen(R.dimen.size_avatar, R.dimen.size_avatar)
+                .onlyScaleDown()
+                .centerCrop()
+                .transform(new CircleTransformation())
+                .into(mAvatar);
+    }
+
+    /**
+     * Upload avatar to server
+     */
+    private void uploadAvatar() {
+        if (mSelectedAvatar != null) {
+            File file = new File(filePathFromUri(mSelectedAvatar));
+
+            User user = mDataManager.getPreferencesManager().loadUser();
+            if (user == null) user = createEmptyUser();
+            final User finalUser = user;
+
+            showProgress();
+            mDataManager.uploadAvatar(file).enqueue(new Callback<ImageUploadedResponse>() {
+                @Override
+                public void onResponse(Call<ImageUploadedResponse> call, Response<ImageUploadedResponse> response) {
+                    hideProgress();
+                    if (response.code() == 200) {
+                        finalUser.getPublicInfo().setAvatar(response.body().getData().getPhoto());
+                        finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
+                        mDataManager.getPreferencesManager().saveUser(finalUser);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ImageUploadedResponse> call, Throwable t) {
+                    hideProgress();
+                    showError(getString(R.string.error_upload_image), t);
+                }
+            });
+        }
+    }
+
+    /**
+     * Upload user photo to server
+     */
+    private void uploadUserPhoto() {
+        if (mSelectedUserPhoto != null) {
+            File file = new File(filePathFromUri(mSelectedUserPhoto));
+
+            User user = mDataManager.getPreferencesManager().loadUser();
+            if (user == null) user = createEmptyUser();
+            final User finalUser = user;
+
+            showProgress();
+            mDataManager.uploadUserPhoto(file).enqueue(new Callback<ImageUploadedResponse>() {
+                @Override
+                public void onResponse(Call<ImageUploadedResponse> call, Response<ImageUploadedResponse> response) {
+                    hideProgress();
+                    if (response.code() == 200) {
+                        finalUser.getPublicInfo().setPhoto(response.body().getData().getPhoto());
+                        finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
+                        mDataManager.getPreferencesManager().saveUser(finalUser);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ImageUploadedResponse> call, Throwable t) {
+                    hideProgress();
+                    showError(getString(R.string.error_upload_image), t);
+                }
+            });
+        }
     }
 }

@@ -1,12 +1,15 @@
 package com.softdesign.devintensive.data.managers;
 
 import android.content.SharedPreferences;
-import android.net.Uri;
 
+import com.google.gson.Gson;
+import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.utils.App;
+import com.softdesign.devintensive.utils.Constants;
 
-import java.util.ArrayList;
-import java.util.List;
+import static android.content.SharedPreferences.Editor;
+import static com.softdesign.devintensive.utils.Constants.AUTH_TOKEN_KEY;
+import static com.softdesign.devintensive.utils.Constants.USER_ID_KEY;
 
 /**
  * Class to manage {@link android.content.SharedPreferences}
@@ -16,47 +19,44 @@ import java.util.List;
 
 public class PreferencesManager {
 
-    private static final String USER_PHONE_KEY = "USER_PHONE_KEY";
-    private static final String USER_EMAIL_KEY = "USER_EMAIL_KEY";
-    private static final String USER_VK_KEY = "USER_VK_KEY";
-    private static final String USER_GIT_KEY = "USER_GIT_KEY";
-    private static final String USER_BIO_KEY = "USER_BIO_KEY";
-    private static final String USER_PHOTO_KEY = "USER_PHOTO_KEY";
-
-    private static final String[] USER_FIELDS = {
-            USER_PHONE_KEY,
-            USER_EMAIL_KEY,
-            USER_VK_KEY,
-            USER_GIT_KEY,USER_BIO_KEY
-    };
+    private static final String USER_KEY = "USER_KEY";
 
     private SharedPreferences mPreferences;
+    private Gson mGson;
 
     PreferencesManager() {
         mPreferences = App.getSharedPreferences();
+        mGson = App.getGson();
     }
 
-    public void saveUserProfileData(List<String> data) {
-        SharedPreferences.Editor editor = mPreferences.edit();
-        for (int i = 0 ; i < USER_FIELDS.length; i++) {
-            editor.putString(USER_FIELDS[i], data.get(i));
-        }
+    public void saveUser(User user) {
+        Editor editor = mPreferences.edit();
+        editor.putString(USER_KEY, mGson.toJson(user));
         editor.apply();
     }
 
-    public List<String> loadUserProfileData() {
-        List<String> data = new ArrayList<>(5);
-        for (String field : USER_FIELDS) data.add(mPreferences.getString(field, null));
-        return data;
+    public User loadUser() {
+        String json = mPreferences.getString(USER_KEY, "");
+        return mGson.fromJson(json, User.class);
     }
 
-    public void saveUserPhoto(Uri uri) {
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(USER_PHOTO_KEY, uri.toString());
+    public void saveAuthToken(String token) {
+        Editor editor = mPreferences.edit();
+        editor.putString(AUTH_TOKEN_KEY, token);
         editor.apply();
     }
 
-    public Uri loadUserPhoto() {
-        return Uri.parse(mPreferences.getString(USER_PHOTO_KEY, ""));
+    public void saveUserId(String userId) {
+        Editor editor = mPreferences.edit();
+        editor.putString(USER_ID_KEY, userId);
+        editor.apply();
+    }
+
+    public String getAuthToken() {
+        return mPreferences.getString(AUTH_TOKEN_KEY, "");
+    }
+
+    public String getUserId() {
+        return mPreferences.getString(Constants.USER_ID_KEY, "");
     }
 }

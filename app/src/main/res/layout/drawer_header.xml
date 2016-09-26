@@ -12,8 +12,8 @@
 
     <ImageView
         android:id="@+id/avatar"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="@dimen/size_avatar"
+        android:layout_height="@dimen/size_avatar"
         android:layout_marginTop="@dimen/space_normal_16"/>
 
     <LinearLayout
@@ -27,7 +27,6 @@
             android:id="@+id/username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:fontFamily="sans-serif-medium"/>
@@ -36,7 +35,6 @@
             android:id="@+id/email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/sevoro_sv_gmail_com"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:fontFamily="sans-serif"/>

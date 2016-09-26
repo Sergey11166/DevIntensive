@@ -12,4 +12,6 @@ public interface Constants {
 
     String DIALOG_FRAGMENT_TAG = "SHOW_DIALOG_FRAGMENT_TAG";
     String DIALOG_MESSAGE_KEY = "DIALOG_MESSAGE_KEY";
+    String AUTH_TOKEN_KEY = "AUTH_TOKEN_KEY";
+    String USER_ID_KEY = "USER_ID_KEY";
 }

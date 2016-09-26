@@ -8,9 +8,10 @@
     <string name="regex_pattern.link_vk">^vk.com\\/\\w{3,}$</string>
     <string name="regex_pattern.link_gitHub">^github.com\\/\\w{3,}([\\/]\\w*)*$</string>
 
-    <string name="login.hint.username">Username</string>
-    <string name="login.hint.password">Password</string>
-    <string name="login.button.log_in">Log in</string>
+    <string name="auth.hint.username">Username</string>
+    <string name="auth.hint.password">Password</string>
+    <string name="auth.button.log_in">Log in</string>
+    <string name="auth.forgot_password">Forgot password?</string>
 
     <string name="profile.placeholder">Change profile photo</string>
     <string name="profile.placeholder.load_photo_dialog.title">Change profile photo</string>
@@ -46,5 +47,10 @@
     <string name="error.edit_text.vk_wrong_format">Wrong vk format</string>
     <string name="error.edit_text.github_wrong_format">Wrong github format</string>
     <string name="error.toast.creation_file">Error creation file</string>
+    <string name="error.wrong_username_or_password">Wrong username or password</string>
+    <string name="error.unknown_error">Unknown error</string>
+    <string name="error.no_connection">No internet connection</string>
+    <string name="error.upload_image">Upload image to server</string>
+    <string name="error.creation_file">Error creation file</string>
 
 </resources>
