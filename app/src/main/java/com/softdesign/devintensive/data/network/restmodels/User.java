@@ -91,4 +91,21 @@ public class User {
     public void setUpdated(String updated) {
         this.updated = updated;
     }
+
+    /**
+     * Create object {@link User} with empty properties
+     * @return {@link User}
+     */
+    public static User createEmptyUser() {
+        User user = new User();
+        PublicInfo publicInfo = new PublicInfo();
+        Contacts constants = new Contacts();
+        Repositories repositories = new Repositories();
+
+        user.setPublicInfo(publicInfo);
+        user.setContacts(constants);
+        user.setRepositories(repositories);
+
+        return user;
+    }
 }

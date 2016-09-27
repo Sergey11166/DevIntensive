@@ -52,5 +52,7 @@
     <string name="error.no_connection">No internet connection</string>
     <string name="error.upload_image">Upload image to server</string>
     <string name="error.creation_file">Error creation file</string>
+    <string name="drawer_open">drawer open</string>
+    <string name="drawer_close">drawer close</string>
 
 </resources>

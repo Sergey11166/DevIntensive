@@ -15,6 +15,7 @@ import com.softdesign.devintensive.utils.NetworkStatusChecker;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -30,6 +31,7 @@ public class AuthActivity extends BaseActivity {
 
     @BindView(R.id.username_et) EditText mUsernameET;
     @BindView(R.id.password_et) EditText mPasswordET;
+    private Unbinder mUnbinder;
 
     private DataManager mDataManager;
 
@@ -37,9 +39,15 @@ public class AuthActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
-        ButterKnife.bind(this);
+        mUnbinder = ButterKnife.bind(this);
 
         mDataManager = DataManager.getInstance();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mUnbinder.unbind();
+        super.onDestroy();
     }
 
     @OnClick({
