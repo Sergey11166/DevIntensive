@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -60,14 +61,20 @@ public class MainActivity extends BaseActivity
     private static final String TAG = LOG_TAG_PREFIX + "MainActivity";
 
     // Activity requests
-    private static final int REQUEST_CODE_CAMERA_AVATAR = 0;
-    private static final int REQUEST_CODE_GALLERY_AVATAR = 1;
-    private static final int REQUEST_CODE_SETTING_CAMERA_AVATAR = 4;
-    private static final int REQUEST_CODE_SETTING_GALLERY_AVATAR = 5;
+    public static final int REQUEST_CODE_CAMERA_AVATAR = 0;
+    public static final int REQUEST_CODE_GALLERY_AVATAR = 1;
+    public static final int REQUEST_CODE_CAMERA_USER_PHOTO = 2;
+    public static final int REQUEST_CODE_GALLERY_USER_PHOTO = 3;
+    public static final int REQUEST_CODE_SETTING_CAMERA_AVATAR = 4;
+    public static final int REQUEST_CODE_SETTING_GALLERY_AVATAR = 5;
+    public static final int REQUEST_CODE_SETTING_CAMERA_USER_PHOTO = 6;
+    public static final int REQUEST_CODE_SETTING_GALLERY_USER_PHOTO = 7;
 
     // Permissions requests
-    private static final int AVATAR_CAMERA_PERMISSION_REQUEST_CODE = 0;
-    private static final int AVATAR_GALLERY_PERMISSION_REQUEST_CODE = 1;
+    public static final int AVATAR_CAMERA_PERMISSION_REQUEST_CODE = 0;
+    public static final int AVATAR_GALLERY_PERMISSION_REQUEST_CODE = 1;
+    public static final int USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE = 2;
+    public static final int USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE = 3;
 
     @BindView(R.id.navigation_view) NavigationView mNavigationView;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
@@ -130,6 +137,8 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         switch (requestCode) {
             case REQUEST_CODE_GALLERY_AVATAR:
                 if (resultCode == RESULT_OK && data != null) mSelectedAvatar = data.getData();
@@ -147,6 +156,10 @@ public class MainActivity extends BaseActivity
             case REQUEST_CODE_SETTING_GALLERY_AVATAR:
                 checkAndRequestGalleryPermission();
                 break;
+        }
+
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+            if (fragment != null) fragment.onActivityResult(requestCode, resultCode, data);
         }
     }
 

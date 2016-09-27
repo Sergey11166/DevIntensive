@@ -17,9 +17,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -61,8 +63,13 @@ import static android.app.Activity.RESULT_OK;
 import static android.content.DialogInterface.OnClickListener;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.softdesign.devintensive.data.network.restmodels.User.createEmptyUser;
+import static com.softdesign.devintensive.ui.activities.MainActivity.REQUEST_CODE_CAMERA_USER_PHOTO;
+import static com.softdesign.devintensive.ui.activities.MainActivity.REQUEST_CODE_GALLERY_USER_PHOTO;
+import static com.softdesign.devintensive.ui.activities.MainActivity.REQUEST_CODE_SETTING_CAMERA_USER_PHOTO;
+import static com.softdesign.devintensive.ui.activities.MainActivity.REQUEST_CODE_SETTING_GALLERY_USER_PHOTO;
+import static com.softdesign.devintensive.ui.activities.MainActivity.USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE;
+import static com.softdesign.devintensive.ui.activities.MainActivity.USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE;
 import static com.softdesign.devintensive.utils.Constants.DIALOG_FRAGMENT_TAG;
-import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 import static com.softdesign.devintensive.utils.IOUtils.filePathFromUri;
 import static com.softdesign.devintensive.utils.NavUtils.goToAppSettings;
 import static com.softdesign.devintensive.utils.NavUtils.goToCameraApp;
@@ -78,22 +85,9 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
  * @author Sergey Vorobyev.
  */
 
-public class ProfileFragment extends BaseFragment {
+public class ProfileFragment extends BaseFragment implements ActionMode.Callback {
 
     public static final String FRAGMENT_TAG = "ProfileFragment";
-    private static final String TAG = LOG_TAG_PREFIX + "ProfileFragment";
-
-    private static final String EDIT_MODE_KEY = "EDIT_MODE_KEY";
-
-    // Activity requests
-    private static final int REQUEST_CODE_CAMERA_USER_PHOTO = 2;
-    private static final int REQUEST_CODE_GALLERY_USER_PHOTO = 3;
-    private static final int REQUEST_CODE_SETTING_CAMERA_USER_PHOTO = 6;
-    private static final int REQUEST_CODE_SETTING_GALLERY_USER_PHOTO = 7;
-
-    // Permissions requests
-    private static final int USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE = 2;
-    private static final int USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE = 3;
 
     private static final ButterKnife.Action<View> EDIT_MODE_TRUE = (view, index) -> {
         view.setFocusableInTouchMode(true);
@@ -139,48 +133,49 @@ public class ProfileFragment extends BaseFragment {
 
     private DataManager mDataManager;
 
+    private ActionMode mActionMode;
+    private boolean mIsCancelChanges;
     private boolean mIsEditMode;
+
+    private boolean isChangedUserPhoto;
     private File mImageFile;
     private Uri mSelectedUserPhoto;
-    private boolean isChangedUserPhoto;
     private Point mPhotoSize;
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+
+        mDataManager = DataManager.getInstance();
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.profile_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
+        return view;
+    }
 
-        mDataManager = DataManager.getInstance();
-
-        setupInfoLayouts();
-
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.setSupportActionBar(mToolbar);
         DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         setupDrawer(activity, drawerLayout);
 
+        changeEditMode(mIsEditMode);
+        if (mIsEditMode) startActionMode();
+        setupInfoLayouts();
         loadUser();
-
-        if (savedInstanceState != null) {
-            mIsEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY);
-            changeEditMode(mIsEditMode);
-        }
-
-        return view;
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstanceState");
-        outState.putBoolean(EDIT_MODE_KEY, mIsEditMode);
     }
 
     @OnClick({
@@ -195,11 +190,14 @@ public class ProfileFragment extends BaseFragment {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:
-                if (mIsEditMode) {
-                    saveUser();
-                    uploadUserPhoto();
-                }
                 changeEditMode(!mIsEditMode);
+                if (!mIsEditMode) {
+                    mIsCancelChanges = false;
+                    mActionMode.finish();
+                } else {
+                    mIsCancelChanges = true;
+                    startActionMode();
+                }
                 break;
             case R.id.profile_placeholder_layout:
                 showChangeProfilePhotoDialog();
@@ -538,6 +536,37 @@ public class ProfileFragment extends BaseFragment {
                     showError(getString(R.string.error_upload_image), t);
                 }
             });
+        }
+    }
+
+    private void startActionMode() {
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        mActionMode = activity.startSupportActionMode(this);
+    }
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        return false;
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+        if (!mIsCancelChanges) {
+            saveUser();
+            uploadUserPhoto();
+        } else {
+            loadUser();
+            changeEditMode(false);
         }
     }
 }
