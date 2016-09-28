@@ -1,7 +1,7 @@
 package com.softdesign.devintensive.data.network.restmodels;
 
 @SuppressWarnings("unused")
-public class UsedData {
+public class AuthData {
 
     private User user;
     private String token;

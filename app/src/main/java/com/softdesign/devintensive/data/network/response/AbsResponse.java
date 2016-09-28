@@ -5,14 +5,11 @@ package com.softdesign.devintensive.data.network.response;
  */
 
 @SuppressWarnings("unused")
-public abstract class AbsResponse {
+abstract class AbsResponse {
 
     private boolean success;
 
     public boolean isSuccess() {
         return success;
-    }
-    public void setSuccess(boolean success) {
-        this.success = success;
     }
 }

@@ -9,8 +9,7 @@ import android.widget.EditText;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.request.UserLoginRequest;
-import com.softdesign.devintensive.data.network.response.UserModelResponse;
-import com.softdesign.devintensive.utils.NetworkStatusChecker;
+import com.softdesign.devintensive.data.network.response.AuthResponse;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -21,6 +20,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
+import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
@@ -79,7 +79,7 @@ public class AuthActivity extends BaseActivity {
         goToUrl(this, "https://google.com");
     }
 
-    private void loginSuccess(Response<UserModelResponse> response) {
+    private void loginSuccess(Response<AuthResponse> response) {
         mDataManager.getPreferencesManager().saveAuthToken(response.body().getData().getToken());
         mDataManager.getPreferencesManager().saveUserId(response.body().getData().getUser().getId());
         mDataManager.getPreferencesManager().saveUser(response.body().getData().getUser());
@@ -92,7 +92,7 @@ public class AuthActivity extends BaseActivity {
     }
 
     private void signIn() {
-        if (!NetworkStatusChecker.isNetworkAvailable(this)) {
+        if (!isNetworkAvailable(this)) {
             showToast(this, getString(R.string.error_no_connection));
             return;
         }
@@ -101,9 +101,9 @@ public class AuthActivity extends BaseActivity {
         request.setEmail(mUsernameET.getText().toString());
         request.setPassword(mPasswordET.getText().toString());
         showProgress();
-        mDataManager.loginUser(request).enqueue(new Callback<UserModelResponse>() {
+        mDataManager.loginUser(request).enqueue(new Callback<AuthResponse>() {
             @Override
-            public void onResponse(Call<UserModelResponse> call, Response<UserModelResponse> response) {
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 hideProgress();
                 if (response.code() == 200) {
                     loginSuccess(response);
@@ -115,7 +115,7 @@ public class AuthActivity extends BaseActivity {
             }
 
             @Override
-            public void onFailure(Call<UserModelResponse> call, Throwable t) {
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
                 hideProgress();
                 showError(getString(R.string.error_unknown_error), t);
             }

@@ -35,10 +35,10 @@ import com.softdesign.devintensive.data.network.restmodels.Repo;
 import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.ui.dialogs.ChangeImageDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
-import com.softdesign.devintensive.ui.view.watchers.EmailTextWatcher;
-import com.softdesign.devintensive.ui.view.watchers.GithubTextWatcher;
-import com.softdesign.devintensive.ui.view.watchers.PhoneTextWatcher;
-import com.softdesign.devintensive.ui.view.watchers.VkTextWatcher;
+import com.softdesign.devintensive.ui.views.watchers.EmailTextWatcher;
+import com.softdesign.devintensive.ui.views.watchers.GithubTextWatcher;
+import com.softdesign.devintensive.ui.views.watchers.PhoneTextWatcher;
+import com.softdesign.devintensive.ui.views.watchers.VkTextWatcher;
 import com.softdesign.devintensive.utils.IOUtils;
 import com.squareup.picasso.Picasso;
 
@@ -77,6 +77,7 @@ import static com.softdesign.devintensive.utils.NavUtils.goToGalleryApp;
 import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
 import static com.softdesign.devintensive.utils.NavUtils.openPhoneApp;
 import static com.softdesign.devintensive.utils.NavUtils.sendEmail;
+import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
 import static com.softdesign.devintensive.utils.UIUtils.hideSoftKeyboard;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
@@ -153,7 +154,7 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.profile_fragment, container, false);
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
         mUnbinder = ButterKnife.bind(this, view);
         return view;
     }
@@ -332,25 +333,17 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
         mSelectedUserPhoto = (photo != null) ? Uri.parse(photo) : Uri.parse("");
         loadImageUserPhoto(mSelectedUserPhoto);
 
-        int rating = user.getProfileValues().getRating();
-        int linesCode = user.getProfileValues().getLinesCode();
-        int countProjects = user.getProfileValues().getProjects();
+        mRating.setText(String.valueOf(user.getProfileValues().getRating()));
+        mLinesCode.setText(String.valueOf(user.getProfileValues().getLinesCode()));
+        mCountProjects.setText(String.valueOf(user.getProfileValues().getProjects()));
 
-        mRating.setText(String.valueOf(rating));
-        mLinesCode.setText(String.valueOf(linesCode));
-        mCountProjects.setText(String.valueOf(countProjects));
-
-        String phone = user.getContacts().getPhone();
-        String email = user.getContacts().getEmail();
-        String vk = user.getContacts().getVk();
         List<Repo> repos = user.getRepositories().getRepo();
-        String bio = user.getPublicInfo().getBio();
 
-        mEditTextList.get(0).setText(!phone.isEmpty() ? phone : "");
-        mEditTextList.get(1).setText(!email.isEmpty() ? email : "");
-        mEditTextList.get(2).setText(!vk.isEmpty() ? vk : "");
+        mEditTextList.get(0).setText(user.getContacts().getPhone());
+        mEditTextList.get(1).setText(user.getContacts().getEmail());
+        mEditTextList.get(2).setText(user.getContacts().getVk());
         mEditTextList.get(3).setText(repos.size() > 0 ? repos.get(0).getGit() : "");
-        mEditTextList.get(4).setText(!bio.isEmpty() ? bio : "");
+        mEditTextList.get(4).setText(user.getPublicInfo().getBio());
     }
 
     /**
@@ -510,6 +503,10 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
      */
     private void uploadUserPhoto() {
         if (isChangedUserPhoto && mSelectedUserPhoto != null) {
+            if (!isNetworkAvailable(getContext())) {
+                showToast(getContext(), getString(R.string.error_no_connection));
+                return;
+            }
             File file = new File(filePathFromUri(mSelectedUserPhoto));
 
             User user = mDataManager.getPreferencesManager().loadUser();

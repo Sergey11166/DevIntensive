@@ -24,7 +24,7 @@ import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.ui.dialogs.ChangeImageDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
 import com.softdesign.devintensive.ui.fragments.ProfileFragment;
-import com.softdesign.devintensive.ui.view.transformations.CircleTransformation;
+import com.softdesign.devintensive.ui.views.transformations.CircleTransformation;
 import com.softdesign.devintensive.utils.IOUtils;
 import com.squareup.picasso.Picasso;
 
@@ -49,6 +49,7 @@ import static com.softdesign.devintensive.utils.IOUtils.filePathFromUri;
 import static com.softdesign.devintensive.utils.NavUtils.goToAppSettings;
 import static com.softdesign.devintensive.utils.NavUtils.goToCameraApp;
 import static com.softdesign.devintensive.utils.NavUtils.goToGalleryApp;
+import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
@@ -337,6 +338,10 @@ public class MainActivity extends BaseActivity
      */
     private void uploadAvatar() {
         if (mSelectedAvatar != null) {
+            if (!isNetworkAvailable(this)) {
+                showToast(this, getString(R.string.error_no_connection));
+                return;
+            }
             File file = new File(filePathFromUri(mSelectedAvatar));
 
             User user = mDataManager.getPreferencesManager().loadUser();

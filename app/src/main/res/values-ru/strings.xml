@@ -17,6 +17,8 @@
     <string name="profile.hint.github">Репозитории</string>
     <string name="profile.hint.about">Обо мне</string>
 
+    <string name="user_list.button.show_more">Подробнее</string>
+
     <string name="drawer.menu.my_profile">Мой профиль</string>
     <string name="drawer.menu.my_team">Команда</string>
 

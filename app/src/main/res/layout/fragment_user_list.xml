@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/match_parent_all">
+
+    <android.support.v7.widget.RecyclerView
+        style="@style/match_parent_all"
+        android:id="@+id/recycler"
+        android:name="com.softdesign.devintensive.ui.fragments.ProfileFragment"
+        android:layout_marginStart="@dimen/space_small_8"
+        android:layout_marginEnd="@dimen/space_small_8"
+        tools:context=".ui.activity.MainActivity"
+        tools:listitem="@layout/item_user_list"
+        app:layoutManager="LinearLayoutManager">
+
+    </android.support.v7.widget.RecyclerView>
+</FrameLayout>

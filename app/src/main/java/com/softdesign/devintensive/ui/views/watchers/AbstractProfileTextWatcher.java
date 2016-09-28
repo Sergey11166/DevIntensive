@@ -1,4 +1,4 @@
-package com.softdesign.devintensive.ui.view.watchers;
+package com.softdesign.devintensive.ui.views.watchers;
 
 import android.content.res.Resources;
 import android.support.design.widget.TextInputLayout;

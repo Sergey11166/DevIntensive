@@ -8,9 +8,8 @@
                                         tools:ignore="contentDescription">
 
     <FrameLayout
-        android:id="@+id/main_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        style="@style/match_parent_all"
+        android:id="@+id/main_container"/>
 
     <android.support.design.widget.NavigationView
         style="@style/match_parent_all"
