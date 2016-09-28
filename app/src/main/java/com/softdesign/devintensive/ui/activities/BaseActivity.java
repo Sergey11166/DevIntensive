@@ -40,4 +40,10 @@ public class BaseActivity extends AppCompatActivity {
         Log.d(TAG, "Message: "+ message + "\n" + "Exception: " + t.toString());
         showToast(this, message);
     }
+
+    @Override
+    protected void onDestroy() {
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+        super.onDestroy();
+    }
 }

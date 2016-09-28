@@ -78,7 +78,6 @@ import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
 import static com.softdesign.devintensive.utils.NavUtils.openPhoneApp;
 import static com.softdesign.devintensive.utils.NavUtils.sendEmail;
 import static com.softdesign.devintensive.utils.UIUtils.hideSoftKeyboard;
-import static com.softdesign.devintensive.utils.UIUtils.showSoftKeyboard;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
@@ -468,7 +467,6 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
                     EditText input = (EditText) view;
                     if (!input.isEnabled() && !input.isFocusable()) return;
                     input.setSelection(input.getText().length());
-                    showSoftKeyboard(input);
                 }
             } else {
                 hideSoftKeyboard(view);
