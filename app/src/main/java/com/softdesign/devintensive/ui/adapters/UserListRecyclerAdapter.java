@@ -40,8 +40,8 @@ public class UserListRecyclerAdapter
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-        View convertView = LayoutInflater.from(mContext).inflate(R.layout.item_user_list, parent, false);
-        return new UserViewHolder(convertView);
+        return new UserViewHolder(LayoutInflater
+                .from(parent.getContext()).inflate(R.layout.item_user_list, parent, false));
     }
 
     @Override
@@ -49,9 +49,9 @@ public class UserListRecyclerAdapter
         User user = mData.get(position);
 
         holder.mUserName.setText(user.getFirstName() + " " + user.getSecondName());
-        holder.mRating.setText(user.getProfileValues().getRating());
-        holder.mCodeLines.setText(user.getProfileValues().getLinesCode());
-        holder.mProjects.setText(user.getProfileValues().getProjects());
+        holder.mRating.setText(String.valueOf(user.getProfileValues().getRating()));
+        holder.mCodeLines.setText(String.valueOf(user.getProfileValues().getLinesCode()));
+        holder.mProjects.setText(String.valueOf(user.getProfileValues().getProjects()));
         holder.mAbout.setText(user.getPublicInfo().getBio());
         holder.mMore.setOnClickListener(v -> mOnItemClickListener.onItemClick(mData.get(position)));
 
@@ -71,7 +71,7 @@ public class UserListRecyclerAdapter
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mData != null ? mData.size() : 0;
     }
 
     @Nullable
@@ -81,6 +81,7 @@ public class UserListRecyclerAdapter
 
     public void setData(@NonNull List<User> data) {
         mData = data;
+        notifyDataSetChanged();
     }
 
     static class UserViewHolder extends RecyclerView.ViewHolder {

@@ -24,6 +24,7 @@ import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.ui.dialogs.ChangeImageDialog;
 import com.softdesign.devintensive.ui.dialogs.NeedGrantPermissionDialog;
 import com.softdesign.devintensive.ui.fragments.ProfileFragment;
+import com.softdesign.devintensive.ui.fragments.UserListFragment;
 import com.softdesign.devintensive.ui.views.transformations.CircleTransformation;
 import com.softdesign.devintensive.utils.IOUtils;
 import com.squareup.picasso.Picasso;
@@ -93,6 +94,9 @@ public class MainActivity extends BaseActivity
         setContentView(R.layout.activity_main);
         mUnbinder = ButterKnife.bind(this);
 
+        mAvatar = (ImageView) mNavigationView.getHeaderView(0).findViewById(R.id.avatar);
+        mAvatar.setOnClickListener(v -> showChangeAvatarDialog());
+
         mDataManager = DataManager.getInstance();
 
         if (!isAuthorized()) {
@@ -101,7 +105,9 @@ public class MainActivity extends BaseActivity
             MainActivity.this.finish();
             return;
         }
-        setupNavigationView();
+        if (savedInstanceState == null) {
+            setupNavigationView();
+        }
         setupDrawer();
 
         User user = mDataManager.getPreferencesManager().loadUser();
@@ -188,6 +194,10 @@ public class MainActivity extends BaseActivity
                 }
                 break;
         }
+
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+            if (fragment != null) fragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     /**
@@ -251,8 +261,6 @@ public class MainActivity extends BaseActivity
 
         TextView username = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.username);
         TextView email = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.email);
-        mAvatar = (ImageView) mNavigationView.getHeaderView(0).findViewById(R.id.avatar);
-        mAvatar.setOnClickListener(v -> showChangeAvatarDialog());
 
         username.setText(user.getFirstName() + " " + user.getSecondName());
         email.setText(user.getContacts().getEmail());
@@ -261,21 +269,29 @@ public class MainActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         switch (id) {
             case R.id.profile_item:
-                ProfileFragment profileFragment;
-                FragmentManager fm = getSupportFragmentManager();
-                profileFragment = (ProfileFragment) fm.findFragmentByTag(ProfileFragment.FRAGMENT_TAG);
+                ProfileFragment profileFragment = (ProfileFragment) fragmentManager
+                        .findFragmentByTag(ProfileFragment.FRAGMENT_TAG);
                 if (profileFragment == null) profileFragment = new ProfileFragment();
-                fm.beginTransaction()
+                fragmentManager.beginTransaction()
                         .replace(R.id.main_container, profileFragment, ProfileFragment.FRAGMENT_TAG)
                         .commit();
                 break;
             case R.id.team_item:
+                UserListFragment userListFragment = (UserListFragment) fragmentManager
+                        .findFragmentByTag(UserListFragment.FRAGMENT_TAG);
+                if (userListFragment == null) userListFragment = new UserListFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.main_container, userListFragment, UserListFragment.FRAGMENT_TAG)
+                        .commit();
                 break;
         }
 
+        mNavigationView.setCheckedItem(id);
         mDrawerLayout.closeDrawer(GravityCompat.START);
+
         return false;
     }
 

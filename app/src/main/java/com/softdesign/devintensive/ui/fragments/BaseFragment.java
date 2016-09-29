@@ -21,6 +21,12 @@ public class BaseFragment extends Fragment {
 
     ProgressDialog mProgressDialog;
 
+    @Override
+    public void onDetach() {
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+        super.onDetach();
+    }
+
     public void showProgress() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(getActivity(), R.style.custom_progress);

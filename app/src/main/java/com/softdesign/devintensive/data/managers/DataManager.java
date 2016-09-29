@@ -51,7 +51,6 @@ public class DataManager {
     }
 
     public Call<ImageUploadedResponse> uploadUserPhoto(File file) {
-
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         String fileName = String.valueOf(System.currentTimeMillis()) + "_" + "user_photo.jpg";
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", fileName, requestFile);
@@ -60,7 +59,6 @@ public class DataManager {
     }
 
     public Call<ImageUploadedResponse> uploadAvatar(File file) {
-
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         String fileName = String.valueOf(System.currentTimeMillis()) + "_" + "avatar.jpg";
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", fileName, requestFile);

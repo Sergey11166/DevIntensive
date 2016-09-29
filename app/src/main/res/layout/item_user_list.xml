@@ -21,6 +21,7 @@
                 android:id="@+id/user_photo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:scaleType="centerCrop"
                 app:aspect_ratio="1.78"/>
             
             <TextView
@@ -55,11 +56,6 @@
             android:paddingEnd="@dimen/space_normal_16"
             android:fontFamily="sans-serif"
             android:textSize="@dimen/font_normal_14"/>
-
-        <view
-            style="@style/line.horizontal"
-            android:layout_marginTop="@dimen/space_normal_16"
-            android:layout_marginBottom="@dimen/space_small_8"/>
 
         <Button
             style="@style/Widget.AppCompat.Button.Borderless"
