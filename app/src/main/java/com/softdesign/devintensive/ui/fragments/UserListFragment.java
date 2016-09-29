@@ -71,9 +71,12 @@ public class UserListFragment extends BaseFragment implements OnItemClickListene
         setupDrawer(activity, drawerLayout);
         mToolbar.setTitle(getString(R.string.drawer_menu_my_team));
 
-        mAdapter = new UserListRecyclerAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
-        loadUsers();
+        if (mAdapter.getData() == null) {
+            loadUsers();
+        } else {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

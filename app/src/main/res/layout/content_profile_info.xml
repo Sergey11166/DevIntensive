@@ -23,7 +23,7 @@
                 style="@style/profile_text_input_layout"
                 android:id="@+id/phone_text_input_layout">
 
-                <EditText
+                <android.support.design.widget.TextInputEditText
                     style="@style/profile_edit_text"
                     android:id="@+id/phone_edit_text"
                     android:inputType="phone"
@@ -48,7 +48,7 @@
                 style="@style/profile_text_input_layout"
                 android:id="@+id/email_text_input_layout">
 
-                <EditText
+                <android.support.design.widget.TextInputEditText
                     style="@style/profile_edit_text"
                     android:id="@+id/email_edit_text"
                     android:inputType="textEmailAddress"
@@ -73,7 +73,7 @@
                 style="@style/profile_text_input_layout"
                 android:id="@+id/vk_text_input_layout">
 
-                <EditText
+                <android.support.design.widget.TextInputEditText
                     style="@style/profile_edit_text"
                     android:id="@+id/vk_edit_text"
                     android:inputType="textUri|textMultiLine"
@@ -98,7 +98,7 @@
                 style="@style/profile_text_input_layout"
                 android:id="@+id/github_text_input_layout">
 
-                <EditText
+                <android.support.design.widget.TextInputEditText
                     style="@style/profile_edit_text"
                     android:id="@+id/github_edit_text"
                     android:inputType="textMultiLine"
@@ -123,7 +123,7 @@
                 style="@style/profile_text_input_layout"
                 android:id="@+id/about_text_input_layout">
 
-                <EditText
+                <android.support.design.widget.TextInputEditText
                     style="@style/profile_edit_text"
                     android:id="@+id/about_edit_text"
                     android:inputType="textMultiLine"
