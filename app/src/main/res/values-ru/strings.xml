@@ -45,5 +45,6 @@
     <string name="error.no_connection">Нет подключения к интернету</string>
     <string name="error.upload_image">Ошибка загрузки изображения на сервер</string>
     <string name="error.creation_file">Ошибка записи файла</string>
+    <string name="user_list.hint.search">Поиск</string>
 
 </resources>

@@ -333,6 +333,7 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
         mSelectedUserPhoto = (photo != null) ? Uri.parse(photo) : Uri.parse("");
         loadImageUserPhoto(mSelectedUserPhoto);
 
+        mCollapsingToolbarLayout.setTitle(user.getFirstName() + " " + user.getSecondName());
         mRating.setText(String.valueOf(user.getProfileValues().getRating()));
         mLinesCode.setText(String.valueOf(user.getProfileValues().getLinesCode()));
         mCountProjects.setText(String.valueOf(user.getProfileValues().getProjects()));

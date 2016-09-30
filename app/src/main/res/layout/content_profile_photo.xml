@@ -4,12 +4,6 @@
        style="@style/match_parent_all"
        tools:ignore="contentDescription">
 
-    <ImageView
-        android:id="@+id/profile_photo"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/size_profile_photo_240"
-        android:scaleType="centerCrop"/>
-
     <RelativeLayout
         style="@style/match_parent_all"
         android:id="@+id/profile_placeholder_layout"
@@ -26,4 +20,10 @@
             android:id="@+id/profile_placeholder_image"
             android:src="@drawable/ic_add_a_photo_white_24px"/>
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/profile_photo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/size_profile_photo_240"
+        android:scaleType="centerCrop"/>
 </merge>

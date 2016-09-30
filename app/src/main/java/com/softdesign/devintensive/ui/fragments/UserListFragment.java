@@ -4,12 +4,17 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -37,7 +42,8 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
  * @author Sergey Vorobyev
  */
 
-public class UserListFragment extends BaseFragment implements OnItemClickListener {
+public class UserListFragment extends BaseFragment
+        implements OnItemClickListener, SearchView.OnQueryTextListener {
 
     public static final String FRAGMENT_TAG = "UserListFragment";
     public static final String PARCELABLE_USER_KEY = "PARCELABLE_USER_KEY";
@@ -53,6 +59,7 @@ public class UserListFragment extends BaseFragment implements OnItemClickListene
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        setHasOptionsMenu(true);
         mAdapter = new UserListRecyclerAdapter(this);
         mDataManager = DataManager.getInstance();
     }
@@ -76,11 +83,31 @@ public class UserListFragment extends BaseFragment implements OnItemClickListene
         mToolbar.setTitle(getString(R.string.drawer_menu_my_team));
 
         mRecyclerView.setAdapter(mAdapter);
-        if (mAdapter.getData() == null) {
+        if (mAdapter.getData().isEmpty()) {
             loadUsers();
         } else {
             mAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        getActivity().getMenuInflater().inflate(R.menu.menu_search, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(this);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        mAdapter.getFilter().filter(newText);
+        return true;
     }
 
     @Override
@@ -92,7 +119,7 @@ public class UserListFragment extends BaseFragment implements OnItemClickListene
     @Override
     public void onItemClick(int position) {
         List<User> users = mAdapter.getData();
-        if (users != null && !users.isEmpty()) {
+        if (!users.isEmpty()) {
             User user = users.get(position);
             Intent i = new Intent(getActivity(), UserDetailsActivity.class);
             i.putExtra(PARCELABLE_USER_KEY, user);
