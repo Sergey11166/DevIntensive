@@ -57,6 +57,8 @@
             android:fontFamily="sans-serif"
             android:textSize="@dimen/font_normal_14"/>
 
+        <View style="@style/line.horizontal" android:layout_marginTop="@dimen/space_small_8"/>
+
         <Button
             style="@style/Widget.AppCompat.Button.Borderless"
             android:id="@+id/button_show_more"

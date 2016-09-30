@@ -1,12 +1,50 @@
 package com.softdesign.devintensive.data.network.restmodels;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 @SuppressWarnings("unused")
-public class PublicInfo {
+public class PublicInfo implements Parcelable {
 
     private String bio;
     private String avatar;
     private String photo;
     private String updated;
+
+    public PublicInfo() {
+    }
+
+    protected PublicInfo(Parcel in) {
+        bio = in.readString();
+        avatar = in.readString();
+        photo = in.readString();
+        updated = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(bio);
+        dest.writeString(avatar);
+        dest.writeString(photo);
+        dest.writeString(updated);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<PublicInfo> CREATOR = new Creator<PublicInfo>() {
+        @Override
+        public PublicInfo createFromParcel(Parcel in) {
+            return new PublicInfo(in);
+        }
+
+        @Override
+        public PublicInfo[] newArray(int size) {
+            return new PublicInfo[size];
+        }
+    };
 
     public String getBio() {
         return bio;

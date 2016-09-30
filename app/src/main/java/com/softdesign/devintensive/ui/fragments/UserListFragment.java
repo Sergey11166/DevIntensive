@@ -1,6 +1,7 @@
 package com.softdesign.devintensive.ui.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
@@ -16,8 +17,11 @@ import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.response.UserListResponse;
 import com.softdesign.devintensive.data.network.restmodels.User;
+import com.softdesign.devintensive.ui.activities.UserDetailsActivity;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter.OnItemClickListener;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -86,11 +90,14 @@ public class UserListFragment extends BaseFragment implements OnItemClickListene
     }
 
     @Override
-    public void onItemClick(User user) {
-        //Intent i = new Intent(getActivity(), UserDetailActivity.class);
-        //Bundle bundle = new Bundle();
-        //bundle.putParcelable(PARCELABLE_USER_KEY, user);
-        //startActivity(i);
+    public void onItemClick(int position) {
+        List<User> users = mAdapter.getData();
+        if (users != null && !users.isEmpty()) {
+            User user = users.get(position);
+            Intent i = new Intent(getActivity(), UserDetailsActivity.class);
+            i.putExtra(PARCELABLE_USER_KEY, user);
+            startActivity(i);
+        }
     }
 
     private void setupDrawer(Activity activity, DrawerLayout drawerLayout) {

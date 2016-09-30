@@ -40,8 +40,8 @@ public class UserListRecyclerAdapter
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-        return new UserViewHolder(LayoutInflater
-                .from(parent.getContext()).inflate(R.layout.item_user_list, parent, false));
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_list, parent, false);
+        return new UserViewHolder(view, mOnItemClickListener);
     }
 
     @Override
@@ -53,7 +53,6 @@ public class UserListRecyclerAdapter
         holder.mCodeLines.setText(String.valueOf(user.getProfileValues().getLinesCode()));
         holder.mProjects.setText(String.valueOf(user.getProfileValues().getProjects()));
         holder.mAbout.setText(user.getPublicInfo().getBio());
-        holder.mMore.setOnClickListener(v -> mOnItemClickListener.onItemClick(mData.get(position)));
 
         if (mPhotoSize == null) {
             int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
@@ -84,7 +83,7 @@ public class UserListRecyclerAdapter
         notifyDataSetChanged();
     }
 
-    static class UserViewHolder extends RecyclerView.ViewHolder {
+    static class UserViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         @BindView(R.id.user_photo) AspectRatioImageView mUserPhoto;
         @BindView(R.id.username) TextView mUserName;
@@ -94,13 +93,23 @@ public class UserListRecyclerAdapter
         @BindView(R.id.about) TextView mAbout;
         @BindView(R.id.button_show_more) Button mMore;
 
-        UserViewHolder(View itemView) {
+        private OnItemClickListener mOnItemClickListener;
+
+        UserViewHolder(View itemView, OnItemClickListener listener) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            mOnItemClickListener = listener;
+
+            mMore.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (mOnItemClickListener != null) mOnItemClickListener.onItemClick(getAdapterPosition());
         }
     }
 
     public interface OnItemClickListener {
-        void onItemClick(User userId);
+        void onItemClick(int position);
     }
 }
