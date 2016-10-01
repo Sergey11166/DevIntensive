@@ -48,8 +48,8 @@ public class UserListRecyclerAdapter
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (mContext == null) mContext = parent.getContext();
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_list, parent, false);
-        return new UserViewHolder(view, mOnItemClickListener);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_list, parent, false);
+        return new UserViewHolder(itemView, mOnItemClickListener);
     }
 
     @Override
@@ -120,7 +120,6 @@ public class UserListRecyclerAdapter
             super(itemView);
             ButterKnife.bind(this, itemView);
             mOnItemClickListener = listener;
-
             mMore.setOnClickListener(this);
         }
 
@@ -153,10 +152,10 @@ public class UserListRecyclerAdapter
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
                 for (final User user : mAdapter.getData()) {
-                    if (user.getFirstName().toLowerCase().startsWith(filterPattern)) {
-                        mAdapter.getFilteredData().add(user);
-                    }
-                    if (user.getSecondName().toLowerCase().startsWith(filterPattern)) {
+                    String firstSecondName = user.getFirstName() + " " + user.getSecondName();
+                    String secondFirstName = user.getSecondName() + " " + user.getFirstName();
+                    if (firstSecondName.toLowerCase().startsWith(filterPattern) ||
+                            secondFirstName.toLowerCase().startsWith(filterPattern)) {
                         mAdapter.getFilteredData().add(user);
                     }
                 }

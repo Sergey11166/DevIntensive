@@ -42,18 +42,21 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
  * @author Sergey Vorobyev
  */
 
-public class UserListFragment extends BaseFragment
-        implements OnItemClickListener, SearchView.OnQueryTextListener {
+public class UserListFragment extends BaseFragment implements OnItemClickListener {
 
     public static final String FRAGMENT_TAG = "UserListFragment";
     public static final String PARCELABLE_USER_KEY = "PARCELABLE_USER_KEY";
+    private static final String SEARCH_KEY = "SEARCH_KEY";
 
     @BindView(R.id.recycler) RecyclerView mRecyclerView;
     @BindView(R.id.toolbar) Toolbar mToolbar;
-    Unbinder mUnbinder;
+    private Unbinder mUnbinder;
+    private SearchView mSearchView;
 
     private UserListRecyclerAdapter mAdapter;
     private DataManager mDataManager;
+    private String mQueryText;
+    private boolean mIsSearching;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -88,27 +91,54 @@ public class UserListFragment extends BaseFragment
         } else {
             mAdapter.notifyDataSetChanged();
         }
+
+        if (savedInstanceState != null) {
+            mQueryText = savedInstanceState.getString(SEARCH_KEY);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mQueryText = mSearchView.getQuery().toString();
+        outState.putString(SEARCH_KEY, mQueryText);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        getActivity().getMenuInflater().inflate(R.menu.menu_search, menu);
-
+        inflater.inflate(R.menu.menu_search, menu);
         MenuItem searchItem = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        searchView.setOnQueryTextListener(this);
+        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                mIsSearching = true;
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                mIsSearching = false;
+                return true;
+            }
+        });
+        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override public boolean onQueryTextSubmit(String query) {return false;}
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mAdapter.getFilter().filter(newText);
+                return true;
+            }
+        });
+
+        if (mIsSearching && mQueryText != null) {
+            searchItem.expandActionView();
+            mSearchView.setQuery(mQueryText, true);
+        }
     }
 
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
-    }
 
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        mAdapter.getFilter().filter(newText);
-        return true;
-    }
 
     @Override
     public void onDestroyView() {
@@ -118,7 +148,7 @@ public class UserListFragment extends BaseFragment
 
     @Override
     public void onItemClick(int position) {
-        List<User> users = mAdapter.getData();
+        List<User> users = mAdapter.getFilteredData();
         if (!users.isEmpty()) {
             User user = users.get(position);
             Intent i = new Intent(getActivity(), UserDetailsActivity.class);
