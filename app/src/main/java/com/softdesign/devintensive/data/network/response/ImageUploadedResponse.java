@@ -14,7 +14,4 @@ public class ImageUploadedResponse extends AbsResponse {
     public ImageData getData() {
         return data;
     }
-    public void setData(ImageData data) {
-        this.data = data;
-    }
 }

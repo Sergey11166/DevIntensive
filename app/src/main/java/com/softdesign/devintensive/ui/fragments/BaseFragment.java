@@ -1,9 +1,9 @@
-package com.softdesign.devintensive.ui.activities;
+package com.softdesign.devintensive.ui.fragments;
 
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.softdesign.devintensive.R;
@@ -15,15 +15,21 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
  * @author Sergey Vorobyev.
  */
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseFragment extends Fragment {
 
-    private static final String TAG = Constants.LOG_TAG_PREFIX + "BaseActivity";
+    private static final String TAG = Constants.LOG_TAG_PREFIX + "BaseFragment";
 
     ProgressDialog mProgressDialog;
 
+    @Override
+    public void onDetach() {
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+        super.onDetach();
+    }
+
     public void showProgress() {
         if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this, R.style.custom_progress);
+            mProgressDialog = new ProgressDialog(getActivity(), R.style.custom_progress);
             mProgressDialog.setCancelable(false);
             assert mProgressDialog.getWindow() != null;
             mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -38,12 +44,6 @@ public class BaseActivity extends AppCompatActivity {
 
     public void showError(String message, Throwable t) {
         Log.d(TAG, "Message: "+ message + "\n" + "Exception: " + t.toString());
-        showToast(this, message);
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (mProgressDialog != null) mProgressDialog.dismiss();
-        super.onDestroy();
+        showToast(getContext(), message);
     }
 }

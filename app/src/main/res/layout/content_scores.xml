@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+
+    <LinearLayout
+        style="@style/header_layout"
+        android:layout_weight="1">
+
+        <TextView
+            style="@style/header_text.number"
+            android:id="@+id/rating"/>
+
+        <TextView
+            style="@style/header_text"
+            android:text="@string/profile.scoreBox.rating"/>
+    </LinearLayout>
+
+    <View style="@style/line.vertical.main_header"/>
+
+    <LinearLayout
+        style="@style/header_layout"
+        android:layout_weight="2">
+
+        <TextView
+            style="@style/header_text.number"
+            android:id="@+id/code_lines"/>
+
+        <TextView
+            style="@style/header_text"
+            android:text="@string/profile.scoreBox.code"/>
+    </LinearLayout>
+
+    <View style="@style/line.vertical.main_header"/>
+
+    <LinearLayout
+        style="@style/header_layout"
+        android:layout_weight="1">
+
+        <TextView
+            style="@style/header_text.number"
+            android:id="@+id/count_projects"/>
+
+        <TextView
+            style="@style/header_text"
+            android:text="@string/profile.scoreBox.projects"/>
+    </LinearLayout>
+</merge>

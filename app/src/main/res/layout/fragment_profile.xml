@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 xmlns:tools="http://schemas.android.com/tools"
+                                                 style="@style/match_parent_all"
+                                                 android:id="@+id/coordinator_layout"
+                                                 tools:context=".ui.activities.MainActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            style="@style/match_parent_all"
+            android:id="@+id/collapsing_toolbar_layout"
+            app:contentScrim="@color/color_primary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <include layout="@layout/content_profile_photo"/>
+
+            <android.support.v7.widget.Toolbar
+                style="@style/toolbar"
+                android:id="@+id/toolbar"
+                app:layout_collapseMode="pin"/>
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <include layout="@layout/content_profile_scores"/>
+
+    <include layout="@layout/content_profile_info"/>
+
+    <android.support.design.widget.FloatingActionButton
+        style="@style/wrap_content_all.fab"
+        android:id="@+id/fab"
+        android:src="@drawable/ic_mode_edit_black_24dp"
+        app:layout_anchor="@id/appbar_layout"
+        app:layout_anchorGravity="bottom|right"/>
+</android.support.design.widget.CoordinatorLayout>

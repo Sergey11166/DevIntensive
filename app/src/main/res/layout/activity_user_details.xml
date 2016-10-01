@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/match_parent_all"
+    android:id="@+id/coordinator_layout"
+    tools:context=".ui.activities.MainActivity"
+    tools:ignore="contentDescription">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            style="@style/match_parent_all"
+            android:id="@+id/collapsing_toolbar_layout"
+            app:contentScrim="@color/color_primary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <ImageView
+                android:id="@+id/profile_photo"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/size_profile_photo_240"
+                android:scaleType="centerCrop"/>
+
+            <android.support.v7.widget.Toolbar
+                style="@style/toolbar"
+                android:id="@+id/toolbar"
+                app:layout_collapseMode="pin"/>
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        style="@style/match_parent_all"
+        android:id="@+id/profile_info_nested_scroll_view"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            style="@style/match_parent_all"
+            android:orientation="vertical"
+            android:layout_marginBottom="@dimen/activity_vertical_margin">
+
+            <LinearLayout
+                android:id="@+id/scores_layout"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/size_large_72"
+                android:background="@color/color_gray">
+
+                <include layout="@layout/content_scores"/>
+            </LinearLayout>
+
+            <LinearLayout style="@style/main_item_layout">
+
+                <ImageView
+                    style="@style/profile_icon.left"
+                    android:src="@drawable/ic_github_circle"/>
+
+                <com.softdesign.devintensive.ui.views.RepositoriesListView
+                    android:id="@+id/list_repositories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_medial_24"
+                    android:layout_marginTop="@dimen/space_small_8"
+                    android:layout_marginBottom="@dimen/space_small_8"
+                    android:layout_marginEnd="@dimen/space_medial_24"/>
+            </LinearLayout>
+
+            <View style="@style/line.horizontal.profile"/>
+
+            <LinearLayout style="@style/main_item_layout">
+
+                <ImageView
+                    style="@style/profile_icon.left"
+                    android:src="@drawable/ic_account_circle"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/wrap_content_all"
+                        android:textColor="@color/color_gray"
+                        android:layout_marginStart="@dimen/space_medial_24"
+                        android:layout_marginTop="@dimen/space_small_8"
+                        android:text="@string/profile.hint.about"/>
+
+                    <TextView
+                        style="@style/wrap_content_all"
+                        android:id="@+id/about"
+                        android:layout_marginTop="@dimen/space_small_8"
+                        android:layout_marginBottom="@dimen/space_small_8"
+                        android:layout_marginStart="@dimen/space_medial_24"
+                        android:layout_marginEnd="@dimen/space_medial_24"
+                        android:textColor="@android:color/black"
+                        android:fontFamily="sans-serif-condensed"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        style="@style/wrap_content_all.fab"
+        android:id="@+id/fab"
+        android:src="@drawable/ic_mode_edit_black_24dp"
+        app:layout_anchor="@id/appbar_layout"
+        app:layout_anchorGravity="bottom|right"/>
+</android.support.design.widget.CoordinatorLayout>

@@ -1,7 +1,10 @@
 package com.softdesign.devintensive.data.network.restmodels;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 @SuppressWarnings("unused")
-public class User {
+public class User implements Parcelable {
 
     private String id;
     private String firstName;
@@ -14,6 +17,55 @@ public class User {
     private String specialization;
     private String role;
     private String updated;
+
+    public User() {
+    }
+
+    protected User(Parcel in) {
+        id = in.readString();
+        firstName = in.readString();
+        secondName = in.readString();
+        v = in.readInt();
+        repositories = in.readParcelable(Repositories.class.getClassLoader());
+        contacts = in.readParcelable(Contacts.class.getClassLoader());
+        profileValues = in.readParcelable(ProfileValues.class.getClassLoader());
+        publicInfo = in.readParcelable(PublicInfo.class.getClassLoader());
+        specialization = in.readString();
+        role = in.readString();
+        updated = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(firstName);
+        dest.writeString(secondName);
+        dest.writeInt(v);
+        dest.writeParcelable(repositories, flags);
+        dest.writeParcelable(contacts, flags);
+        dest.writeParcelable(profileValues, flags);
+        dest.writeParcelable(publicInfo, flags);
+        dest.writeString(specialization);
+        dest.writeString(role);
+        dest.writeString(updated);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 
     public String getId() {
         return id;
@@ -90,5 +142,22 @@ public class User {
     }
     public void setUpdated(String updated) {
         this.updated = updated;
+    }
+
+    /**
+     * Create object {@link User} with empty properties
+     * @return {@link User}
+     */
+    public static User createEmptyUser() {
+        User user = new User();
+        PublicInfo publicInfo = new PublicInfo();
+        Contacts constants = new Contacts();
+        Repositories repositories = new Repositories();
+
+        user.setPublicInfo(publicInfo);
+        user.setContacts(constants);
+        user.setRepositories(repositories);
+
+        return user;
     }
 }

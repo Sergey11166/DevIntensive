@@ -1,4 +1,4 @@
-package com.softdesign.devintensive.ui.view.transformations;
+package com.softdesign.devintensive.ui.views.transformations;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;

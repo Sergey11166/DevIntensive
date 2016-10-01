@@ -1,14 +1,18 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorAccent">@color/color_accent</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeBackground">@android:color/transparent</item>
+        <item name="actionModeCloseDrawable">@android:color/transparent</item>
+        <item name="actionModeCloseButtonStyle">@style/Widget.AppCompat.ActionMode</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
@@ -46,7 +50,7 @@
     <style name="toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
-        <item name="android:theme">@style/AppTheme.PopupOverlay</item>
+        <item name="popupTheme">@style/AppTheme.PopupOverlay</item>
     </style>
 
     <style name="wrap_content_all.fab">

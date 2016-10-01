@@ -2,9 +2,10 @@ package com.softdesign.devintensive.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 
 import com.softdesign.devintensive.R;
 
@@ -28,6 +29,7 @@ public class NeedGrantPermissionDialog extends DialogFragment {
         return dialog;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         int message = getArguments().getInt(DIALOG_MESSAGE_KEY);

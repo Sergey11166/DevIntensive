@@ -4,7 +4,8 @@ import com.softdesign.devintensive.data.network.RestService;
 import com.softdesign.devintensive.data.network.ServiceGenerator;
 import com.softdesign.devintensive.data.network.request.UserLoginRequest;
 import com.softdesign.devintensive.data.network.response.ImageUploadedResponse;
-import com.softdesign.devintensive.data.network.response.UserModelResponse;
+import com.softdesign.devintensive.data.network.response.AuthResponse;
+import com.softdesign.devintensive.data.network.response.UserListResponse;
 import com.softdesign.devintensive.data.network.restmodels.User;
 
 import java.io.File;
@@ -41,12 +42,15 @@ public class DataManager {
         return mPreferencesManager;
     }
 
-    public Call<UserModelResponse> loginUser(UserLoginRequest request) {
+    public Call<AuthResponse> loginUser(UserLoginRequest request) {
         return mRestService.loginUser(request);
     }
 
-    public Call<ImageUploadedResponse> uploadUserPhoto(File file) {
+    public Call<UserListResponse> getUserList() {
+        return mRestService.getUserList();
+    }
 
+    public Call<ImageUploadedResponse> uploadUserPhoto(File file) {
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         String fileName = String.valueOf(System.currentTimeMillis()) + "_" + "user_photo.jpg";
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", fileName, requestFile);
@@ -55,7 +59,6 @@ public class DataManager {
     }
 
     public Call<ImageUploadedResponse> uploadAvatar(File file) {
-
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         String fileName = String.valueOf(System.currentTimeMillis()) + "_" + "avatar.jpg";
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", fileName, requestFile);
