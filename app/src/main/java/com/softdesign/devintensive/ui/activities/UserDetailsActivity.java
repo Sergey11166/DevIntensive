@@ -88,14 +88,11 @@ public class UserDetailsActivity extends BaseActivity implements AdapterView.OnI
     }
 
     private void initUI() {
+
         List<String> repos = new ArrayList<>(mUser.getRepositories().getRepo().size());
-        for(Repo repo : mUser.getRepositories().getRepo()) {
-            repos.add(repo.getGit());
-            repos.add(repo.getGit());
-            repos.add(repo.getGit());
-            repos.add(repo.getGit());
-        }
+        for(Repo repo : mUser.getRepositories().getRepo()) repos.add(repo.getGit());
         mRepositories.setAdapter(new RepositoriesAdapter(this, repos));
+
         mRepositories.setOnItemClickListener(this);
         mCollapsingToolbarLayout.setTitle(mUser.getFirstName() + " " + mUser.getSecondName());
         mRating.setText(String.valueOf(mUser.getProfileValues().getRating()));

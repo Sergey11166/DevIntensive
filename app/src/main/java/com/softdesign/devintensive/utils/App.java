@@ -5,8 +5,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.facebook.stetho.Stetho;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import org.greenrobot.greendao.AbstractDaoMaster;
+import org.greenrobot.greendao.AbstractDaoSession;
 
 public class App extends Application {
 
@@ -18,6 +22,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Stetho.initializeWithDefaults(this);
         app = this;
         sSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sGson = new GsonBuilder().create();

@@ -137,7 +137,6 @@ public class UserListFragment extends BaseFragment
     private void loadUsers() {
         if (!isNetworkAvailable(getContext())) {
             showToast(getContext(), getString(R.string.error_no_connection));
-            return;
         }
         showProgress();
         mDataManager.getUserList().enqueue(new Callback<UserListResponse>() {

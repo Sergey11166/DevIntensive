@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,15 +14,19 @@ import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.ui.views.AspectRatioImageView;
-import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Callback;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
+import static com.squareup.picasso.NetworkPolicy.OFFLINE;
 
 /**
  * @author Sergey Vorobyev
@@ -30,6 +35,8 @@ import butterknife.ButterKnife;
 public class UserListRecyclerAdapter
         extends RecyclerView.Adapter<UserListRecyclerAdapter.UserViewHolder>
         implements Filterable {
+
+    private static final String TAG = LOG_TAG_PREFIX + "UserListAdapter";
 
     private Context mContext;
     private List<User> mFilteredData;
@@ -67,13 +74,47 @@ public class UserListRecyclerAdapter
             int screenHeight = (int) (screenWidth / holder.mUserPhoto.getAspectRatio());
             mPhotoSize = new Point(screenWidth, screenHeight);
         }
-        Picasso.with(mContext)
-                .load(user.getPublicInfo().getPhoto())
+        String userPhoto = user.getPublicInfo().getPhoto();
+        if (userPhoto != null && userPhoto.isEmpty()) {
+            userPhoto = "null";
+            Log.e(TAG, "onBindViewHolder: user with name "
+                    + user.getFirstName() + " " + user.getSecondName() + " has empty name");
+        }
+        String finalUserPhoto = userPhoto;
+        DataManager.getInstance().getPicasso()
+                .load(userPhoto)
                 .placeholder(R.drawable.user_bg)
                 .resize(mPhotoSize.x, mPhotoSize.y)
                 .onlyScaleDown()
                 .centerCrop()
-                .into(holder.mUserPhoto);
+                .networkPolicy(OFFLINE)
+                .into(holder.mUserPhoto, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "user photo loaded from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(finalUserPhoto)
+                                .placeholder(R.drawable.user_bg)
+                                .resize(mPhotoSize.x, mPhotoSize.y)
+                                .onlyScaleDown()
+                                .centerCrop()
+                                .into(holder.mUserPhoto, new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "user photo loaded from server");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(TAG, "Can't load user photo from server");
+                                    }
+                                });
+                    }
+                });
     }
 
     @Override
