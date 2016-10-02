@@ -139,7 +139,7 @@ public class UserListFragment extends BaseFragment
             showToast(getContext(), getString(R.string.error_no_connection));
         }
         showProgress();
-        mDataManager.getUserList().enqueue(new Callback<UserListResponse>() {
+        mDataManager.getUserListFromNetwork().enqueue(new Callback<UserListResponse>() {
             @Override
             public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
                 hideProgress();

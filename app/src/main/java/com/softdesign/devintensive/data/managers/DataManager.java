@@ -8,6 +8,8 @@ import com.softdesign.devintensive.data.network.response.AuthResponse;
 import com.softdesign.devintensive.data.network.response.ImageUploadedResponse;
 import com.softdesign.devintensive.data.network.response.UserListResponse;
 import com.softdesign.devintensive.data.network.restmodels.User;
+import com.softdesign.devintensive.data.storage.entities.DaoSession;
+import com.softdesign.devintensive.utils.App;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -23,15 +25,16 @@ import retrofit2.Call;
 
 public class DataManager {
 
-    private static DataManager instance;
-    private Picasso mPicasso;
-
     private PreferencesManager mPreferencesManager;
+    private static DataManager instance;
     private RestService mRestService;
+    private DaoSession mDaoSession;
+    private Picasso mPicasso;
 
     private DataManager() {
         mPreferencesManager = new PreferencesManager();
         mRestService = ServiceGenerator.createService(RestService.class);
+        mDaoSession = App.getDaoSession();
         mPicasso = new PicassoCache().getPicassoInstance();
     }
 
@@ -50,11 +53,15 @@ public class DataManager {
         return mPicasso;
     }
 
+    public DaoSession getDaoSession() {
+        return mDaoSession;
+    }
+
     public Call<AuthResponse> loginUser(UserLoginRequest request) {
         return mRestService.loginUser(request);
     }
 
-    public Call<UserListResponse> getUserList() {
+    public Call<UserListResponse> getUserListFromNetwork() {
         return mRestService.getUserList();
     }
 
