@@ -111,10 +111,11 @@ public class MainActivity extends BaseActivity
         setupDrawer();
 
         User user = mDataManager.getPreferencesManager().loadUser();
-        if (user == null) return;
-        String avatar = user.getPublicInfo().getAvatar();
-        mSelectedAvatar = (avatar != null) ? Uri.parse(avatar) : Uri.parse("");
-        loadImageAvatar(mSelectedAvatar);
+        if (user != null) {
+            String avatar = user.getPublicInfo().getAvatar();
+            mSelectedAvatar = (avatar != null) ? Uri.parse(avatar) : Uri.parse("");
+            loadImageAvatar(mSelectedAvatar);
+        }
     }
 
     @Override
@@ -369,7 +370,7 @@ public class MainActivity extends BaseActivity
                 @Override
                 public void onResponse(Call<ImageUploadedResponse> call, Response<ImageUploadedResponse> response) {
                     hideProgress();
-                    if (response.code() == 200) {
+                    if (response.isSuccessful()) {
                         finalUser.getPublicInfo().setAvatar(response.body().getData().getPhoto());
                         finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
                         mDataManager.getPreferencesManager().saveUser(finalUser);

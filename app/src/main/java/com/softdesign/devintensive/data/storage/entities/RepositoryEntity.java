@@ -1,5 +1,7 @@
 package com.softdesign.devintensive.data.storage.entities;
 
+import com.softdesign.devintensive.data.network.restmodels.Repo;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.NotNull;
@@ -30,19 +32,25 @@ public class RepositoryEntity {
     private transient DaoSession daoSession;
 
     /** Used for active entity operations. */
-    @Generated(hash = 332345895)
-    private transient RepositoryDao myDao;
+    @Generated(hash = 1417481650)
+    private transient RepositoryEntityDao myDao;
 
-    @Generated(hash = 1780858433)
-    public RepositoryEntity(long id, @NotNull String remoteId, String repositoryName,
-                            String userRemoteId) {
+    public RepositoryEntity(Repo repo, String userRemoteId) {
+        remoteId = repo.getId();
+        repositoryName = repo.getGit();
+        this.userRemoteId = userRemoteId;
+    }
+
+    @Generated(hash = 1915991862)
+    public RepositoryEntity(long id, @NotNull String remoteId,
+            String repositoryName, String userRemoteId) {
         this.id = id;
         this.remoteId = remoteId;
         this.repositoryName = repositoryName;
         this.userRemoteId = userRemoteId;
     }
 
-    @Generated(hash = 984204935)
+    @Generated(hash = 1602679108)
     public RepositoryEntity() {
     }
 
@@ -115,9 +123,9 @@ public class RepositoryEntity {
     }
 
     /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 636002579)
+    @Generated(hash = 1974715418)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
-        myDao = daoSession != null ? daoSession.getRepositoryDao() : null;
+        myDao = daoSession != null ? daoSession.getRepositoryEntityDao() : null;
     }
 }

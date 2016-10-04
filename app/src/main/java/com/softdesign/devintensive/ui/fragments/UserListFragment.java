@@ -19,9 +19,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.dto.UserDTO;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.response.UserListResponse;
-import com.softdesign.devintensive.data.network.restmodels.User;
+import com.softdesign.devintensive.data.storage.entities.UserEntity;
 import com.softdesign.devintensive.ui.activities.UserDetailsActivity;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter.OnItemClickListener;
@@ -118,11 +119,11 @@ public class UserListFragment extends BaseFragment
 
     @Override
     public void onItemClick(int position) {
-        List<User> users = mAdapter.getData();
+        List<UserEntity> users = mAdapter.getData();
         if (!users.isEmpty()) {
-            User user = users.get(position);
+            UserDTO userDTO = new UserDTO(users.get(position));
             Intent i = new Intent(getActivity(), UserDetailsActivity.class);
-            i.putExtra(PARCELABLE_USER_KEY, user);
+            i.putExtra(PARCELABLE_USER_KEY, userDTO);
             startActivity(i);
         }
     }
@@ -143,8 +144,8 @@ public class UserListFragment extends BaseFragment
             @Override
             public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
                 hideProgress();
-                if (response.code() == 200) {
-                    mAdapter.setData(response.body().getData().getUsers());
+                if (response.isSuccessful()) {
+                    mAdapter.setData(response.body().getData().toUserEntityList());
                 } else {
                     showToast(getContext(), getString(R.string.error_unknown_error));
                 }

@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
-import com.softdesign.devintensive.data.network.restmodels.User;
+import com.softdesign.devintensive.data.storage.entities.UserEntity;
 import com.softdesign.devintensive.ui.views.AspectRatioImageView;
 import com.squareup.picasso.Callback;
 
@@ -39,9 +39,8 @@ public class UserListRecyclerAdapter
     private static final String TAG = LOG_TAG_PREFIX + "UserListAdapter";
 
     private Context mContext;
-    private List<User> mFilteredData;
-    private List<User> mAllData;
-    private Point mPhotoSize;
+    private List<UserEntity> mFilteredData;
+    private List<UserEntity> mAllData;
     private NameFilter mFilter;
     private OnItemClickListener mOnItemClickListener;
 
@@ -61,30 +60,24 @@ public class UserListRecyclerAdapter
 
     @Override
     public void onBindViewHolder(UserViewHolder holder, int position) {
-        User user = mFilteredData.get(position);
+        UserEntity user = mFilteredData.get(position);
 
-        holder.mUserName.setText(user.getFirstName() + " " + user.getSecondName());
-        holder.mRating.setText(String.valueOf(user.getProfileValues().getRating()));
-        holder.mCodeLines.setText(String.valueOf(user.getProfileValues().getLinesCode()));
-        holder.mProjects.setText(String.valueOf(user.getProfileValues().getProjects()));
-        holder.mAbout.setText(user.getPublicInfo().getBio());
+        holder.mUserName.setText(user.getFullName());
+        holder.mRating.setText(String.valueOf(user.getRating()));
+        holder.mCodeLines.setText(String.valueOf(user.getCountCodeLines()));
+        holder.mProjects.setText(String.valueOf(user.getCountProjects()));
+        holder.mAbout.setText(user.getBio());
 
-        if (mPhotoSize == null) {
-            int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
-            int screenHeight = (int) (screenWidth / holder.mUserPhoto.getAspectRatio());
-            mPhotoSize = new Point(screenWidth, screenHeight);
-        }
-        String userPhoto = user.getPublicInfo().getPhoto();
+        String userPhoto = user.getPhoto();
         if (userPhoto != null && userPhoto.isEmpty()) {
             userPhoto = "null";
-            Log.e(TAG, "onBindViewHolder: user with name "
-                    + user.getFirstName() + " " + user.getSecondName() + " has empty name");
+            Log.e(TAG, "onBindViewHolder: user with name " + user.getFullName() + " has empty name");
         }
         String finalUserPhoto = userPhoto;
         DataManager.getInstance().getPicasso()
                 .load(userPhoto)
                 .placeholder(R.drawable.user_bg)
-                .resize(mPhotoSize.x, mPhotoSize.y)
+                .resize(holder.mPhotoSize.x, holder.mPhotoSize.y)
                 .onlyScaleDown()
                 .centerCrop()
                 .networkPolicy(OFFLINE)
@@ -99,7 +92,7 @@ public class UserListRecyclerAdapter
                         DataManager.getInstance().getPicasso()
                                 .load(finalUserPhoto)
                                 .placeholder(R.drawable.user_bg)
-                                .resize(mPhotoSize.x, mPhotoSize.y)
+                                .resize(holder.mPhotoSize.x, holder.mPhotoSize.y)
                                 .onlyScaleDown()
                                 .centerCrop()
                                 .into(holder.mUserPhoto, new Callback() {
@@ -123,16 +116,16 @@ public class UserListRecyclerAdapter
     }
 
     @NonNull
-    public List<User> getFilteredData() {
+    public List<UserEntity> getFilteredData() {
         return mFilteredData;
     }
 
     @NonNull
-    public List<User> getData() {
+    public List<UserEntity> getData() {
         return mAllData;
     }
 
-    public void setData(@NonNull List<User> data) {
+    public void setData(@NonNull List<UserEntity> data) {
         mAllData = new ArrayList<>(data);
         mFilteredData = new ArrayList<>(data);
         notifyDataSetChanged();
@@ -156,6 +149,7 @@ public class UserListRecyclerAdapter
         @BindView(R.id.button_show_more) Button mMore;
 
         private OnItemClickListener mOnItemClickListener;
+        private Point mPhotoSize;
 
         UserViewHolder(View itemView, OnItemClickListener listener) {
             super(itemView);
@@ -163,6 +157,11 @@ public class UserListRecyclerAdapter
             mOnItemClickListener = listener;
 
             mMore.setOnClickListener(this);
+
+            int screenWidth = itemView.getResources().getDisplayMetrics().widthPixels;
+            int screenHeight = (int) (screenWidth / mUserPhoto.getAspectRatio());
+            mPhotoSize = new Point(screenWidth, screenHeight);
+
         }
 
         @Override
@@ -192,14 +191,9 @@ public class UserListRecyclerAdapter
             if (constraint.length() == 0) {
                 mAdapter.getFilteredData().addAll(mAdapter.getData());
             } else {
-                String filterPattern = constraint.toString().toLowerCase().trim();
-                for (final User user : mAdapter.getData()) {
-                    if (user.getFirstName().toLowerCase().startsWith(filterPattern)) {
-                        mAdapter.getFilteredData().add(user);
-                    }
-                    if (user.getSecondName().toLowerCase().startsWith(filterPattern)) {
-                        mAdapter.getFilteredData().add(user);
-                    }
+                String filterPattern = constraint.toString().toUpperCase().trim();
+                for (final UserEntity user : mAdapter.getData()) {
+                    if (user.getSearchName().startsWith(filterPattern)) mAdapter.getFilteredData().add(user);
                 }
             }
             results.values = mAdapter.getFilteredData();

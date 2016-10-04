@@ -14,13 +14,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
-import com.softdesign.devintensive.data.network.restmodels.Repo;
-import com.softdesign.devintensive.data.network.restmodels.User;
+import com.softdesign.devintensive.data.dto.UserDTO;
 import com.softdesign.devintensive.ui.adapters.RepositoriesAdapter;
 import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,7 +41,7 @@ public class UserDetailsActivity extends BaseActivity implements AdapterView.OnI
     @BindView(R.id.list_repositories) ListView mRepositories;
     private Unbinder mUnbinder;
 
-    private User mUser;
+    private UserDTO mUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,7 +72,7 @@ public class UserDetailsActivity extends BaseActivity implements AdapterView.OnI
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        goToUrl(this, mUser.getRepositories().getRepo().get(0).getGit());
+        goToUrl(this, mUser.getRepos().get(position));
     }
 
     private void setupToolbar() {
@@ -89,21 +85,18 @@ public class UserDetailsActivity extends BaseActivity implements AdapterView.OnI
 
     private void initUI() {
 
-        List<String> repos = new ArrayList<>(mUser.getRepositories().getRepo().size());
-        for(Repo repo : mUser.getRepositories().getRepo()) repos.add(repo.getGit());
-        mRepositories.setAdapter(new RepositoriesAdapter(this, repos));
-
+        mRepositories.setAdapter(new RepositoriesAdapter(this, mUser.getRepos()));
         mRepositories.setOnItemClickListener(this);
-        mCollapsingToolbarLayout.setTitle(mUser.getFirstName() + " " + mUser.getSecondName());
-        mRating.setText(String.valueOf(mUser.getProfileValues().getRating()));
-        mCodeLines.setText(String.valueOf(mUser.getProfileValues().getLinesCode()));
-        mProjects.setText(String.valueOf(mUser.getProfileValues().getProjects()));
-        mAbout.setText(String.valueOf(mUser.getPublicInfo().getBio()));
+        mCollapsingToolbarLayout.setTitle(mUser.getFullName());
+        mRating.setText(String.valueOf(mUser.getRating()));
+        mCodeLines.setText(String.valueOf(mUser.getCountCodeLines()));
+        mProjects.setText(String.valueOf(mUser.getCountProjects()));
+        mAbout.setText(String.valueOf(mUser.getBio()));
 
         Point photoSize = new Point(getResources().getDisplayMetrics().widthPixels,
                     getResources().getDimensionPixelSize(R.dimen.size_profile_photo_240));
         Picasso.with(this)
-                .load(mUser.getPublicInfo().getPhoto())
+                .load(mUser.getPhoto())
                 .placeholder(R.drawable.user_bg)
                 .resize(photoSize.x, photoSize.y)
                 .onlyScaleDown()

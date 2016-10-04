@@ -1,5 +1,8 @@
 package com.softdesign.devintensive.data.storage.entities;
 
+import com.softdesign.devintensive.data.network.restmodels.Repo;
+import com.softdesign.devintensive.data.network.restmodels.User;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.JoinProperty;
@@ -7,6 +10,7 @@ import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.Unique;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
@@ -36,9 +40,9 @@ public class UserEntity {
 
     private int rating;
 
-    private int codeLines;
+    private int countCodeLines;
 
-    private int projects;
+    private int countProjects;
 
     private String bio;
 
@@ -50,24 +54,37 @@ public class UserEntity {
     private transient DaoSession daoSession;
 
     /** Used for active entity operations. */
-    @Generated(hash = 1507654846)
-    private transient UserDao myDao;
+    @Generated(hash = 1814575071)
+    private transient UserEntityDao myDao;
 
-    @Generated(hash = 1306243543)
+    public UserEntity(User user) {
+        remoteId = user.getId();
+        photo = user.getPublicInfo().getPhoto();
+        fullName = user.getFirstName() + " " + user.getSecondName();
+        searchName = fullName.toUpperCase();
+        rating = user.getProfileValues().getRating();
+        countCodeLines = user.getProfileValues().getLinesCode();
+        countProjects = user.getProfileValues().getProjects();
+        bio = user.getPublicInfo().getBio();
+        repositories = new ArrayList<>(user.getRepositories().getRepo().size()) ;
+        for (Repo r: user.getRepositories().getRepo()) repositories.add(new RepositoryEntity(r, remoteId));
+    }
+
+    @Generated(hash = 726522695)
     public UserEntity(long id, @NotNull String remoteId, String photo, @NotNull String fullName,
-                      @NotNull String searchName, int rating, int codeLines, int projects, String bio) {
+            @NotNull String searchName, int rating, int countCodeLines, int countProjects, String bio) {
         this.id = id;
         this.remoteId = remoteId;
         this.photo = photo;
         this.fullName = fullName;
         this.searchName = searchName;
         this.rating = rating;
-        this.codeLines = codeLines;
-        this.projects = projects;
+        this.countCodeLines = countCodeLines;
+        this.countProjects = countProjects;
         this.bio = bio;
     }
 
-    @Generated(hash = 586692638)
+    @Generated(hash = 1433178141)
     public UserEntity() {
     }
 
@@ -119,20 +136,20 @@ public class UserEntity {
         this.rating = rating;
     }
 
-    public int getCodeLines() {
-        return this.codeLines;
+    public int getCountCodeLines() {
+        return this.countCodeLines;
     }
 
-    public void setCodeLines(int codeLines) {
-        this.codeLines = codeLines;
+    public void setCountCodeLines(int countCodeLines) {
+        this.countCodeLines = countCodeLines;
     }
 
-    public int getProjects() {
-        return this.projects;
+    public int getCountProjects() {
+        return this.countProjects;
     }
 
-    public void setProjects(int projects) {
-        this.projects = projects;
+    public void setCountProjects(int countProjects) {
+        this.countProjects = countProjects;
     }
 
     public String getBio() {
@@ -147,15 +164,15 @@ public class UserEntity {
      * To-many relationship, resolved on first access (and after reset).
      * Changes to to-many relations are not persisted, make changes to the target entity.
      */
-    @Generated(hash = 1643807649)
+    @Generated(hash = 1664108813)
     public List<RepositoryEntity> getRepositories() {
         if (repositories == null) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
                 throw new DaoException("Entity is detached from DAO context");
             }
-            RepositoryDao targetDao = daoSession.getRepositoryDao();
-            List<RepositoryEntity> repositoriesNew = targetDao._queryUser_Repositories(remoteId);
+            RepositoryEntityDao targetDao = daoSession.getRepositoryEntityDao();
+            List<RepositoryEntity> repositoriesNew = targetDao._queryUserEntity_Repositories(remoteId);
             synchronized (this) {
                 if (repositories == null) {
                     repositories = repositoriesNew;
@@ -208,9 +225,9 @@ public class UserEntity {
     }
 
     /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 2059241980)
+    @Generated(hash = 287999134)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
-        myDao = daoSession != null ? daoSession.getUserDao() : null;
+        myDao = daoSession != null ? daoSession.getUserEntityDao() : null;
     }
 }
