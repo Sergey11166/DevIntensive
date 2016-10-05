@@ -9,10 +9,13 @@ import com.softdesign.devintensive.data.network.response.ImageUploadedResponse;
 import com.softdesign.devintensive.data.network.response.UserListResponse;
 import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.data.storage.entities.DaoSession;
+import com.softdesign.devintensive.data.storage.entities.UserEntity;
 import com.softdesign.devintensive.utils.App;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -63,6 +66,10 @@ public class DataManager {
 
     public Call<UserListResponse> getUserListFromNetwork() {
         return mRestService.getUserList();
+    }
+
+    public List<UserEntity> getUserListFromDb() {
+        return new ArrayList<>();
     }
 
     public Call<ImageUploadedResponse> uploadUserPhoto(File file) {

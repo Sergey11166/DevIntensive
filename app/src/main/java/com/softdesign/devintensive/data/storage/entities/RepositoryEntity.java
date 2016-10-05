@@ -17,7 +17,7 @@ import org.greenrobot.greendao.DaoException;
 public class RepositoryEntity {
 
     @Id
-    private long id;
+    private Long id;
 
     @NotNull
     @Unique
@@ -41,8 +41,8 @@ public class RepositoryEntity {
         this.userRemoteId = userRemoteId;
     }
 
-    @Generated(hash = 1915991862)
-    public RepositoryEntity(long id, @NotNull String remoteId,
+    @Generated(hash = 380741033)
+    public RepositoryEntity(Long id, @NotNull String remoteId,
             String repositoryName, String userRemoteId) {
         this.id = id;
         this.remoteId = remoteId;
@@ -54,11 +54,11 @@ public class RepositoryEntity {
     public RepositoryEntity() {
     }
 
-    public long getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

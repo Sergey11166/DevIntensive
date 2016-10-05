@@ -1,6 +1,5 @@
 package com.softdesign.devintensive.data.storage.entities;
 
-import com.softdesign.devintensive.data.network.restmodels.Repo;
 import com.softdesign.devintensive.data.network.restmodels.User;
 
 import org.greenrobot.greendao.annotation.Entity;
@@ -10,7 +9,6 @@ import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.Unique;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
@@ -22,7 +20,7 @@ import org.greenrobot.greendao.DaoException;
 public class UserEntity {
 
     @Id
-    private long id;
+    private Long id;
 
     @NotNull
     @Unique
@@ -66,12 +64,12 @@ public class UserEntity {
         countCodeLines = user.getProfileValues().getLinesCode();
         countProjects = user.getProfileValues().getProjects();
         bio = user.getPublicInfo().getBio();
-        repositories = new ArrayList<>(user.getRepositories().getRepo().size()) ;
-        for (Repo r: user.getRepositories().getRepo()) repositories.add(new RepositoryEntity(r, remoteId));
+        //repositories = new ArrayList<>(user.getRepositories().getRepo().size()) ;
+        //for (Repo r: user.getRepositories().getRepo()) repositories.add(new RepositoryEntity(r, remoteId));
     }
 
-    @Generated(hash = 726522695)
-    public UserEntity(long id, @NotNull String remoteId, String photo, @NotNull String fullName,
+    @Generated(hash = 747569558)
+    public UserEntity(Long id, @NotNull String remoteId, String photo, @NotNull String fullName,
             @NotNull String searchName, int rating, int countCodeLines, int countProjects, String bio) {
         this.id = id;
         this.remoteId = remoteId;
@@ -88,11 +86,11 @@ public class UserEntity {
     public UserEntity() {
     }
 
-    public long getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

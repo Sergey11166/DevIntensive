@@ -22,11 +22,17 @@ import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.dto.UserDTO;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.response.UserListResponse;
+import com.softdesign.devintensive.data.network.restmodels.Repo;
+import com.softdesign.devintensive.data.network.restmodels.User;
+import com.softdesign.devintensive.data.storage.entities.RepositoryEntity;
+import com.softdesign.devintensive.data.storage.entities.RepositoryEntityDao;
 import com.softdesign.devintensive.data.storage.entities.UserEntity;
+import com.softdesign.devintensive.data.storage.entities.UserEntityDao;
 import com.softdesign.devintensive.ui.activities.UserDetailsActivity;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter.OnItemClickListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -55,6 +61,8 @@ public class UserListFragment extends BaseFragment
 
     private UserListRecyclerAdapter mAdapter;
     private DataManager mDataManager;
+    private UserEntityDao mUserEntityDao;
+    private RepositoryEntityDao mRepositoryEntityDao;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,6 +71,8 @@ public class UserListFragment extends BaseFragment
         setHasOptionsMenu(true);
         mAdapter = new UserListRecyclerAdapter(this);
         mDataManager = DataManager.getInstance();
+        mUserEntityDao = mDataManager.getDaoSession().getUserEntityDao();
+        mRepositoryEntityDao = mDataManager.getDaoSession().getRepositoryEntityDao();
     }
 
     @Nullable
@@ -85,7 +95,7 @@ public class UserListFragment extends BaseFragment
 
         mRecyclerView.setAdapter(mAdapter);
         if (mAdapter.getData().isEmpty()) {
-            loadUsers();
+            loadUsersFromServer();
         } else {
             mAdapter.notifyDataSetChanged();
         }
@@ -135,9 +145,10 @@ public class UserListFragment extends BaseFragment
         toggle.syncState();
     }
 
-    private void loadUsers() {
+    private void loadUsersFromServer() {
         if (!isNetworkAvailable(getContext())) {
             showToast(getContext(), getString(R.string.error_no_connection));
+            return;
         }
         showProgress();
         mDataManager.getUserListFromNetwork().enqueue(new Callback<UserListResponse>() {
@@ -145,7 +156,20 @@ public class UserListFragment extends BaseFragment
             public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
                 hideProgress();
                 if (response.isSuccessful()) {
-                    mAdapter.setData(response.body().getData().toUserEntityList());
+                    List<User> userListResponse = response.body().getData().getUsers();
+                    List<UserEntity> allUsers = new ArrayList<>(userListResponse.size());
+                    List<RepositoryEntity> allRepositories = new ArrayList<>(userListResponse.size());
+
+                    for (User user : userListResponse) {
+                        List<RepositoryEntity> repos = new ArrayList<>(user.getRepositories().getRepo().size());
+                        for (Repo r: user.getRepositories().getRepo()) repos.add(new RepositoryEntity(r, user.getId()));
+                        allRepositories.addAll(repos);
+                        allUsers.add(new UserEntity(user));
+                    }
+
+                    mAdapter.setData(allUsers);
+                    mRepositoryEntityDao.insertOrReplaceInTx(allRepositories);
+                    mUserEntityDao.insertOrReplaceInTx(allUsers);
                 } else {
                     showToast(getContext(), getString(R.string.error_unknown_error));
                 }

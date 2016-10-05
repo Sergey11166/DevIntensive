@@ -14,12 +14,6 @@ public class UserListData {
 
     private List<User> users;
 
-    public List<UserEntity> toUserEntityList() {
-        List<UserEntity> result = new ArrayList<>(users.size());
-        for (User user: users) result.add(new UserEntity(user));
-        return result;
-    }
-
     public List<User> getUsers() {
         return users;
     }
