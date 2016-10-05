@@ -15,6 +15,7 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
  * @author Sergey Vorobyev.
  */
 
+@SuppressWarnings("unused")
 public class NavUtils {
 
     /**

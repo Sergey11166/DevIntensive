@@ -17,6 +17,7 @@ import java.util.Locale;
  * @author Sergey Vorobyev
  */
 
+@SuppressWarnings("unused")
 public class IOUtils {
 
     public static String filePathFromUri(@NonNull Uri uri) {

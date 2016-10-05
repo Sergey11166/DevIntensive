@@ -56,5 +56,6 @@
     <string name="drawer_close">drawer close</string>
     <string name="user_list.button.show_more">Show more</string>
     <string name="user_list.hint.search">Search</string>
+    <string name="user_list.hint.tape_user_name">Tape username</string>
 
 </resources>

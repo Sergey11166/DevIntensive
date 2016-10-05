@@ -3,8 +3,12 @@ package com.softdesign.devintensive.ui.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.MenuItemCompat.OnActionExpandListener;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -20,14 +24,13 @@ import android.view.ViewGroup;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.dto.UserDTO;
+import com.softdesign.devintensive.data.loaders.GetAllUsersFromDbLoader;
+import com.softdesign.devintensive.data.loaders.SaveUserEntityListLoader;
+import com.softdesign.devintensive.data.loaders.SearchUsersByNameFromDbLoader;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.response.UserListResponse;
-import com.softdesign.devintensive.data.network.restmodels.Repo;
 import com.softdesign.devintensive.data.network.restmodels.User;
-import com.softdesign.devintensive.data.storage.entities.RepositoryEntity;
-import com.softdesign.devintensive.data.storage.entities.RepositoryEntityDao;
 import com.softdesign.devintensive.data.storage.entities.UserEntity;
-import com.softdesign.devintensive.data.storage.entities.UserEntityDao;
 import com.softdesign.devintensive.ui.activities.UserDetailsActivity;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter.OnItemClickListener;
@@ -42,6 +45,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.softdesign.devintensive.utils.AppConfig.SEARCH_DELAY;
 import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
@@ -50,19 +54,27 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
  */
 
 public class UserListFragment extends BaseFragment
-        implements OnItemClickListener, SearchView.OnQueryTextListener {
+        implements OnItemClickListener, LoaderCallbacks<List<UserEntity>> {
 
     public static final String FRAGMENT_TAG = "UserListFragment";
     public static final String PARCELABLE_USER_KEY = "PARCELABLE_USER_KEY";
+    private static final String SEARCH_KEY = "SEARCH_KEY";
+
 
     @BindView(R.id.recycler) RecyclerView mRecyclerView;
     @BindView(R.id.toolbar) Toolbar mToolbar;
     Unbinder mUnbinder;
+    private SearchView mSearchView;
+
 
     private UserListRecyclerAdapter mAdapter;
     private DataManager mDataManager;
-    private UserEntityDao mUserEntityDao;
-    private RepositoryEntityDao mRepositoryEntityDao;
+    private String mSavedQuery;
+    private String mLastQuery;
+    private boolean mIsSearching;
+    private Handler mHandler;
+    private Runnable searchRunnable;
+    private List<UserEntity> mLastUserEntityListFromServer;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,8 +83,8 @@ public class UserListFragment extends BaseFragment
         setHasOptionsMenu(true);
         mAdapter = new UserListRecyclerAdapter(this);
         mDataManager = DataManager.getInstance();
-        mUserEntityDao = mDataManager.getDaoSession().getUserEntityDao();
-        mRepositoryEntityDao = mDataManager.getDaoSession().getRepositoryEntityDao();
+        searchRunnable = () -> initLoader(R.id.loader_search_users_by_name_from_db);
+        mHandler = new Handler();
     }
 
     @Nullable
@@ -95,30 +107,57 @@ public class UserListFragment extends BaseFragment
 
         mRecyclerView.setAdapter(mAdapter);
         if (mAdapter.getData().isEmpty()) {
-            loadUsersFromServer();
+            loadAllUsersFromDb();
         } else {
             mAdapter.notifyDataSetChanged();
+        }
+
+        if (savedInstanceState != null) {
+            mSavedQuery = savedInstanceState.getString(SEARCH_KEY);
         }
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mSavedQuery = mSearchView.getQuery().toString();
+        outState.putString(SEARCH_KEY, mSavedQuery);
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        getActivity().getMenuInflater().inflate(R.menu.menu_search, menu);
+        inflater.inflate(R.menu.menu_search, menu);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        searchView.setOnQueryTextListener(this);
-    }
+        MenuItemCompat.setOnActionExpandListener(searchItem, new OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                mIsSearching = true;
+                return true;
+            }
 
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
-    }
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                mIsSearching = false;
+                return true;
+            }
+        });
+        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        mSearchView.setQueryHint(getString(R.string.user_list_hint_tape_user_name));
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override public boolean onQueryTextSubmit(String query) {return false;}
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mLastQuery = newText;
+                searchUsersByNameFromDb();
+                return true;
+            }
+        });
 
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        mAdapter.getFilter().filter(newText);
-        return true;
+        if (mIsSearching && mSavedQuery != null) {
+            searchItem.expandActionView();
+            mSearchView.setQuery(mSavedQuery, true);
+        }
     }
 
     @Override
@@ -145,7 +184,28 @@ public class UserListFragment extends BaseFragment
         toggle.syncState();
     }
 
-    private void loadUsersFromServer() {
+    private void showUsers(List<UserEntity> users) {
+        mAdapter.setData(users);
+    }
+
+    private void loadAllUsersFromDb() {
+        if (mIsSearching) {
+            initLoader(R.id.loader_search_users_by_name_from_db);
+        } else {
+            initLoader(R.id.loader_all_users_from_db);
+        }
+    }
+
+    private void searchUsersByNameFromDb() {
+        mHandler.removeCallbacks(searchRunnable);
+        mHandler.postDelayed(searchRunnable, mLastQuery.isEmpty() ? 0 : SEARCH_DELAY);
+    }
+
+    private void saveUsersToDb() {
+        initLoader(R.id.loader_save_users_to_db);
+    }
+
+    private void loadAllUsersFromServer() {
         if (!isNetworkAvailable(getContext())) {
             showToast(getContext(), getString(R.string.error_no_connection));
             return;
@@ -156,20 +216,15 @@ public class UserListFragment extends BaseFragment
             public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
                 hideProgress();
                 if (response.isSuccessful()) {
-                    List<User> userListResponse = response.body().getData().getUsers();
-                    List<UserEntity> allUsers = new ArrayList<>(userListResponse.size());
-                    List<RepositoryEntity> allRepositories = new ArrayList<>(userListResponse.size());
 
+                    List<User> userListResponse = response.body().getData().getUsers();
+                    mLastUserEntityListFromServer = new ArrayList<>(userListResponse.size());
                     for (User user : userListResponse) {
-                        List<RepositoryEntity> repos = new ArrayList<>(user.getRepositories().getRepo().size());
-                        for (Repo r: user.getRepositories().getRepo()) repos.add(new RepositoryEntity(r, user.getId()));
-                        allRepositories.addAll(repos);
-                        allUsers.add(new UserEntity(user));
+                        UserEntity userEntity = new UserEntity(user);
+                        mLastUserEntityListFromServer.add(userEntity);
                     }
 
-                    mAdapter.setData(allUsers);
-                    mRepositoryEntityDao.insertOrReplaceInTx(allRepositories);
-                    mUserEntityDao.insertOrReplaceInTx(allUsers);
+                    saveUsersToDb();
                 } else {
                     showToast(getContext(), getString(R.string.error_unknown_error));
                 }
@@ -181,5 +236,45 @@ public class UserListFragment extends BaseFragment
                 showError(getString(R.string.error_unknown_error), t);
             }
         });
+    }
+
+    @Override
+    public Loader<List<UserEntity>> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case R.id.loader_all_users_from_db:
+                return new GetAllUsersFromDbLoader(getActivity());
+            case R.id.loader_search_users_by_name_from_db:
+                return new SearchUsersByNameFromDbLoader(getActivity(), mLastQuery);
+            case R.id.loader_save_users_to_db:
+                return new SaveUserEntityListLoader(getActivity(), mLastUserEntityListFromServer);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<UserEntity>> loader, List<UserEntity> data) {
+        switch (loader.getId()) {
+            case R.id.loader_all_users_from_db:
+                if (!data.isEmpty()) {
+                    showUsers(data);
+                } else {
+                    loadAllUsersFromServer();
+                }
+                break;
+            case R.id.loader_search_users_by_name_from_db:
+                showUsers(data);
+                break;
+            case R.id.loader_save_users_to_db:
+                showUsers(data);
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<UserEntity>> loader) {}
+
+    private void initLoader(int id) {
+        getActivity().getSupportLoaderManager().restartLoader(id, Bundle.EMPTY, this).forceLoad();
     }
 }

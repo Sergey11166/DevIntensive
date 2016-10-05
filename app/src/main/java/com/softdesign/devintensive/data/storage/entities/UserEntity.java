@@ -1,5 +1,6 @@
 package com.softdesign.devintensive.data.storage.entities;
 
+import com.softdesign.devintensive.data.network.restmodels.Repo;
 import com.softdesign.devintensive.data.network.restmodels.User;
 
 import org.greenrobot.greendao.annotation.Entity;
@@ -9,6 +10,7 @@ import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.Unique;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
@@ -64,8 +66,8 @@ public class UserEntity {
         countCodeLines = user.getProfileValues().getLinesCode();
         countProjects = user.getProfileValues().getProjects();
         bio = user.getPublicInfo().getBio();
-        //repositories = new ArrayList<>(user.getRepositories().getRepo().size()) ;
-        //for (Repo r: user.getRepositories().getRepo()) repositories.add(new RepositoryEntity(r, remoteId));
+        repositories = new ArrayList<>(user.getRepositories().getRepo().size()) ;
+        for (Repo r: user.getRepositories().getRepo()) repositories.add(new RepositoryEntity(r, remoteId));
     }
 
     @Generated(hash = 747569558)

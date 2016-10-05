@@ -22,6 +22,10 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 
+import static com.softdesign.devintensive.data.storage.entities.UserEntityDao.Properties.CountCodeLines;
+import static com.softdesign.devintensive.data.storage.entities.UserEntityDao.Properties.Rating;
+import static com.softdesign.devintensive.data.storage.entities.UserEntityDao.Properties.SearchName;
+
 /**
  * @author Sergey Vorobyev
  */
@@ -68,8 +72,28 @@ public class DataManager {
         return mRestService.getUserList();
     }
 
-    public List<UserEntity> getUserListFromDb() {
-        return new ArrayList<>();
+    public List<UserEntity> getAllUserListFromDb() {
+        List<UserEntity> result = new ArrayList<>();
+        try {
+            result = mDaoSession.queryBuilder(UserEntity.class)
+                    .where(CountCodeLines.gt(0))
+                    .orderDesc(CountCodeLines)
+                    .build()
+                    .list();
+        } catch (Exception ignored) {}
+        return result;
+    }
+
+    public List<UserEntity> getUserListByNameFromDb(String query) {
+        List<UserEntity> result = new ArrayList<>();
+        try {
+            result = mDaoSession.queryBuilder(UserEntity.class)
+                    .where(Rating.gt(0), SearchName.like("%" + query.toUpperCase() + "%"))
+                    .orderDesc(CountCodeLines)
+                    .build()
+                    .list();
+        } catch (Exception ignore){}
+        return result;
     }
 
     public Call<ImageUploadedResponse> uploadUserPhoto(File file) {

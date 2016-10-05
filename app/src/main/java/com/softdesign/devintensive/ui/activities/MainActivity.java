@@ -27,7 +27,6 @@ import com.softdesign.devintensive.ui.fragments.ProfileFragment;
 import com.softdesign.devintensive.ui.fragments.UserListFragment;
 import com.softdesign.devintensive.ui.views.transformations.CircleTransformation;
 import com.softdesign.devintensive.utils.IOUtils;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +51,7 @@ import static com.softdesign.devintensive.utils.NavUtils.goToCameraApp;
 import static com.softdesign.devintensive.utils.NavUtils.goToGalleryApp;
 import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
+import static com.squareup.picasso.NetworkPolicy.OFFLINE;
 
 /**
  * @author Sergey Vorobyev
@@ -340,14 +340,43 @@ public class MainActivity extends BaseActivity
      * @param uri Object {@link Uri} of image
      */
     private void loadImageAvatar(Uri uri) {
-        Picasso.with(this)
+
+        DataManager.getInstance().getPicasso()
                 .load(uri)
-                .placeholder(R.drawable.ic_account_circle)
+                .placeholder(R.drawable.user_bg)
                 .resizeDimen(R.dimen.size_avatar, R.dimen.size_avatar)
                 .onlyScaleDown()
                 .centerCrop()
                 .transform(new CircleTransformation())
-                .into(mAvatar);
+                .networkPolicy(OFFLINE)
+                .into(mAvatar, new com.squareup.picasso.Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "avatar loaded from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(uri)
+                                .placeholder(R.drawable.user_bg)
+                                .resizeDimen(R.dimen.size_avatar, R.dimen.size_avatar)
+                                .onlyScaleDown()
+                                .centerCrop()
+                                .transform(new CircleTransformation())
+                                .into(mAvatar, new com.squareup.picasso.Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "avatar loaded from server");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(TAG, "Can't load avatar from server");
+                                    }
+                                });
+                    }
+                });
     }
 
     /**

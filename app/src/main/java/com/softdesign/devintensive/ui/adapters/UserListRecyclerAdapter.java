@@ -4,13 +4,12 @@ import android.content.Context;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.Adapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
@@ -32,23 +31,17 @@ import static com.squareup.picasso.NetworkPolicy.OFFLINE;
  * @author Sergey Vorobyev
  */
 
-public class UserListRecyclerAdapter
-        extends RecyclerView.Adapter<UserListRecyclerAdapter.UserViewHolder>
-        implements Filterable {
+public class UserListRecyclerAdapter extends Adapter<UserListRecyclerAdapter.UserViewHolder> {
 
     private static final String TAG = LOG_TAG_PREFIX + "UserListAdapter";
 
     private Context mContext;
-    private List<UserEntity> mFilteredData;
-    private List<UserEntity> mAllData;
-    private NameFilter mFilter;
+    private List<UserEntity> mData;
     private OnItemClickListener mOnItemClickListener;
 
     public UserListRecyclerAdapter(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
-        mFilteredData = new ArrayList<>();
-        mAllData = new ArrayList<>();
-        mFilter = new NameFilter(this);
+        mData = new ArrayList<>();
     }
 
     @Override
@@ -60,7 +53,7 @@ public class UserListRecyclerAdapter
 
     @Override
     public void onBindViewHolder(UserViewHolder holder, int position) {
-        UserEntity user = mFilteredData.get(position);
+        UserEntity user = mData.get(position);
 
         holder.mUserName.setText(user.getFullName());
         holder.mRating.setText(String.valueOf(user.getRating()));
@@ -112,31 +105,18 @@ public class UserListRecyclerAdapter
 
     @Override
     public int getItemCount() {
-        return mFilteredData.size();
-    }
-
-    @NonNull
-    public List<UserEntity> getFilteredData() {
-        return mFilteredData;
+        return mData.size();
     }
 
     @NonNull
     public List<UserEntity> getData() {
-        return mAllData;
+        return mData;
     }
 
     public void setData(@NonNull List<UserEntity> data) {
-        mAllData = new ArrayList<>(data);
-        mFilteredData = new ArrayList<>(data);
+        mData = data;
         notifyDataSetChanged();
     }
-
-    @NonNull
-    @Override
-    public Filter getFilter() {
-        return mFilter;
-    }
-
 
     static class UserViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -172,39 +152,5 @@ public class UserListRecyclerAdapter
 
     public interface OnItemClickListener {
         void onItemClick(int position);
-    }
-
-    public class NameFilter extends Filter {
-
-        private UserListRecyclerAdapter mAdapter;
-
-        public NameFilter(@NonNull UserListRecyclerAdapter adapter) {
-            super();
-            mAdapter = adapter;
-        }
-
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            mAdapter.getFilteredData().clear();
-            FilterResults results = new FilterResults();
-
-            if (constraint.length() == 0) {
-                mAdapter.getFilteredData().addAll(mAdapter.getData());
-            } else {
-                String filterPattern = constraint.toString().toUpperCase().trim();
-                for (final UserEntity user : mAdapter.getData()) {
-                    if (user.getSearchName().startsWith(filterPattern)) mAdapter.getFilteredData().add(user);
-                }
-            }
-            results.values = mAdapter.getFilteredData();
-            results.count = mAdapter.getFilteredData().size();
-            return results;
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            mAdapter.notifyDataSetChanged();
-        }
     }
 }

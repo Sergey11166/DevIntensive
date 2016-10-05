@@ -46,5 +46,6 @@
     <string name="error.upload_image">Ошибка загрузки изображения на сервер</string>
     <string name="error.creation_file">Ошибка записи файла</string>
     <string name="user_list.hint.search">Поиск</string>
+    <string name="user_list.hint.tape_user_name">Введите имя пользователя</string>
 
 </resources>

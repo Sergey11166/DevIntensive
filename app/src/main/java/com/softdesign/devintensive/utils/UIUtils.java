@@ -13,6 +13,7 @@ import android.widget.Toast;
  * @author Sergey Vorobyev
  */
 
+@SuppressWarnings("unused")
 public class UIUtils {
 
     public static int getMinHeight(View v) {
