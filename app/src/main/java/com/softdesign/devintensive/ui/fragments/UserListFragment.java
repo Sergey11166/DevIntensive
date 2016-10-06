@@ -25,29 +25,19 @@ import android.view.ViewGroup;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.dto.UserDTO;
 import com.softdesign.devintensive.data.loaders.GetAllUsersFromDbLoader;
-import com.softdesign.devintensive.data.loaders.SaveUserEntityListLoader;
 import com.softdesign.devintensive.data.loaders.SearchUsersByNameFromDbLoader;
-import com.softdesign.devintensive.data.managers.DataManager;
-import com.softdesign.devintensive.data.network.response.UserListResponse;
-import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.data.storage.entities.UserEntity;
 import com.softdesign.devintensive.ui.activities.UserDetailsActivity;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter.OnItemClickListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import static com.softdesign.devintensive.utils.AppConfig.SEARCH_DELAY;
-import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
-import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
  * @author Sergey Vorobyev
@@ -60,21 +50,17 @@ public class UserListFragment extends BaseFragment
     public static final String PARCELABLE_USER_KEY = "PARCELABLE_USER_KEY";
     private static final String SEARCH_KEY = "SEARCH_KEY";
 
-
     @BindView(R.id.recycler) RecyclerView mRecyclerView;
     @BindView(R.id.toolbar) Toolbar mToolbar;
     Unbinder mUnbinder;
     private SearchView mSearchView;
 
-
     private UserListRecyclerAdapter mAdapter;
-    private DataManager mDataManager;
     private String mSavedQuery;
     private String mLastQuery;
     private boolean mIsSearching;
     private Handler mHandler;
     private Runnable searchRunnable;
-    private List<UserEntity> mLastUserEntityListFromServer;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -82,7 +68,6 @@ public class UserListFragment extends BaseFragment
         setRetainInstance(true);
         setHasOptionsMenu(true);
         mAdapter = new UserListRecyclerAdapter(this);
-        mDataManager = DataManager.getInstance();
         searchRunnable = () -> initLoader(R.id.loader_search_users_by_name_from_db);
         mHandler = new Handler();
     }
@@ -90,6 +75,7 @@ public class UserListFragment extends BaseFragment
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_user_list, container, false);
         mUnbinder = ButterKnife.bind(this, view);
         return view;
@@ -201,43 +187,6 @@ public class UserListFragment extends BaseFragment
         mHandler.postDelayed(searchRunnable, mLastQuery.isEmpty() ? 0 : SEARCH_DELAY);
     }
 
-    private void saveUsersToDb() {
-        initLoader(R.id.loader_save_users_to_db);
-    }
-
-    private void loadAllUsersFromServer() {
-        if (!isNetworkAvailable(getContext())) {
-            showToast(getContext(), getString(R.string.error_no_connection));
-            return;
-        }
-        showProgress();
-        mDataManager.getUserListFromNetwork().enqueue(new Callback<UserListResponse>() {
-            @Override
-            public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
-                hideProgress();
-                if (response.isSuccessful()) {
-
-                    List<User> userListResponse = response.body().getData().getUsers();
-                    mLastUserEntityListFromServer = new ArrayList<>(userListResponse.size());
-                    for (User user : userListResponse) {
-                        UserEntity userEntity = new UserEntity(user);
-                        mLastUserEntityListFromServer.add(userEntity);
-                    }
-
-                    saveUsersToDb();
-                } else {
-                    showToast(getContext(), getString(R.string.error_unknown_error));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserListResponse> call, Throwable t) {
-                hideProgress();
-                showError(getString(R.string.error_unknown_error), t);
-            }
-        });
-    }
-
     @Override
     public Loader<List<UserEntity>> onCreateLoader(int id, Bundle args) {
         switch (id) {
@@ -245,8 +194,6 @@ public class UserListFragment extends BaseFragment
                 return new GetAllUsersFromDbLoader(getActivity());
             case R.id.loader_search_users_by_name_from_db:
                 return new SearchUsersByNameFromDbLoader(getActivity(), mLastQuery);
-            case R.id.loader_save_users_to_db:
-                return new SaveUserEntityListLoader(getActivity(), mLastUserEntityListFromServer);
             default:
                 return null;
         }
@@ -256,15 +203,7 @@ public class UserListFragment extends BaseFragment
     public void onLoadFinished(Loader<List<UserEntity>> loader, List<UserEntity> data) {
         switch (loader.getId()) {
             case R.id.loader_all_users_from_db:
-                if (!data.isEmpty()) {
-                    showUsers(data);
-                } else {
-                    loadAllUsersFromServer();
-                }
-                break;
             case R.id.loader_search_users_by_name_from_db:
-                showUsers(data);
-                break;
             case R.id.loader_save_users_to_db:
                 showUsers(data);
                 break;

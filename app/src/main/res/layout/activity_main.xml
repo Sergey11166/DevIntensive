@@ -9,7 +9,7 @@
 
     <FrameLayout
         style="@style/match_parent_all"
-        android:id="@+id/main_container"/>
+        android:id="@+id/container_main"/>
 
     <android.support.design.widget.NavigationView
         style="@style/match_parent_all"

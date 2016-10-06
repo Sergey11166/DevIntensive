@@ -99,12 +99,6 @@ public class MainActivity extends BaseActivity
 
         mDataManager = DataManager.getInstance();
 
-        if (!isAuthorized()) {
-            Intent i = new Intent(this, AuthActivity.class);
-            startActivity(i);
-            MainActivity.this.finish();
-            return;
-        }
         if (savedInstanceState == null) {
             setupNavigationView();
         }
@@ -122,10 +116,6 @@ public class MainActivity extends BaseActivity
     protected void onDestroy() {
         mUnbinder.unbind();
         super.onDestroy();
-    }
-
-    private boolean isAuthorized() {
-        return !mDataManager.getPreferencesManager().getAuthToken().isEmpty();
     }
 
     @Override
@@ -277,7 +267,7 @@ public class MainActivity extends BaseActivity
                         .findFragmentByTag(ProfileFragment.FRAGMENT_TAG);
                 if (profileFragment == null) profileFragment = new ProfileFragment();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.main_container, profileFragment, ProfileFragment.FRAGMENT_TAG)
+                        .replace(R.id.container_main, profileFragment, ProfileFragment.FRAGMENT_TAG)
                         .commit();
                 break;
             case R.id.team_item:
@@ -285,7 +275,7 @@ public class MainActivity extends BaseActivity
                         .findFragmentByTag(UserListFragment.FRAGMENT_TAG);
                 if (userListFragment == null) userListFragment = new UserListFragment();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.main_container, userListFragment, UserListFragment.FRAGMENT_TAG)
+                        .replace(R.id.container_main, userListFragment, UserListFragment.FRAGMENT_TAG)
                         .commit();
                 break;
         }

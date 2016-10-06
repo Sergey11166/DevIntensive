@@ -157,6 +157,7 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         mUnbinder = ButterKnife.bind(this, view);
         return view;
@@ -164,6 +165,7 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.setSupportActionBar(mToolbar);
         DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);

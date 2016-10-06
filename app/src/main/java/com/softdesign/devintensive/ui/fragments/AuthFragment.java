@@ -1,9 +1,12 @@
-package com.softdesign.devintensive.ui.activities;
+package com.softdesign.devintensive.ui.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.softdesign.devintensive.R;
@@ -19,6 +22,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
 import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
@@ -27,7 +31,10 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
  * @author Sergey Vorobyev.
  */
 
-public class AuthActivity extends BaseActivity {
+public class AuthFragment extends BaseFragment {
+
+    private static final String TAG = LOG_TAG_PREFIX + "AuthFragment";
+    public static final String FRAGMENT_TAG = "AuthFragment";
 
     @BindView(R.id.username_et) EditText mUsernameET;
     @BindView(R.id.password_et) EditText mPasswordET;
@@ -36,18 +43,33 @@ public class AuthActivity extends BaseActivity {
     private DataManager mDataManager;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_auth);
-        mUnbinder = ButterKnife.bind(this);
-
+        Log.d(TAG, "onCreate");
+        setRetainInstance(true);
         mDataManager = DataManager.getInstance();
     }
 
+    @Nullable
     @Override
-    protected void onDestroy() {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_auth, container, false);
+        mUnbinder = ButterKnife.bind(this, view);
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG, "onViewCreated");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "onDestroyView");
         mUnbinder.unbind();
-        super.onDestroy();
     }
 
     @OnClick({
@@ -76,24 +98,26 @@ public class AuthActivity extends BaseActivity {
     }
 
     private void rememberPassword() {
-        goToUrl(this, "https://google.com");
+        goToUrl(getActivity(), "https://google.com");
     }
 
     private void loginSuccess(Response<AuthResponse> response) {
         mDataManager.getPreferencesManager().saveAuthToken(response.body().getData().getToken());
         mDataManager.getPreferencesManager().saveUserId(response.body().getData().getUser().getId());
         mDataManager.getPreferencesManager().saveUser(response.body().getData().getUser());
-        startMainActivity();
-    }
 
-    private void startMainActivity() {
-        startActivity(new Intent(this, MainActivity.class));
-        AuthActivity.this.finish();
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        SplashScreenFragment f = (SplashScreenFragment) fm
+                .findFragmentByTag(SplashScreenFragment.FRAGMENT_TAG);
+        if (f == null) f = new SplashScreenFragment();
+        fm.beginTransaction()
+                .replace(R.id.container_start, f, SplashScreenFragment.FRAGMENT_TAG)
+                .commit();
     }
 
     private void signIn() {
-        if (!isNetworkAvailable(this)) {
-            showToast(this, getString(R.string.error_no_connection));
+        if (!isNetworkAvailable(getActivity())) {
+            showToast(getActivity(), getString(R.string.error_no_connection));
             return;
         }
 
@@ -105,17 +129,21 @@ public class AuthActivity extends BaseActivity {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 hideProgress();
-                if (response.code() == 200) {
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "onResponse(): login success");
                     loginSuccess(response);
                 } else if (response.code() == 403) {
-                    showToast(AuthActivity.this, getString(R.string.error_wrong_username_or_password));
+                    Log.d(TAG, "onResponse(): wrong username or password");
+                    showToast(getActivity(), getString(R.string.error_wrong_username_or_password));
                 } else {
-                    showToast(AuthActivity.this, getString(R.string.error_unknown_error));
+                    Log.d(TAG, "onResponse(): unknown error");
+                    showToast(getActivity(), getString(R.string.error_unknown_error));
                 }
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
+                Log.d(TAG, "onFailure(): unknown error");
                 hideProgress();
                 showError(getString(R.string.error_unknown_error), t);
             }
