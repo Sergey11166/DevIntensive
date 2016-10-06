@@ -1,7 +1,7 @@
 package com.softdesign.devintensive.ui.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -12,12 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.events.UserListResponseEvent;
 import com.softdesign.devintensive.data.loaders.SaveUserEntityListLoader;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.response.UserListResponse;
 import com.softdesign.devintensive.data.network.restmodels.User;
 import com.softdesign.devintensive.data.storage.entities.UserEntity;
-import com.softdesign.devintensive.ui.activities.MainActivity;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,7 @@ public class SplashScreenFragment extends BaseFragment implements LoaderCallback
 
     private DataManager mDataManager;
     private List<UserEntity> mLastUserEntityListFromServer;
+    private Handler mHandler;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class SplashScreenFragment extends BaseFragment implements LoaderCallback
         Log.d(TAG, "onCreate");
         setRetainInstance(true);
         mDataManager = DataManager.getInstance();
+        mHandler = new Handler();
     }
 
     @Nullable
@@ -86,14 +90,10 @@ public class SplashScreenFragment extends BaseFragment implements LoaderCallback
         return !mDataManager.getPreferencesManager().getAuthToken().isEmpty();
     }
 
-    private void startMainActivity() {
-        startActivity(new Intent(getContext(), MainActivity.class));
-        getActivity().finish();
-    }
-
     private void loadAllUsersFromServer() {
         if (!isNetworkAvailable(getContext())) {
             showToast(getContext(), getString(R.string.error_no_connection));
+            mHandler.post(() -> EventBus.getDefault().post(new UserListResponseEvent()));
             return;
         }
         showProgress();
@@ -112,7 +112,7 @@ public class SplashScreenFragment extends BaseFragment implements LoaderCallback
                     saveUsersToDb();
                 } else {
                     showToast(getContext(), getString(R.string.error_unknown_error));
-                    startMainActivity();
+                    EventBus.getDefault().post(new UserListResponseEvent());
                 }
             }
 
@@ -120,7 +120,7 @@ public class SplashScreenFragment extends BaseFragment implements LoaderCallback
             public void onFailure(Call<UserListResponse> call, Throwable t) {
                 hideProgress();
                 showError(getString(R.string.error_unknown_error), t);
-                startMainActivity();
+                EventBus.getDefault().post(new UserListResponseEvent());
             }
         });
     }
@@ -139,7 +139,7 @@ public class SplashScreenFragment extends BaseFragment implements LoaderCallback
     public void onLoadFinished(Loader<List<UserEntity>> loader, List<UserEntity> data) {
         switch (loader.getId()) {
             case R.id.loader_save_users_to_db:
-                startMainActivity();
+                EventBus.getDefault().post(new UserListResponseEvent());
                 break;
         }
     }

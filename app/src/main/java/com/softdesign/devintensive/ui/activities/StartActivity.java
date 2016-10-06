@@ -1,14 +1,20 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.events.UserListResponseEvent;
 import com.softdesign.devintensive.ui.fragments.SplashScreenFragment;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
+import static org.greenrobot.eventbus.ThreadMode.MAIN;
 
 /**
  * @author Sergey Vorobyev.
@@ -33,5 +39,24 @@ public class StartActivity extends BaseActivity {
                     .replace(R.id.container_start, f, SplashScreenFragment.FRAGMENT_TAG)
                     .commit();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe(threadMode = MAIN)
+    @SuppressWarnings("unused")
+    public void onUserListResponseEvent(UserListResponseEvent event) {
+        startActivity(new Intent(this, MainActivity.class));
+        StartActivity.this.finish();
     }
 }

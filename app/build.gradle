@@ -50,6 +50,7 @@ dependencies {
     compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
     compile 'com.facebook.stetho:stetho:1.4.1'
     compile 'org.greenrobot:greendao:3.2.0'
+    compile 'org.greenrobot:eventbus:3.0.0'
 
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
     testCompile 'junit:junit:4.12'
