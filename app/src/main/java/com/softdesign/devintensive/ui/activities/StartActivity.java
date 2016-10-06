@@ -10,11 +10,9 @@ import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.events.UserListResponseEvent;
 import com.softdesign.devintensive.ui.fragments.SplashScreenFragment;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
+import de.greenrobot.event.EventBus;
 
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
-import static org.greenrobot.eventbus.ThreadMode.MAIN;
 
 /**
  * @author Sergey Vorobyev.
@@ -53,9 +51,8 @@ public class StartActivity extends BaseActivity {
         super.onStop();
     }
 
-    @Subscribe(threadMode = MAIN)
     @SuppressWarnings("unused")
-    public void onUserListResponseEvent(UserListResponseEvent event) {
+    public void onEvent(UserListResponseEvent event) {
         startActivity(new Intent(this, MainActivity.class));
         StartActivity.this.finish();
     }

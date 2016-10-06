@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.MenuItemCompat.OnActionExpandListener;
 import android.support.v4.widget.DrawerLayout;
@@ -23,9 +21,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.chronos.operations.LoadUserListOperationFromDb;
+import com.softdesign.devintensive.data.chronos.operations.SearchUsersByNameInDbOperation;
 import com.softdesign.devintensive.data.dto.UserDTO;
-import com.softdesign.devintensive.data.loaders.GetAllUsersFromDbLoader;
-import com.softdesign.devintensive.data.loaders.SearchUsersByNameFromDbLoader;
 import com.softdesign.devintensive.data.storage.entities.UserEntity;
 import com.softdesign.devintensive.ui.activities.UserDetailsActivity;
 import com.softdesign.devintensive.ui.adapters.UserListRecyclerAdapter;
@@ -43,8 +41,7 @@ import static com.softdesign.devintensive.utils.AppConfig.SEARCH_DELAY;
  * @author Sergey Vorobyev
  */
 
-public class UserListFragment extends BaseFragment
-        implements OnItemClickListener, LoaderCallbacks<List<UserEntity>> {
+public class UserListFragment extends BaseFragment implements OnItemClickListener {
 
     public static final String FRAGMENT_TAG = "UserListFragment";
     public static final String PARCELABLE_USER_KEY = "PARCELABLE_USER_KEY";
@@ -68,7 +65,8 @@ public class UserListFragment extends BaseFragment
         setRetainInstance(true);
         setHasOptionsMenu(true);
         mAdapter = new UserListRecyclerAdapter(this);
-        searchRunnable = () -> initLoader(R.id.loader_search_users_by_name_from_db);
+        searchRunnable = () -> runOperation(new SearchUsersByNameInDbOperation(mLastQuery),
+                SearchUsersByNameInDbOperation.OPERATION_TAG);
         mHandler = new Handler();
     }
 
@@ -176,44 +174,24 @@ public class UserListFragment extends BaseFragment
 
     private void loadAllUsersFromDb() {
         if (mIsSearching) {
-            initLoader(R.id.loader_search_users_by_name_from_db);
+            runOperation(new SearchUsersByNameInDbOperation(mLastQuery), SearchUsersByNameInDbOperation.OPERATION_TAG);
         } else {
-            initLoader(R.id.loader_all_users_from_db);
+            runOperation(new LoadUserListOperationFromDb(), LoadUserListOperationFromDb.OPERATION_TAG);
         }
+    }
+
+    @SuppressWarnings("unused")
+    public void onOperationFinished(final LoadUserListOperationFromDb.Result result) {
+        showUsers(result.getOutput());
+    }
+
+    @SuppressWarnings("unused")
+    public void onOperationFinished(final SearchUsersByNameInDbOperation.Result result) {
+        showUsers(result.getOutput());
     }
 
     private void searchUsersByNameFromDb() {
         mHandler.removeCallbacks(searchRunnable);
         mHandler.postDelayed(searchRunnable, mLastQuery.isEmpty() ? 0 : SEARCH_DELAY);
-    }
-
-    @Override
-    public Loader<List<UserEntity>> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case R.id.loader_all_users_from_db:
-                return new GetAllUsersFromDbLoader(getActivity());
-            case R.id.loader_search_users_by_name_from_db:
-                return new SearchUsersByNameFromDbLoader(getActivity(), mLastQuery);
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<UserEntity>> loader, List<UserEntity> data) {
-        switch (loader.getId()) {
-            case R.id.loader_all_users_from_db:
-            case R.id.loader_search_users_by_name_from_db:
-            case R.id.loader_save_users_to_db:
-                showUsers(data);
-                break;
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<UserEntity>> loader) {}
-
-    private void initLoader(int id) {
-        getActivity().getSupportLoaderManager().restartLoader(id, Bundle.EMPTY, this).forceLoad();
     }
 }

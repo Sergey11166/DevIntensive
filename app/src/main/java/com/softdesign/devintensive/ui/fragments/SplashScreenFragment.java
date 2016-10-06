@@ -1,49 +1,34 @@
 package com.softdesign.devintensive.ui.fragments;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.chronos.operations.LoadUserListOperationFromServer;
+import com.softdesign.devintensive.data.chronos.operations.LoadUserListOperationFromServer.Result;
 import com.softdesign.devintensive.data.events.UserListResponseEvent;
-import com.softdesign.devintensive.data.loaders.SaveUserEntityListLoader;
 import com.softdesign.devintensive.data.managers.DataManager;
-import com.softdesign.devintensive.data.network.response.UserListResponse;
-import com.softdesign.devintensive.data.network.restmodels.User;
-import com.softdesign.devintensive.data.storage.entities.UserEntity;
 
-import org.greenrobot.eventbus.EventBus;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import de.greenrobot.event.EventBus;
 
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
-import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
  * @author Sergey Vorobyev.
  */
 
-public class SplashScreenFragment extends BaseFragment implements LoaderCallbacks<List<UserEntity>> {
+public class SplashScreenFragment extends BaseFragment {
 
     private static final String TAG = LOG_TAG_PREFIX + "SplashScreenFragment";
     public static final String FRAGMENT_TAG = "SplashScreenFragment";
 
     private DataManager mDataManager;
-    private List<UserEntity> mLastUserEntityListFromServer;
-    private Handler mHandler;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,7 +36,6 @@ public class SplashScreenFragment extends BaseFragment implements LoaderCallback
         Log.d(TAG, "onCreate");
         setRetainInstance(true);
         mDataManager = DataManager.getInstance();
-        mHandler = new Handler();
     }
 
     @Nullable
@@ -76,7 +60,9 @@ public class SplashScreenFragment extends BaseFragment implements LoaderCallback
                     .commit();
         } else {
             Log.d(TAG, "User is authorized");
-            loadAllUsersFromServer();
+            runOperation(new LoadUserListOperationFromServer(),
+                    LoadUserListOperationFromServer.OPERATION_TAG);
+            showProgress();
         }
     }
 
@@ -90,68 +76,12 @@ public class SplashScreenFragment extends BaseFragment implements LoaderCallback
         return !mDataManager.getPreferencesManager().getAuthToken().isEmpty();
     }
 
-    private void loadAllUsersFromServer() {
-        if (!isNetworkAvailable(getContext())) {
-            showToast(getContext(), getString(R.string.error_no_connection));
-            mHandler.post(() -> EventBus.getDefault().post(new UserListResponseEvent()));
-            return;
+    @SuppressWarnings("unused")
+    public void onOperationFinished(final Result result) {
+        if (!result.isSuccessful()) {
+            showToast(getContext(), getString(R.string.error_unknown_error));
         }
-        showProgress();
-        mDataManager.getUserListFromNetwork().enqueue(new Callback<UserListResponse>() {
-            @Override
-            public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
-                hideProgress();
-                if (response.isSuccessful()) {
-
-                    List<User> userListResponse = response.body().getData().getUsers();
-                    mLastUserEntityListFromServer = new ArrayList<>(userListResponse.size());
-                    for (User user : userListResponse) {
-                        UserEntity userEntity = new UserEntity(user);
-                        mLastUserEntityListFromServer.add(userEntity);
-                    }
-                    saveUsersToDb();
-                } else {
-                    showToast(getContext(), getString(R.string.error_unknown_error));
-                    EventBus.getDefault().post(new UserListResponseEvent());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserListResponse> call, Throwable t) {
-                hideProgress();
-                showError(getString(R.string.error_unknown_error), t);
-                EventBus.getDefault().post(new UserListResponseEvent());
-            }
-        });
-    }
-
-    @Override
-    public Loader<List<UserEntity>> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case R.id.loader_save_users_to_db:
-                return new SaveUserEntityListLoader(getActivity(), mLastUserEntityListFromServer);
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<UserEntity>> loader, List<UserEntity> data) {
-        switch (loader.getId()) {
-            case R.id.loader_save_users_to_db:
-                EventBus.getDefault().post(new UserListResponseEvent());
-                break;
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<UserEntity>> loader) {}
-
-    private void initLoader(int id) {
-        getActivity().getSupportLoaderManager().restartLoader(id, Bundle.EMPTY, this).forceLoad();
-    }
-
-    private void saveUsersToDb() {
-        initLoader(R.id.loader_save_users_to_db);
+        hideProgress();
+        EventBus.getDefault().post(new UserListResponseEvent());
     }
 }

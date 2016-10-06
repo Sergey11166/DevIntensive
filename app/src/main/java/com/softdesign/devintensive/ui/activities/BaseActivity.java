@@ -3,9 +3,9 @@ package com.softdesign.devintensive.ui.activities;
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.redmadrobot.chronos.gui.activity.ChronosAppCompatActivity;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.Constants;
 
@@ -15,7 +15,7 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
  * @author Sergey Vorobyev.
  */
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends ChronosAppCompatActivity {
 
     private static final String TAG = Constants.LOG_TAG_PREFIX + "BaseActivity";
 

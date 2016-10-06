@@ -16,6 +16,7 @@
 #   public *;
 #}
 
+#---------  GreenDAO -----
 -keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
 public static java.lang.String TABLENAME;
 }
@@ -25,3 +26,9 @@ public static java.lang.String TABLENAME;
 -dontwarn org.greenrobot.greendao.database.**
 # If you do not use Rx:
 -dontwarn rx.**
+
+# ------ Chronos ---------
+-keepclassmembers class ** {
+ public void onOperationFinished*(**);
+ public void onBroadcastOperationFinished*(**);
+}

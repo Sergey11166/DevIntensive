@@ -5,10 +5,10 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
 
+import com.redmadrobot.chronos.gui.fragment.ChronosSupportFragment;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.Constants;
 
@@ -18,7 +18,7 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
  * @author Sergey Vorobyev.
  */
 
-public class BaseFragment extends Fragment {
+public class BaseFragment extends ChronosSupportFragment {
 
     private static final String TAG = Constants.LOG_TAG_PREFIX + "BaseFragment";
     private static final String IS_PROGRESS_SHOWING_KEY = "IS_PROGRESS_SHOWING_KEY";
