@@ -14,14 +14,14 @@ import java.util.List;
  * @author Sergey Vorobyev.
  */
 
-public class LoadUserListOperationFromDb extends ChronosOperation<List<UserEntity>> {
+public class LoadUsersFromDbOperation extends ChronosOperation<List<UserEntity>> {
 
-    public static final String OPERATION_TAG = "LoadUserListOperationFromDb";
+    public static final String OPERATION_TAG = "LoadUsersFromDbOperation";
 
     @Nullable
     @Override
     public List<UserEntity> run() {
-        return DataManager.getInstance().getAllUserListFromDb();
+        return DataManager.getInstance().getAllUsersFromDb();
     }
 
     @NonNull

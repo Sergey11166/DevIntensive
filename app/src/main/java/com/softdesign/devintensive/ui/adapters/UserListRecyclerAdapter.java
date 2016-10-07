@@ -1,6 +1,7 @@
 package com.softdesign.devintensive.ui.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +9,7 @@ import android.support.v7.widget.RecyclerView.Adapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.storage.entities.UserEntity;
+import com.softdesign.devintensive.ui.adapters.helpers.ItemTouchHelperViewHolder;
 import com.softdesign.devintensive.ui.views.AspectRatioImageView;
 import com.squareup.picasso.Callback;
 
@@ -118,7 +121,8 @@ public class UserListRecyclerAdapter extends Adapter<UserListRecyclerAdapter.Use
         notifyDataSetChanged();
     }
 
-    static class UserViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    static class UserViewHolder extends RecyclerView.ViewHolder
+            implements OnClickListener, ItemTouchHelperViewHolder {
 
         @BindView(R.id.user_photo) AspectRatioImageView mUserPhoto;
         @BindView(R.id.username) TextView mUserName;
@@ -147,6 +151,16 @@ public class UserListRecyclerAdapter extends Adapter<UserListRecyclerAdapter.Use
         @Override
         public void onClick(View v) {
             if (mOnItemClickListener != null) mOnItemClickListener.onItemClick(getAdapterPosition());
+        }
+
+        @Override
+        public void onItemSelected() {
+            itemView.setBackgroundColor(Color.LTGRAY);
+        }
+
+        @Override
+        public void onItemClear() {
+            itemView.setBackgroundColor(0);
         }
     }
 

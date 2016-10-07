@@ -27,7 +27,7 @@ public class SearchUsersByNameInDbOperation extends ChronosOperation<List<UserEn
     @Nullable
     @Override
     public List<UserEntity> run() {
-        return DataManager.getInstance().getUserListByNameFromDb(query);
+        return DataManager.getInstance().getUsersByNameFromDb(query);
     }
 
     @NonNull

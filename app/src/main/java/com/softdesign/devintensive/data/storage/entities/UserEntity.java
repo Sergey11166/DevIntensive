@@ -28,6 +28,8 @@ public class UserEntity {
     @Unique
     private String remoteId;
 
+    private Integer position;
+
     private String photo;
 
     @NotNull
@@ -57,24 +59,26 @@ public class UserEntity {
     @Generated(hash = 1814575071)
     private transient UserEntityDao myDao;
 
-    public UserEntity(User user) {
-        remoteId = user.getId();
-        photo = user.getPublicInfo().getPhoto();
-        fullName = user.getFirstName() + " " + user.getSecondName();
-        searchName = fullName.toUpperCase();
-        rating = user.getProfileValues().getRating();
-        countCodeLines = user.getProfileValues().getLinesCode();
-        countProjects = user.getProfileValues().getProjects();
-        bio = user.getPublicInfo().getBio();
-        repositories = new ArrayList<>(user.getRepositories().getRepo().size()) ;
-        for (Repo r: user.getRepositories().getRepo()) repositories.add(new RepositoryEntity(r, remoteId));
+    public UserEntity(User user, int position) {
+        this.remoteId = user.getId();
+        this.position = position;
+        this.photo = user.getPublicInfo().getPhoto();
+        this.fullName = user.getFirstName() + " " + user.getSecondName();
+        this.searchName = fullName.toUpperCase();
+        this.rating = user.getProfileValues().getRating();
+        this.countCodeLines = user.getProfileValues().getLinesCode();
+        this.countProjects = user.getProfileValues().getProjects();
+        this.bio = user.getPublicInfo().getBio();
+        this.repositories = new ArrayList<>(user.getRepositories().getRepo().size()) ;
+        for (Repo r: user.getRepositories().getRepo()) this.repositories.add(new RepositoryEntity(r, remoteId));
     }
 
-    @Generated(hash = 747569558)
-    public UserEntity(Long id, @NotNull String remoteId, String photo, @NotNull String fullName,
+    @Generated(hash = 1769189894)
+    public UserEntity(Long id, @NotNull String remoteId, Integer position, String photo, @NotNull String fullName,
             @NotNull String searchName, int rating, int countCodeLines, int countProjects, String bio) {
         this.id = id;
         this.remoteId = remoteId;
+        this.position = position;
         this.photo = photo;
         this.fullName = fullName;
         this.searchName = searchName;
@@ -102,6 +106,14 @@ public class UserEntity {
 
     public void setRemoteId(String remoteId) {
         this.remoteId = remoteId;
+    }
+
+    public Integer getPosition() {
+        return this.position;
+    }
+
+    public void setPosition(Integer position) {
+        this.position = position;
     }
 
     public String getPhoto() {

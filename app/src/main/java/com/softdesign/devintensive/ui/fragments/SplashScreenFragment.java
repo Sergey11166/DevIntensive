@@ -9,8 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.softdesign.devintensive.R;
-import com.softdesign.devintensive.data.chronos.operations.LoadUserListOperationFromServer;
-import com.softdesign.devintensive.data.chronos.operations.LoadUserListOperationFromServer.Result;
+import com.softdesign.devintensive.data.chronos.operations.LoadUsersFromServerOperation;
+import com.softdesign.devintensive.data.chronos.operations.LoadUsersFromServerOperation.Result;
 import com.softdesign.devintensive.data.events.UserListResponseEvent;
 import com.softdesign.devintensive.data.managers.DataManager;
 
@@ -60,8 +60,7 @@ public class SplashScreenFragment extends BaseFragment {
                     .commit();
         } else {
             Log.d(TAG, "User is authorized");
-            runOperation(new LoadUserListOperationFromServer(),
-                    LoadUserListOperationFromServer.OPERATION_TAG);
+            runOperation(new LoadUsersFromServerOperation(), LoadUsersFromServerOperation.OPERATION_TAG);
             showProgress();
         }
     }
