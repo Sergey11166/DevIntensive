@@ -6,7 +6,7 @@ package com.softdesign.devintensive.utils;
 
 public interface AppConfig {
 
-    int MAX_CONNECT_TIMEOUT = 1000*5;
-    int MAX_READ_TIMEOUT = 1000*5;
+    int MAX_CONNECT_TIMEOUT = 1000*3;
+    int MAX_READ_TIMEOUT = 1000*6;
     int SEARCH_DELAY = 1000;
 }

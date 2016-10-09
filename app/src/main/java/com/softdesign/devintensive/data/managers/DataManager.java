@@ -22,6 +22,7 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
+import rx.Observable;
 
 import static com.softdesign.devintensive.data.storage.entities.UserEntityDao.Properties.Position;
 import static com.softdesign.devintensive.data.storage.entities.UserEntityDao.Properties.SearchName;
@@ -64,7 +65,7 @@ public class DataManager {
         return mDaoSession;
     }
 
-    public Call<AuthResponse> loginUser(UserLoginRequest request) {
+    public Observable<AuthResponse> loginUser(UserLoginRequest request) {
         return mRestService.loginUser(request);
     }
 

@@ -42,9 +42,10 @@
     <string name="error.toast.creation_file">Ошибка создания файла</string>
     <string name="error.wrong_username_or_password">Неверные имя пользователя или пароль</string>
     <string name="error.unknown_error">Неизвестная ошибка</string>
-    <string name="error.no_connection">Нет подключения к интернету</string>
+    <string name="error.no_connection">Нет подключения к сети</string>
     <string name="error.upload_image">Ошибка загрузки изображения на сервер</string>
     <string name="error.creation_file">Ошибка записи файла</string>
+    <string name="error.failed_to_connect_to_server">Ошибка соединения с сервером</string>
     <string name="user_list.hint.search">Поиск</string>
     <string name="user_list.hint.tape_user_name">Введите имя пользователя</string>
 
