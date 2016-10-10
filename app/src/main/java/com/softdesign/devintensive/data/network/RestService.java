@@ -1,9 +1,9 @@
 package com.softdesign.devintensive.data.network;
 
 import com.softdesign.devintensive.data.network.request.UserLoginRequest;
+import com.softdesign.devintensive.data.network.response.AuthResponse;
 import com.softdesign.devintensive.data.network.response.ImageUploadedResponse;
 import com.softdesign.devintensive.data.network.response.UserListResponse;
-import com.softdesign.devintensive.data.network.response.AuthResponse;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
@@ -25,7 +25,7 @@ public interface RestService {
     Observable<AuthResponse> loginUser(@Body UserLoginRequest request);
 
     @GET("user/list")
-    Call<UserListResponse> getUserList();
+    Observable<UserListResponse> getUserList();
 
     @Multipart
     @POST("user/{userId}/publicValues/profilePhoto")

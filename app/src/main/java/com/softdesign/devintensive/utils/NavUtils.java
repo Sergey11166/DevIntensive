@@ -67,7 +67,7 @@ public class NavUtils {
         try {
             context.startActivity(i);
         } catch (android.content.ActivityNotFoundException ex) {
-            showToast(context, "Browser not found");
+            showToast("Browser not found");
         }
     }
 
@@ -84,7 +84,7 @@ public class NavUtils {
         try {
             context.startActivity(i);
         } catch (android.content.ActivityNotFoundException ex) {
-            showToast(context, "Email app not found");
+            showToast("Email app not found");
         }
     }
 
@@ -99,7 +99,7 @@ public class NavUtils {
         try {
             context.startActivity(i);
         } catch (android.content.ActivityNotFoundException ex) {
-            showToast(context, "Phone app not found");
+            showToast("Phone app not found");
         }
     }
 }

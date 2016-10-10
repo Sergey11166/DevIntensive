@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 
 import com.redmadrobot.chronos.gui.fragment.ChronosSupportFragment;
 import com.softdesign.devintensive.R;
@@ -33,6 +34,7 @@ public class BaseFragment extends ChronosSupportFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSubscriptions = new CompositeSubscription();
+        initProgressDialog();
     }
 
     @Override
@@ -50,36 +52,33 @@ public class BaseFragment extends ChronosSupportFragment {
     }
 
     @Override
-    public void onDetach() {
-        if (mProgressDialog != null) mProgressDialog.dismiss();
-        super.onDetach();
-    }
-
-    @Override
     public void onDestroy() {
+        mProgressDialog.dismiss();
         mSubscriptions.unsubscribe();
         super.onDestroy();
     }
 
-    public void showProgress() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(getActivity(), R.style.custom_progress);
-            mProgressDialog.setCancelable(false);
-            assert mProgressDialog.getWindow() != null;
-            mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    private void initProgressDialog() {
+        mProgressDialog = new ProgressDialog(getActivity(), R.style.custom_progress);
+        mProgressDialog.setCancelable(false);
+        Window window = mProgressDialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
+    }
+
+    public void showProgress() {
         mProgressDialog.show();
         mProgressDialog.setContentView(R.layout.progress_splash);
-        mIsProgressShowing = true;
     }
 
     public void hideProgress() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) mProgressDialog.hide();
+        if (mProgressDialog.isShowing()) mProgressDialog.hide();
         mIsProgressShowing = false;
     }
 
     public void showError(String message, Throwable t) {
         Log.d(TAG, "Message: "+ message + "\n" + "Exception: " + t.toString());
-        showToast(getContext(), message);
+        showToast(message);
     }
 }

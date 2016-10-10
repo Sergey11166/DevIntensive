@@ -69,7 +69,7 @@ public class DataManager {
         return mRestService.loginUser(request);
     }
 
-    public Call<UserListResponse> getUserListFromNetwork() {
+    public Observable<UserListResponse> getUserListFromNetwork() {
         return mRestService.getUserList();
     }
 

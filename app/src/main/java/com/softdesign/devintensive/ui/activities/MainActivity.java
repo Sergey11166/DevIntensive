@@ -224,7 +224,7 @@ public class MainActivity extends BaseActivity
             mImageFile = IOUtils.createImageFile(this);
         } catch (IOException e) {
             showError(getString(R.string.error_creation_file), e);
-            showToast(this, getString(R.string.error_toast_creation_file));
+            showToast(getString(R.string.error_toast_creation_file));
         }
         goToCameraApp(this, mImageFile, REQUEST_CODE_CAMERA_AVATAR);
     }
@@ -375,7 +375,7 @@ public class MainActivity extends BaseActivity
     private void uploadAvatar() {
         if (mSelectedAvatar != null) {
             if (!isNetworkAvailable(this)) {
-                showToast(this, getString(R.string.error_no_connection));
+                showToast(getString(R.string.error_no_connection));
                 return;
             }
             File file = new File(filePathFromUri(mSelectedAvatar));

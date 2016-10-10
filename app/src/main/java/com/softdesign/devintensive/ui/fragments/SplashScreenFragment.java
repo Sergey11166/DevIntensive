@@ -17,7 +17,6 @@ import com.softdesign.devintensive.data.managers.DataManager;
 import de.greenrobot.event.EventBus;
 
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
-import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
  * @author Sergey Vorobyev.
@@ -77,9 +76,6 @@ public class SplashScreenFragment extends BaseFragment {
 
     @SuppressWarnings("unused")
     public void onOperationFinished(final Result result) {
-        if (!result.isSuccessful()) {
-            showToast(getContext(), getString(R.string.error_unknown_error));
-        }
         hideProgress();
         EventBus.getDefault().post(new UserListResponseEvent());
     }

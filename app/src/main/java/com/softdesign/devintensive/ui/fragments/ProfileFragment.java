@@ -386,7 +386,6 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
             mImageFile = IOUtils.createImageFile(getActivity());
         } catch (IOException e) {
             showError(getString(R.string.error_creation_file), e);
-            showToast(getActivity(), getString(R.string.error_toast_creation_file));
         }
         goToCameraApp(getActivity(), mImageFile, REQUEST_CODE_CAMERA_USER_PHOTO);
     }
@@ -534,7 +533,7 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
     private void uploadUserPhoto() {
         if (isChangedUserPhoto && mSelectedUserPhoto != null) {
             if (!isNetworkAvailable(getContext())) {
-                showToast(getContext(), getString(R.string.error_no_connection));
+                showToast(getString(R.string.error_no_connection));
                 return;
             }
             File file = new File(filePathFromUri(mSelectedUserPhoto));

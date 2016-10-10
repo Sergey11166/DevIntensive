@@ -14,20 +14,17 @@ import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.request.UserLoginRequest;
 import com.softdesign.devintensive.data.network.response.AuthResponse;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
-import retrofit2.adapter.rxjava.HttpException;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
 import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
+import static com.softdesign.devintensive.utils.UIUtils.handleResponseError;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
@@ -122,7 +119,7 @@ public class AuthFragment extends BaseFragment {
 
     private void signIn() {
         if (!isNetworkAvailable(getActivity())) {
-            showToast(getActivity(), getString(R.string.error_no_connection));
+            showToast(getString(R.string.error_no_connection));
             return;
         }
 
@@ -139,21 +136,6 @@ public class AuthFragment extends BaseFragment {
 
     private void handleError(Throwable throwable) {
         hideProgress();
-        if (throwable instanceof HttpException) {
-            HttpException exception = (HttpException) throwable;
-            if (exception.code() == 403) {
-                Log.d(TAG, "handleError(): wrong username or password");
-                showToast(getActivity(), getString(R.string.error_wrong_username_or_password));
-            } else {
-                Log.d(TAG, "handleError(): response code is " + exception.code());
-                showToast(getActivity(), getString(R.string.error_unknown_error)  + " " + exception.code());
-            }
-        } else if (throwable instanceof SocketTimeoutException) {
-            Log.e(TAG, "onResponse(): check internet connection", throwable);
-            showToast(getActivity(), getString(R.string.error_failed_to_connect_to_server));
-        } else if (throwable instanceof IOException) {
-            Log.e(TAG, "onResponse(): unknown error", throwable);
-            showToast(getActivity(), getString(R.string.error_unknown_error));
-        }
+        handleResponseError(TAG, throwable);
     }
 }

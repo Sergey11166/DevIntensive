@@ -61,7 +61,7 @@ public class ProfileScoresLinearLayoutBehavior<Header extends LinearLayout>
     private void initProperties(View child, AppBarLayout dependency) {
         mMaxScoresHeight = child.getHeight();
         mMinScoresHeight = getMinHeight(child);
-        mMinAppbarHeight = getStatusBarHeight(child.getContext()) + getAppBarSize(child.getContext());
+        mMinAppbarHeight = getStatusBarHeight() + getAppBarSize();
         mMaxAppbarHeight = dependency.getHeight() - mMinAppbarHeight;
     }
 }
