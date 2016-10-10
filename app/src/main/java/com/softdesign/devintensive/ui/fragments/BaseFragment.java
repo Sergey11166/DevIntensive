@@ -12,6 +12,8 @@ import com.redmadrobot.chronos.gui.fragment.ChronosSupportFragment;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.Constants;
 
+import rx.subscriptions.CompositeSubscription;
+
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 /**
@@ -25,6 +27,13 @@ public class BaseFragment extends ChronosSupportFragment {
 
     private ProgressDialog mProgressDialog;
     private boolean mIsProgressShowing;
+    protected CompositeSubscription mSubscriptions;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mSubscriptions = new CompositeSubscription();
+    }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -44,6 +53,12 @@ public class BaseFragment extends ChronosSupportFragment {
     public void onDetach() {
         if (mProgressDialog != null) mProgressDialog.dismiss();
         super.onDetach();
+    }
+
+    @Override
+    public void onDestroy() {
+        mSubscriptions.unsubscribe();
+        super.onDestroy();
     }
 
     public void showProgress() {

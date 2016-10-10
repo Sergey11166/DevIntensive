@@ -22,7 +22,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 import retrofit2.adapter.rxjava.HttpException;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -45,7 +44,6 @@ public class AuthFragment extends BaseFragment {
     private Unbinder mUnbinder;
 
     private DataManager mDataManager;
-    private Subscription mLoginSubscription;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,12 +73,6 @@ public class AuthFragment extends BaseFragment {
         super.onDestroyView();
         Log.d(TAG, "onDestroyView");
         mUnbinder.unbind();
-    }
-
-    @Override
-    public void onDestroy() {
-        mLoginSubscription.unsubscribe();
-        super.onDestroy();
     }
 
     @OnClick({
@@ -139,10 +131,10 @@ public class AuthFragment extends BaseFragment {
         request.setPassword(mPasswordET.getText().toString());
         showProgress();
 
-        mLoginSubscription = mDataManager.loginUser(request)
-                .subscribeOn(Schedulers.newThread())
+        mSubscriptions.add(mDataManager.loginUser(request)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::loginSuccess, this::handleError);
+                .subscribe(this::loginSuccess, this::handleError));
     }
 
     private void handleError(Throwable throwable) {
