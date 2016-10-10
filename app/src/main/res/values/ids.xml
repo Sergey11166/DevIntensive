@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="loader_all_users_from_db" type="id"/>
+    <item name="loader_search_users_by_name_from_db" type="id"/>
+    <item name="loader_save_users_to_db" type="id"/>
+</resources>

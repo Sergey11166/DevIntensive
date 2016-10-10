@@ -27,7 +27,6 @@ import com.softdesign.devintensive.ui.fragments.ProfileFragment;
 import com.softdesign.devintensive.ui.fragments.UserListFragment;
 import com.softdesign.devintensive.ui.views.transformations.CircleTransformation;
 import com.softdesign.devintensive.utils.IOUtils;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +51,7 @@ import static com.softdesign.devintensive.utils.NavUtils.goToCameraApp;
 import static com.softdesign.devintensive.utils.NavUtils.goToGalleryApp;
 import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
+import static com.squareup.picasso.NetworkPolicy.OFFLINE;
 
 /**
  * @author Sergey Vorobyev
@@ -99,32 +99,23 @@ public class MainActivity extends BaseActivity
 
         mDataManager = DataManager.getInstance();
 
-        if (!isAuthorized()) {
-            Intent i = new Intent(this, AuthActivity.class);
-            startActivity(i);
-            MainActivity.this.finish();
-            return;
-        }
         if (savedInstanceState == null) {
             setupNavigationView();
         }
         setupDrawer();
 
         User user = mDataManager.getPreferencesManager().loadUser();
-        if (user == null) return;
-        String avatar = user.getPublicInfo().getAvatar();
-        mSelectedAvatar = (avatar != null) ? Uri.parse(avatar) : Uri.parse("");
-        loadImageAvatar(mSelectedAvatar);
+        if (user != null) {
+            String avatar = user.getPublicInfo().getAvatar();
+            mSelectedAvatar = (avatar != null) ? Uri.parse(avatar) : Uri.parse("");
+            loadImageAvatar(mSelectedAvatar);
+        }
     }
 
     @Override
     protected void onDestroy() {
         mUnbinder.unbind();
         super.onDestroy();
-    }
-
-    private boolean isAuthorized() {
-        return !mDataManager.getPreferencesManager().getAuthToken().isEmpty();
     }
 
     @Override
@@ -276,7 +267,7 @@ public class MainActivity extends BaseActivity
                         .findFragmentByTag(ProfileFragment.FRAGMENT_TAG);
                 if (profileFragment == null) profileFragment = new ProfileFragment();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.main_container, profileFragment, ProfileFragment.FRAGMENT_TAG)
+                        .replace(R.id.container_main, profileFragment, ProfileFragment.FRAGMENT_TAG)
                         .commit();
                 break;
             case R.id.team_item:
@@ -284,7 +275,7 @@ public class MainActivity extends BaseActivity
                         .findFragmentByTag(UserListFragment.FRAGMENT_TAG);
                 if (userListFragment == null) userListFragment = new UserListFragment();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.main_container, userListFragment, UserListFragment.FRAGMENT_TAG)
+                        .replace(R.id.container_main, userListFragment, UserListFragment.FRAGMENT_TAG)
                         .commit();
                 break;
         }
@@ -339,14 +330,43 @@ public class MainActivity extends BaseActivity
      * @param uri Object {@link Uri} of image
      */
     private void loadImageAvatar(Uri uri) {
-        Picasso.with(this)
+
+        DataManager.getInstance().getPicasso()
                 .load(uri)
-                .placeholder(R.drawable.ic_account_circle)
+                .placeholder(R.drawable.user_bg)
                 .resizeDimen(R.dimen.size_avatar, R.dimen.size_avatar)
                 .onlyScaleDown()
                 .centerCrop()
                 .transform(new CircleTransformation())
-                .into(mAvatar);
+                .networkPolicy(OFFLINE)
+                .into(mAvatar, new com.squareup.picasso.Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "avatar loaded from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(uri)
+                                .placeholder(R.drawable.user_bg)
+                                .resizeDimen(R.dimen.size_avatar, R.dimen.size_avatar)
+                                .onlyScaleDown()
+                                .centerCrop()
+                                .transform(new CircleTransformation())
+                                .into(mAvatar, new com.squareup.picasso.Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "avatar loaded from server");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(TAG, "Can't load avatar from server");
+                                    }
+                                });
+                    }
+                });
     }
 
     /**
@@ -369,7 +389,7 @@ public class MainActivity extends BaseActivity
                 @Override
                 public void onResponse(Call<ImageUploadedResponse> call, Response<ImageUploadedResponse> response) {
                     hideProgress();
-                    if (response.code() == 200) {
+                    if (response.isSuccessful()) {
                         finalUser.getPublicInfo().setAvatar(response.body().getData().getPhoto());
                         finalUser.getPublicInfo().setUpdated(response.body().getData().getUpdated());
                         mDataManager.getPreferencesManager().saveUser(finalUser);

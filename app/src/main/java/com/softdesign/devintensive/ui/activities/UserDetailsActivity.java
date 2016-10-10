@@ -6,34 +6,37 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
-import com.softdesign.devintensive.data.network.restmodels.Repo;
-import com.softdesign.devintensive.data.network.restmodels.User;
+import com.softdesign.devintensive.data.dto.UserDTO;
+import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.ui.adapters.RepositoriesAdapter;
-import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.squareup.picasso.Callback;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 import static com.softdesign.devintensive.ui.fragments.UserListFragment.PARCELABLE_USER_KEY;
+import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 import static com.softdesign.devintensive.utils.NavUtils.goToUrl;
+import static com.squareup.picasso.NetworkPolicy.OFFLINE;
 
 /**
  * @author Sergey Vorobyev.
  */
 
-public class UserDetailsActivity extends BaseActivity implements AdapterView.OnItemClickListener {
+public class UserDetailsActivity extends BaseActivity implements OnItemClickListener {
+
+    private static final String TAG = LOG_TAG_PREFIX + "UserDetailsActivity";
 
     @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
     @BindView(R.id.toolbar) Toolbar mToolbar;
@@ -45,7 +48,7 @@ public class UserDetailsActivity extends BaseActivity implements AdapterView.OnI
     @BindView(R.id.list_repositories) ListView mRepositories;
     private Unbinder mUnbinder;
 
-    private User mUser;
+    private UserDTO mUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,7 +79,7 @@ public class UserDetailsActivity extends BaseActivity implements AdapterView.OnI
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        goToUrl(this, mUser.getRepositories().getRepo().get(0).getGit());
+        goToUrl(this, mUser.getRepos().get(position));
     }
 
     private void setupToolbar() {
@@ -88,29 +91,51 @@ public class UserDetailsActivity extends BaseActivity implements AdapterView.OnI
     }
 
     private void initUI() {
-        List<String> repos = new ArrayList<>(mUser.getRepositories().getRepo().size());
-        for(Repo repo : mUser.getRepositories().getRepo()) {
-            repos.add(repo.getGit());
-            repos.add(repo.getGit());
-            repos.add(repo.getGit());
-            repos.add(repo.getGit());
-        }
-        mRepositories.setAdapter(new RepositoriesAdapter(this, repos));
+
+        mRepositories.setAdapter(new RepositoriesAdapter(this, mUser.getRepos()));
         mRepositories.setOnItemClickListener(this);
-        mCollapsingToolbarLayout.setTitle(mUser.getFirstName() + " " + mUser.getSecondName());
-        mRating.setText(String.valueOf(mUser.getProfileValues().getRating()));
-        mCodeLines.setText(String.valueOf(mUser.getProfileValues().getLinesCode()));
-        mProjects.setText(String.valueOf(mUser.getProfileValues().getProjects()));
-        mAbout.setText(String.valueOf(mUser.getPublicInfo().getBio()));
+        mCollapsingToolbarLayout.setTitle(mUser.getFullName());
+        mRating.setText(String.valueOf(mUser.getRating()));
+        mCodeLines.setText(String.valueOf(mUser.getCountCodeLines()));
+        mProjects.setText(String.valueOf(mUser.getCountProjects()));
+        mAbout.setText(String.valueOf(mUser.getBio()));
 
         Point photoSize = new Point(getResources().getDisplayMetrics().widthPixels,
                     getResources().getDimensionPixelSize(R.dimen.size_profile_photo_240));
-        Picasso.with(this)
-                .load(mUser.getPublicInfo().getPhoto())
+
+        DataManager.getInstance().getPicasso()
+                .load(mUser.getPhoto())
                 .placeholder(R.drawable.user_bg)
                 .resize(photoSize.x, photoSize.y)
                 .onlyScaleDown()
                 .centerCrop()
-                .into(mUserPhoto);
+                .networkPolicy(OFFLINE)
+                .into(mUserPhoto, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "user photo loaded from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(mUser.getPhoto())
+                                .placeholder(R.drawable.user_bg)
+                                .resize(photoSize.x, photoSize.y)
+                                .onlyScaleDown()
+                                .centerCrop()
+                                .into(mUserPhoto, new com.squareup.picasso.Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "user photo loaded from server");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(TAG, "Can't load user photo from server");
+                                    }
+                                });
+                    }
+                });
     }
 }

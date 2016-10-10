@@ -19,6 +19,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,7 +41,6 @@ import com.softdesign.devintensive.ui.views.watchers.GithubTextWatcher;
 import com.softdesign.devintensive.ui.views.watchers.PhoneTextWatcher;
 import com.softdesign.devintensive.ui.views.watchers.VkTextWatcher;
 import com.softdesign.devintensive.utils.IOUtils;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,6 +70,7 @@ import static com.softdesign.devintensive.ui.activities.MainActivity.REQUEST_COD
 import static com.softdesign.devintensive.ui.activities.MainActivity.USER_PHOTO_CAMERA_PERMISSION_REQUEST_CODE;
 import static com.softdesign.devintensive.ui.activities.MainActivity.USER_PHOTO_GALLERY_PERMISSION_REQUEST_CODE;
 import static com.softdesign.devintensive.utils.Constants.DIALOG_FRAGMENT_TAG;
+import static com.softdesign.devintensive.utils.Constants.LOG_TAG_PREFIX;
 import static com.softdesign.devintensive.utils.IOUtils.filePathFromUri;
 import static com.softdesign.devintensive.utils.NavUtils.goToAppSettings;
 import static com.softdesign.devintensive.utils.NavUtils.goToCameraApp;
@@ -80,6 +81,7 @@ import static com.softdesign.devintensive.utils.NavUtils.sendEmail;
 import static com.softdesign.devintensive.utils.NetworkStatusChecker.isNetworkAvailable;
 import static com.softdesign.devintensive.utils.UIUtils.hideSoftKeyboard;
 import static com.softdesign.devintensive.utils.UIUtils.showToast;
+import static com.squareup.picasso.NetworkPolicy.OFFLINE;
 
 /**
  * @author Sergey Vorobyev.
@@ -87,6 +89,7 @@ import static com.softdesign.devintensive.utils.UIUtils.showToast;
 
 public class ProfileFragment extends BaseFragment implements ActionMode.Callback {
 
+    private static final String TAG = LOG_TAG_PREFIX + "ProfileFragment";
     public static final String FRAGMENT_TAG = "ProfileFragment";
 
     private static final ButterKnife.Action<View> EDIT_MODE_TRUE = (view, index) -> {
@@ -154,6 +157,7 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         mUnbinder = ButterKnife.bind(this, view);
         return view;
@@ -161,11 +165,13 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.setSupportActionBar(mToolbar);
         DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         setupDrawer(activity, drawerLayout);
-
+        mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
+                getResources().getDimensionPixelSize(R.dimen.size_profile_photo_240));
         changeEditMode(mIsEditMode);
         if (mIsEditMode) startActionMode();
         setupInfoLayouts();
@@ -486,17 +492,40 @@ public class ProfileFragment extends BaseFragment implements ActionMode.Callback
      * @param uri Object {@link Uri} of image
      */
     private void loadImageUserPhoto(Uri uri) {
-        if (mPhotoSize == null) {
-            mPhotoSize = new Point(getResources().getDisplayMetrics().widthPixels,
-                    getResources().getDimensionPixelSize(R.dimen.size_profile_photo_240));
-        }
-        Picasso.with(getActivity())
+        DataManager.getInstance().getPicasso()
                 .load(uri)
                 .placeholder(R.drawable.user_bg)
                 .resize(mPhotoSize.x, mPhotoSize.y)
                 .onlyScaleDown()
                 .centerCrop()
-                .into(mProfilePhoto);
+                .networkPolicy(OFFLINE)
+                .into(mProfilePhoto, new com.squareup.picasso.Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "user photo loaded from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(uri)
+                                .placeholder(R.drawable.user_bg)
+                                .resize(mPhotoSize.x, mPhotoSize.y)
+                                .onlyScaleDown()
+                                .centerCrop()
+                                .into(mProfilePhoto, new com.squareup.picasso.Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "user photo loaded from server");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(TAG, "Can't load user photo from server");
+                                    }
+                                });
+                    }
+                });
     }
 
     /**

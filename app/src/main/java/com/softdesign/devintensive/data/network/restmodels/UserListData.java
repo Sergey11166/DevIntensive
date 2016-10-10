@@ -1,5 +1,8 @@
 package com.softdesign.devintensive.data.network.restmodels;
 
+import com.softdesign.devintensive.data.storage.entities.UserEntity;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**

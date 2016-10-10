@@ -33,5 +33,5 @@
     <dimen name="space_large_56">56dp</dimen>
     <dimen name="space_largest_72">72dp</dimen>
 
-    <dimen name="space_fab_right">8dp</dimen>
+    <dimen name="fab_right_space">8dp</dimen>
 </resources>

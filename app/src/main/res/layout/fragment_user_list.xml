@@ -1,32 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                 xmlns:tools="http://schemas.android.com/tools"
-                                                 style="@style/match_parent_all"
-                                                 android:id="@+id/coordinator_layout"
-                                                 tools:context=".ui.activities.MainActivity">
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar_layout"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/match_parent_all"
+    android:id="@+id/coordinator_layout"
+    android:fitsSystemWindows="true"
+    tools:context=".ui.activities.MainActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.design.widget.CollapsingToolbarLayout
-            style="@style/match_parent_all"
-            android:id="@+id/collapsing_toolbar_layout"
-            app:layout_scrollFlags="scroll|enterAlways|snap">
-
-            <android.support.v7.widget.Toolbar
-                style="@style/toolbar"
-                android:id="@+id/toolbar"
-                app:layout_collapseMode="pin"/>
-        </android.support.design.widget.CollapsingToolbarLayout>
-    </android.support.design.widget.AppBarLayout>
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <android.support.v7.widget.RecyclerView
         style="@style/match_parent_all"
         android:id="@+id/recycler"
         android:name="com.softdesign.devintensive.ui.fragments.ProfileFragment"
+        android:layout_marginTop="?attr/actionBarSize"
         android:layout_marginStart="@dimen/space_small_8"
         android:layout_marginEnd="@dimen/space_small_8"
         tools:context=".ui.activity.MainActivity"

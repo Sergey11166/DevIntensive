@@ -13,6 +13,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import rx.Observable;
 
 /**
  * @author Sergey Vorobyev.
@@ -21,7 +22,7 @@ import retrofit2.http.Path;
 public interface RestService {
 
     @POST("login")
-    Call<AuthResponse> loginUser(@Body UserLoginRequest request);
+    Observable<AuthResponse> loginUser(@Body UserLoginRequest request);
 
     @GET("user/list")
     Call<UserListResponse> getUserList();
