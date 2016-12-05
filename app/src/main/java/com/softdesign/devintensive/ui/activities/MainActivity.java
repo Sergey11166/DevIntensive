@@ -1,6 +1,6 @@
 package com.softdesign.devintensive.ui.activities;
 
-import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -314,9 +314,9 @@ public class MainActivity extends BaseActivity
      * @param onNegativeButtonClickListener Actions to handle press on negative button
      */
     private void showNeedGrantPermissionDialog(int message,
-                                               DialogInterface.OnClickListener onPositiveButtonClickListener,
-                                               DialogInterface.OnClickListener onNegativeButtonClickListener,
-                                               DialogInterface.OnClickListener onNeutralButtonClickListener) {
+                                               OnClickListener onPositiveButtonClickListener,
+                                               OnClickListener onNegativeButtonClickListener,
+                                               OnClickListener onNeutralButtonClickListener) {
 
         NeedGrantPermissionDialog d = NeedGrantPermissionDialog.newInstance(message);
         d.setOnPositiveButtonClickListener(onPositiveButtonClickListener);
